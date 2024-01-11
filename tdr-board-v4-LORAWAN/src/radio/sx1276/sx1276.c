@@ -872,42 +872,42 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
              * Test code to see if Romains setup works
              */
             // DEBUG
-            //SX1276Reset();
+            SX1276Reset();
             /* Set the module in sleep mode */
-            //SX1276Write(0x01, 0x80 | 0x00);
+            SX1276Write(0x01, 0x80 | 0x00);
 
             /* Set the frequency to 868 MHz */
-           // SX1276Write(0x06, 0xD9);
-            //SX1276Write(0x07, 0x13);
-            //SX1276Write(0x08, 0x33);
+            SX1276Write(0x06, 0xD9);
+            SX1276Write(0x07, 0x13);
+            SX1276Write(0x08, 0x33);
 
             /* Set base addresses */
-            //SX1276Write(0x0e, 0x00);
-            //SX1276Write(0x0f, 0x00);
+            SX1276Write(0x0e, 0x00);
+            SX1276Write(0x0f, 0x00);
 
             /* Set LNA boost */
-            //uint8_t lnaReg = SX1276Read(0x0c);
-            //SX1276Write(0x0c, lnaReg | 0x03);
+            uint8_t lnaReg = SX1276Read(0x0c);
+            SX1276Write(0x0c, lnaReg | 0x03);
 
             /* Set the output power at +20 dBm */
-            //SX1276Write(0x4d, 0x87);
-            //uint8_t paConfig = SX1276Read(0x09);
-            //SX1276Write(0x09, paConfig | 0x80);
+            SX1276Write(0x4d, 0x87);
+            uint8_t paConfig = SX1276Read(0x09);
+            SX1276Write(0x09, paConfig | 0x80);
 
             /* Set OCP */
             //
-            //uint8_t ocpTrim = (140 + 30) / 10; /* Here 140 is the current limit in mA */
-            //SX1276Write(0x0b, 0x20 | (0x1F & ocpTrim));
+            uint8_t ocpTrim = (140 + 30) / 10; /* Here 140 is the current limit in mA */
+            SX1276Write(0x0b, 0x20 | (0x1F & ocpTrim));
 
             SX1276Write(0x1e, 0x70);
-            /*SX1276Write(0x23, 0xff);
+            SX1276Write(0x23, 0xff);
             SX1276Write(0x26, 0x4);
             SX1276Write(0x39, 0x12);
             SX1276Write(0x5b, 0x00);
             SX1276Write(0x65, 0x00);
             SX1276Write(0x6b, 0x00);
             SX1276Write(0x6c, 0x12);
-            SX1276Write(0x6e, 0x12);*/
+            SX1276Write(0x6e, 0x12);
 
 
             // Initializes the payload size
