@@ -924,17 +924,13 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
                 DelayMs( 1 );
             }
             //DEBUG
-            /*for(int i = 1; i < 113; i++) {
-                printf("Register: %x = %x\n", i, SX1276Read(i));
-            }*/
+            for(int i = 0; i < size; i++) {
+                printf("Fifo: %x\n", buffer[i]);
+            }
             // Write payload buffer
             SX1276WriteFifo( buffer, size );/*
             for (int i = 0; i < size; i++) {
             	printf("FIFO BUFFER: %x\n", buffer[i]);
-            }*/
-            //DEBUG
-            /*for(int i = 1; i < 113; i++) {
-            	printf("Register: %x = %x\n", i, SX1276Read(i));
             }*/
             txTimeout = SX1276.Settings.LoRa.TxTimeout;
         }
