@@ -126,8 +126,6 @@ extern "C" {
  *
  */
 
-
-
 #define SOFT_SE_KEY_LIST                                                                                            \
     {                                                                                                               \
         {                                                                                                  \
