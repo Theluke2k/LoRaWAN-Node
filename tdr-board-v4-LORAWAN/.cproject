@@ -6,8 +6,11 @@
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/tdr-board-v4"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/tdr-board-v4-LORAWAN"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/tdr-board-v4/Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/tdr-board-v4-LORAWAN/Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="tdr-board-v4" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="tdr-board-v4-LORAWAN" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -21,9 +24,9 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="clean" description="" errorParsers="com.analog.crosscore.core.CCESARMErrorParser" id="arm.toolchain.gcc.target.exe.debug.1160186472" name="Debug" parent="arm.toolchain.gcc.target.exe.debug" postbuildStep="">
+				<configuration artifactExtension="hex" artifactName="${ProjName}" buildArtefactType="com.analog.crosscore.managedbuilder.core.buildArtefactType.ihex" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=com.analog.crosscore.managedbuilder.core.buildArtefactType.ihex,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="clean" description="" errorParsers="com.analog.crosscore.core.CCESARMErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.CWDLocator;org.eclipse.cdt.core.GmakeErrorParser" id="arm.toolchain.gcc.target.exe.debug.1160186472" name="Debug" parent="arm.toolchain.gcc.target.exe.debug" postbuildStep="arm-none-eabi-objcopy -O ihex ${ProjName} ${ProjName}.hex">
 					<folderInfo id="arm.toolchain.gcc.target.exe.debug.1160186472." name="/" resourcePath="">
-						<toolChain id="arm.gcc.toolchain.exe.debug.575966247" name="CrossCore GCC ARM Embedded Toolchain" superClass="arm.gcc.toolchain" targetTool="arm.toolchain.gcc.c.linker">
+						<toolChain id="arm.gcc.toolchain.exe.debug.575966247" name="CrossCore GCC ARM Embedded Toolchain" superClass="arm.gcc.toolchain" targetTool="arm.toolchain.gcc.objcopy">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="arm.toolchain.platform.base.1673104848" name="Development Platform" osList="all" superClass="arm.toolchain.platform.base"/>
 							<builder buildPath="${workspace_loc:/tdr-board-v4}/Debug" id="arm.toolchain.builder.base.2126354754" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="arm.toolchain.builder.base"/>
 							<tool id="arm.toolchain.gcc.assembler.1550147846" name="CrossCore GCC ARM Embedded Assembler" superClass="arm.toolchain.gcc.assembler">
@@ -170,7 +173,7 @@
 								</option>
 								<option id="arm.toolchain.gcc.c.linker.option.fpu.type.2047304118" name="-mfpu" superClass="arm.toolchain.gcc.c.linker.option.fpu.type" useByScannerDiscovery="false" value="fpv4-sp-d16" valueType="string"/>
 								<option id="arm.linker.option.ldprocessing.ldfile.487611621" name="Custom linker script (-T)" superClass="arm.linker.option.ldprocessing.ldfile" useByScannerDiscovery="false" value="${workspace_loc:/${ProjName}}/RTE/Device/ADuCM4050/ADuCM4050.ld" valueType="string"/>
-								<option id="arm.toolchain.gcc.c.linker.option.specs.1164496002" name="Semihosting support" superClass="arm.toolchain.gcc.c.linker.option.specs" useByScannerDiscovery="false" value="arm.toolchain.gcc.c.linker.option.specs.rdimon" valueType="enumerated"/>
+								<option id="arm.toolchain.gcc.c.linker.option.specs.1164496002" name="Semihosting support" superClass="arm.toolchain.gcc.c.linker.option.specs" useByScannerDiscovery="false" value="arm.toolchain.gcc.c.linker.option.specs.custom" valueType="enumerated"/>
 								<option id="arm.c.linker.mathslib.907377905" name="Link against system math library (-lm)" superClass="arm.c.linker.mathslib" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<inputType id="arm.linker.input.1440673899" superClass="arm.linker.input">
 									<additionalInput kind="additionaldependency" paths="$(USER_OBJS)"/>
@@ -267,7 +270,9 @@
 							</tool>
 							<tool id="arm.toolchain.gcc.c.linker.1257041665" name="CrossCore GCC ARM Embedded C Linker" superClass="arm.toolchain.gcc.c.linker.406148588"/>
 							<tool id="arm.toolchain.gcc.cpp.compiler.1168356289" name="CrossCore GCC ARM Embedded C++ Compiler" superClass="arm.toolchain.gcc.cpp.compiler.281580549"/>
-							<tool id="arm.toolchain.gcc.cpp.linker.294404897" name="CrossCore GCC ARM Embedded C++ Linker" superClass="arm.toolchain.gcc.cpp.linker.2133646122"/>
+							<tool id="arm.toolchain.gcc.cpp.linker.294404897" name="CrossCore GCC ARM Embedded C++ Linker" superClass="arm.toolchain.gcc.cpp.linker.2133646122">
+								<option id="arm.toolchain.gcc.cpp.linker.option.fpu.abi.422057801" name="Float ABI" superClass="arm.toolchain.gcc.cpp.linker.option.fpu.abi" value="hard" valueType="enumerated"/>
+							</tool>
 							<tool id="arm.toolchain.gcc.archiver.627210101" name="CrossCore GCC ARM Embedded Archiver" superClass="arm.toolchain.gcc.archiver.1556882027"/>
 							<tool id="arm.loader.1288554491" name="ARM Loader Base" superClass="arm.loader.2119315094"/>
 							<tool id="arm.toolchain.gcc.preprocessor.1362644619" name="CrossCore GCC ARM Embedded Preprocessor" superClass="arm.toolchain.gcc.preprocessor.123780666"/>
@@ -308,7 +313,9 @@
 							</tool>
 							<tool id="arm.toolchain.gcc.c.linker.1349741721" name="CrossCore GCC ARM Embedded C Linker" superClass="arm.toolchain.gcc.c.linker.406148588"/>
 							<tool id="arm.toolchain.gcc.cpp.compiler.1868033435" name="CrossCore GCC ARM Embedded C++ Compiler" superClass="arm.toolchain.gcc.cpp.compiler.281580549"/>
-							<tool id="arm.toolchain.gcc.cpp.linker.1716368896" name="CrossCore GCC ARM Embedded C++ Linker" superClass="arm.toolchain.gcc.cpp.linker.2133646122"/>
+							<tool id="arm.toolchain.gcc.cpp.linker.1716368896" name="CrossCore GCC ARM Embedded C++ Linker" superClass="arm.toolchain.gcc.cpp.linker.2133646122">
+								<option id="arm.toolchain.gcc.cpp.linker.option.fpu.abi.1383233699" name="Float ABI" superClass="arm.toolchain.gcc.cpp.linker.option.fpu.abi" value="hard" valueType="enumerated"/>
+							</tool>
 							<tool id="arm.toolchain.gcc.archiver.1483353223" name="CrossCore GCC ARM Embedded Archiver" superClass="arm.toolchain.gcc.archiver.1556882027"/>
 							<tool id="arm.loader.1003248482" name="ARM Loader Base" superClass="arm.loader.2119315094"/>
 							<tool id="arm.toolchain.gcc.preprocessor.8409580" name="CrossCore GCC ARM Embedded Preprocessor" superClass="arm.toolchain.gcc.preprocessor.123780666"/>
