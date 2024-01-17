@@ -249,31 +249,30 @@ int main(void) {
 
 	//printf("Uplink Process Starting...\n");
 	while (1) {
-		printf("Start while\n");
 		// Processes the LoRaMac events
-		//printf("LmHandlerProcess...\n");
+		printf("LmHandlerProcess...\n");
 		LmHandlerProcess();
 
-		//printf("UplinkProcess...\n");
+		printf("UplinkProcess...\n");
 		// Process application uplinks management
 		UplinkProcess();
 
-		//printf("Critical begin...\n");
-		CRITICAL_SECTION_BEGIN( );
+		printf("Critical begin...\n");
+		//CRITICAL_SECTION_BEGIN( );
 		if (IsMacProcessPending == 1) {
 			// Clear flag and prevent MCU to go into low power modes.
 			IsMacProcessPending = 0;
-			//printf("ProcessPending...\n");
+			printf("ProcessPending...\n");
 		}
 		else
 		{
-			//printf("BoardLowPower...\n");
+			printf("BoardLowPower...\n");
 			// The MCU wakes up through events
 			BoardLowPowerHandler();
 		}
-		//printf("Critical end...\n");
-		CRITICAL_SECTION_END( );
-		//printf("end\n");
+		printf("Critical end...\n");
+		//CRITICAL_SECTION_END( );
+	printf("end\n");
 	}
 
 	return 0;
@@ -464,6 +463,7 @@ static void UplinkProcess( void )
     isPending = IsTxFramePending;
     IsTxFramePending = 0;
     CRITICAL_SECTION_END( );
+    printf("Check Pending frame\n");
     if( isPending == 1 )
     {
         PrepareTxFrame( );
@@ -505,10 +505,10 @@ static void OnTxTimerEvent( void* context )
     TimerStop( &TxTimer );
 
     IsTxFramePending = 1;
-
     // Schedule next transmission
     TimerSetValue( &TxTimer, TxPeriodicity );
     TimerStart( &TxTimer );
+    printf("OnTxTimerEvent: END\n");
 }
 
 

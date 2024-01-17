@@ -1392,21 +1392,21 @@ uint8_t rx[1000];
  */
 void SX1276WriteBuffer( uint32_t addr, uint8_t *buffer, uint8_t size )
 {
-	//printf("----------------- SPI Write -----------------\n");
+	printf("----------------- SPI Write -----------------\n");
 	uint8_t rx = 0;
     uint8_t i;
-    //GpioWrite( &SX1276.Spi.Nss, 1 );
+    GpioWrite( &SX1276.Spi.Nss, 1 );
     GpioWrite( &SX1276.Spi.Nss, 0 );
 
     rx = SpiInOut( &SX1276.Spi, addr | 0x80 );
-    //printf("(TX) Address: %x     |     (RX) Received: %x\n", addr, rx);
+    printf("(TX) Address: %x     |     (RX) Received: %x\n", addr, rx);
 
     for( i = 0; i < size; i++ )
     {
         rx = SpiInOut( &SX1276.Spi, buffer[i] );
-        //printf("(TX) Data: %x        |     (RX) Received: %x\n", buffer[i], rx);
+        printf("(TX) Data: %x        |     (RX) Received: %x\n", buffer[i], rx);
     }
-    //printf("\n");
+    printf("\n");
     GpioWrite( &SX1276.Spi.Nss, 1 );
 }
 
@@ -1429,7 +1429,7 @@ void SX1276WriteBuffer( uint32_t addr, uint8_t *buffer, uint8_t size )
  */
 void SX1276ReadBuffer( uint32_t addr, uint8_t *buffer, uint8_t size )
 {
-	//printf("----------------- SPI Read -----------------\n");
+	printf("----------------- SPI Read -----------------\n");
     uint8_t i;
 
     uint8_t rx = 0;
@@ -1437,15 +1437,15 @@ void SX1276ReadBuffer( uint32_t addr, uint8_t *buffer, uint8_t size )
     GpioWrite( &SX1276.Spi.Nss, 0 );
 
     rx = SpiInOut( &SX1276.Spi, addr & 0x7F );
-    //printf("(TX) Address: %x     |     (RX) Received: %x\n", addr, rx);
+    printf("(TX) Address: %x     |     (RX) Received: %x\n", addr, rx);
 
     for( i = 0; i < size; i++ )
     {
         buffer[i] = SpiInOut( &SX1276.Spi, 0 );
-        //printf("(TX) MOSI: %x        |     (RX) Received: %x\n", 0, buffer[i]);
+        printf("(TX) MOSI: %x        |     (RX) Received: %x\n", 0, buffer[i]);
 
     }
-    //printf("\n");
+    printf("\n");
     GpioWrite( &SX1276.Spi.Nss, 1 );
 }
 
@@ -1897,9 +1897,9 @@ static void SX1276OnDio0Irq( void* context )
             {
             case MODEM_LORA:
                 // Clear Irq
-            	//printf("A\n");
+            	printf("A\n");
                 SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_TXDONE );
-                //printf("B\n");
+                printf("B\n");
                 // Intentional fall through
             case MODEM_FSK:
             default:
@@ -1914,6 +1914,7 @@ static void SX1276OnDio0Irq( void* context )
         default:
             break;
     }
+    printf("DIO0 end\n");
 }
 
 static void SX1276OnDio1Irq( void* context )
