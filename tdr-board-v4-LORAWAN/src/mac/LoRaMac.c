@@ -3470,7 +3470,7 @@ LoRaMacStatus_t SendFrameOnChannel( uint8_t channel )
     }*/
 
     Radio.Send( MacCtx.PktBuffer, MacCtx.PktBufferLen );
-
+    printf("Radio End\n");
     return LORAMAC_STATUS_OK;
 }
 

@@ -249,6 +249,7 @@ int main(void) {
 
 	//printf("Uplink Process Starting...\n");
 	while (1) {
+		printf("Start while\n");
 		// Processes the LoRaMac events
 		//printf("LmHandlerProcess...\n");
 		LmHandlerProcess();
