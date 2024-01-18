@@ -872,7 +872,7 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
              * Test code to see if Romains setup works
              */
             // DEBUG
-            SX1276Reset();
+            //SX1276Reset();
             /* Set the module in sleep mode */
             SX1276Write(0x01, 0x80 | 0x00);
 
