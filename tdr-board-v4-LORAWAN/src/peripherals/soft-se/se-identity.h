@@ -144,8 +144,8 @@ extern "C" {
              * WARNING: FOR 1.0.x DEVICES IT IS THE \ref LORAWAN_GEN_APP_KEY                                        \
              */                                                                                                     \
             .KeyID    = APP_KEY,                                                                                    \
-            .KeyValue = { 0x6F, 0x74, 0x33, 0x1C, 0x62, 0xD6, 0x6E, 0x99, 0x29, 0x86, 0x1A, 0x34, 0x87, 0x53, 0x7D, \
-                          0xC0 },                                                                                   \
+            .KeyValue = { 0x90, 0x46, 0x41, 0x01, 0x14, 0x87, 0xBC, 0xDE, 0x57, 0x4F, 0xD7, 0x5C, 0x03, 0xB3, 0x03, \
+                          0x77 },                                                                                   \
         },                                                                                                          \
         {                                                                                                           \
             /*!                                                                                                     \

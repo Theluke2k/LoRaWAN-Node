@@ -932,10 +932,10 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
             // Write payload buffer
             //buffer[17] = 4;
             SX1276WriteFifo( buffer, size );
-
+            /*
             for (int i = 0; i < size; i++) {
             	printf("FIFO BUFFER: %x\n", buffer[i]);
-            }
+            }*/
 
             //DEBUG
             /*for(int i = 1; i < 113; i++) {
