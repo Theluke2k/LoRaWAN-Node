@@ -208,7 +208,6 @@ int main(void) {
 	NVIC_SetPriority(SPI0_EVT_IRQn, 0);
 	NVIC_SetPriority(RTC1_EVT_IRQn, 1);
 	//NVIC_SetPriority(SPI0_EVT_IRQn, 1);
-	//Hejsa
 
 
 	// Initialize transmission perhiodicity variable
