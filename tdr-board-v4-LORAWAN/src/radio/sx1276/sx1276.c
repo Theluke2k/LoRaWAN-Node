@@ -875,14 +875,20 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
             //SX1276Reset();
             /* Set the module in sleep mode */
             //SX1276Write(0x01, 0x80 | 0x00);
+            SX1276Write(0x39, 0x12); // Sync Word
+            //SX1276Write(0x01, 0x81); // Operation register
 
             /* Set the frequency to 868 MHz */
             SX1276Write(0x06, 0xD8);
             SX1276Write(0x07, 0x40);
             SX1276Write(0x08, 0x00);
 
+            //SX1276Write(0x0B, 0x31); // Overcurrent
+            //SX1276Write(0x0C, 0x23); // LNA boost
+
             /* Set base addresses */
-            //SX1276Write(0x0e, 0x00);
+            //SX1276Write(0x0e, 0x80);
+
             //SX1276Write(0x0f, 0x00);
 
             /* Set LNA boost */
@@ -895,11 +901,10 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
             //SX1276Write(0x09, paConfig | 0x80);
 
             /* Set OCP */
-            //
             //uint8_t ocpTrim = (140 + 30) / 10; /* Here 140 is the current limit in mA */
             //SX1276Write(0x0b, 0x20 | (0x1F & ocpTrim));
 
-            SX1276Write(0x1e, 0x70);
+            SX1276Write(0x1e, 0x74); // Spreading factor 7, CRC enabled
             /*SX1276Write(0x23, 0xff);
             SX1276Write(0x26, 0x4);
             SX1276Write(0x39, 0x12);
@@ -917,6 +922,7 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
             SX1276Write( REG_LR_FIFOTXBASEADDR, 0 );
             SX1276Write( REG_LR_FIFOADDRPTR, 0 );
 
+
             // FIFO operations can not take place in Sleep mode
             if( ( SX1276Read( REG_OPMODE ) & ~RF_OPMODE_MASK ) == RF_OPMODE_SLEEP )
             {
@@ -928,14 +934,27 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
                 printf("Register: %x = %x\n", i, SX1276Read(i));
             }*/
             // Write payload buffer
-            SX1276WriteFifo( buffer, size );/*
+            SX1276WriteFifo( buffer, size );
+
+            //Write the buffer that was written
             for (int i = 0; i < size; i++) {
-            	printf("FIFO BUFFER: %x\n", buffer[i]);
-            }*/
+            	//printf("FIFO BUFFER: %x\n", buffer[i]);
+            }
+
+            SX1276Write( REG_LR_FIFOADDRPTR, 0 );
+            uint8_t RXBuffer[255];
+
+            SX1276ReadFifo(RXBuffer, size);
+            for (int i = 0; i < size; i++) {
+            	printf("RXBuffer: %x\n", RXBuffer[i]);
+            }
+
             //DEBUG
             /*for(int i = 1; i < 113; i++) {
             	printf("Register: %x = %x\n", i, SX1276Read(i));
             }*/
+
+
             txTimeout = SX1276.Settings.LoRa.TxTimeout;
         }
         break;
@@ -1321,7 +1340,9 @@ static void SX1276SetOpMode( uint8_t opMode )
     		printf("Register: %x = %x\n", i, SX1276Read(i));
     	}
     }*/
-
+    printf("FiFO pointer: %x\n", SX1276Read(0x0D));
+    printf("TX base: %x\n", SX1276Read(0x0E));
+    printf("RX base: %x\n", SX1276Read(0x0F));
     SX1276Write( REG_OPMODE, ( SX1276Read( REG_OPMODE ) & RF_OPMODE_MASK ) | opMode );
 }
 
