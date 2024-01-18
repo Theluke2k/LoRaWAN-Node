@@ -877,9 +877,9 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
             //SX1276Write(0x01, 0x80 | 0x00);
 
             /* Set the frequency to 868 MHz */
-           // SX1276Write(0x06, 0xD9);
-            //SX1276Write(0x07, 0x13);
-            //SX1276Write(0x08, 0x33);
+            SX1276Write(0x06, 0xD8);
+            SX1276Write(0x07, 0x40);
+            SX1276Write(0x08, 0x00);
 
             /* Set base addresses */
             //SX1276Write(0x0e, 0x00);
