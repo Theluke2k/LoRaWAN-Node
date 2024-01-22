@@ -204,11 +204,11 @@ static volatile uint32_t TxPeriodicity = 0;
 int main(void) {
 	printf("Program Start...\n");
 	BoardInitMcu( );
+
+	// Set interrup priorities. SPI must have highest prioriy!
 	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 1);
 	NVIC_SetPriority(SPI0_EVT_IRQn, 0);
 	NVIC_SetPriority(RTC1_EVT_IRQn, 1);
-	//NVIC_SetPriority(SPI0_EVT_IRQn, 1);
-
 
 	// Initialize transmission perhiodicity variable
 	TxPeriodicity = APP_TX_DUTYCYCLE
@@ -217,7 +217,7 @@ int main(void) {
 	const Version_t appVersion = { .Value = FIRMWARE_VERSION };
 	const Version_t gitHubVersion = { .Value = GITHUB_VERSION };
 
-	//DisplayAppInfo("periodic-uplink-lpp", &appVersion, &gitHubVersion);
+	DisplayAppInfo("periodic-uplink-lpp", &appVersion, &gitHubVersion);
 
 	if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
 		printf("LoRaMac wasn't properly initialized\n");
@@ -226,7 +226,6 @@ int main(void) {
 		{
 		}
 	}
-	//printf("1...\n");
 
 	// Set system maximum tolerated rx error in milliseconds
 	LmHandlerSetSystemMaxRxError( 20 );
@@ -239,14 +238,7 @@ int main(void) {
 	LmHandlerJoin( );
 
 	StartTxProcess( LORAMAC_HANDLER_TX_ON_TIMER );
-/*
-	while(1) {
-		//volatile int *register_ptr = (volatile int *)0x40020070;
-		//printf("INT STATUS: %x\n", *register_ptr);
-	}
-*/
 
-	//printf("Uplink Process Starting...\n");
 	while (1) {
 		// Processes the LoRaMac events
 		//printf("LmHandlerProcess...\n");

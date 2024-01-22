@@ -3013,7 +3013,6 @@ static LoRaMacStatus_t ScheduleTx( bool allowDelayedTx )
         nextChan.Joined = false;
     }
 
-    //printf("Scheduletx: selecting regio channel %d\n", Nvm.MacGroup2.Region);
     // Select channel
     status = RegionNextChannel( Nvm.MacGroup2.Region, &nextChan, &MacCtx.Channel, &MacCtx.DutyCycleWaitTime, &Nvm.MacGroup1.AggregatedTimeOff );
 
@@ -3053,7 +3052,6 @@ static LoRaMacStatus_t ScheduleTx( bool allowDelayedTx )
         return status;
     }
 
-    //printf("Scheduletx: trying to send now...\n");    // Try to send now
     return SendFrameOnChannel( MacCtx.Channel );
 }
 
@@ -3461,13 +3459,7 @@ LoRaMacStatus_t SendFrameOnChannel( uint8_t channel )
     MacCtx.McpsConfirm.NbTrans = MacCtx.ChannelsNbTransCounter;
     MacCtx.ResponseTimeoutStartTime = 0;
 
-    printf("SendFrameOnChannel: Sending now...\n");
-    // Send now
-    /*
-    printf("Packet to send:\n");
-    for(int i = 0; i < MacCtx.PktBufferLen; i++) {
-    	printf("%x\n", MacCtx.PktBuffer[i]);
-    }*/
+    //printf("SendFrameOnChannel: Sending now...\n");
 
     Radio.Send( MacCtx.PktBuffer, MacCtx.PktBufferLen );
 
@@ -5332,13 +5324,11 @@ LoRaMacStatus_t LoRaMacMlmeRequest( MlmeReq_t* mlmeRequest )
         {
             if( ( MacCtx.MacState & LORAMAC_TX_DELAYED ) == LORAMAC_TX_DELAYED )
             {
-            	//printf("LoRaMacMlmeRequest: 1\n");
                 return LORAMAC_STATUS_BUSY;
             }
 
             if( mlmeRequest->Req.Join.NetworkActivation == ACTIVATION_TYPE_OTAA )
             {
-            	//printf("LoRaMacMlmeRequest: 1\n");
                 ResetMacParameters( false );
 
                 Nvm.MacGroup1.ChannelsDatarate = RegionAlternateDr( Nvm.MacGroup2.Region, mlmeRequest->Req.Join.Datarate, ALTERNATE_DR );
