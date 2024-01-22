@@ -91,7 +91,7 @@ void BoardCriticalSectionBegin( uint32_t *mask )
 void BoardCriticalSectionEnd( uint32_t *mask )
 {
 	__set_PRIMASK( *mask );
-	//__enable_irq();
+	__enable_irq();
 }
 
 /*!
