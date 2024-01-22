@@ -867,6 +867,12 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
 
             SX1276.Settings.LoRaPacketHandler.Size = size;
 
+
+            // DEBUG
+            //SX1276Write(0x06, 0xD9);
+            //SX1276Write(0x07, 0x06);
+            //SX1276Write(0x08, 0x66);
+
             // Initializes the payload size
             SX1276Write( REG_LR_PAYLOADLENGTH, size );
 
@@ -890,7 +896,7 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
         break;
     }
 
-    printf("Starting transmission...\n");
+    //printf("Starting transmission...\n");
     SX1276SetTx( txTimeout );
 }
 
@@ -1662,7 +1668,7 @@ static void SX1276OnTimeoutIrq( void* context )
 
 static void SX1276OnDio0Irq( void* context )
 {
-	printf("DIO0\n");
+	//printf("DIO0\n");
     volatile uint8_t irqFlags = 0;
 
     switch( SX1276.Settings.State )
@@ -1852,7 +1858,7 @@ static void SX1276OnDio0Irq( void* context )
 
 static void SX1276OnDio1Irq( void* context )
 {
-	printf("DIO1\n");
+	//printf("DIO1\n");
     switch( SX1276.Settings.State )
     {
         case RF_RX_RUNNING:
