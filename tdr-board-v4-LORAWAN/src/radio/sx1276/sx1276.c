@@ -875,7 +875,7 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
             //SX1276Reset();
             /* Set the module in sleep mode */
             //SX1276Write(0x01, 0x80 | 0x00);
-            SX1276Write(0x39, 0x12); // Sync Word
+            //SX1276Write(0x39, 0x12); // Sync Word
             //SX1276Write(0x01, 0x81); // Operation register
 
             /* Set the frequency to 868 MHz */
