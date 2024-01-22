@@ -813,10 +813,8 @@ static void ProcessRadioTxDone( void )
     // Setup timers
     CRITICAL_SECTION_BEGIN( );
     uint32_t offset = TimerGetCurrentTime( ) - TxDoneParams.CurTime;
-    printf("RxWindowTimer1: %d\n", MacCtx.RxWindow1Delay - offset); // DEBUG
     TimerSetValue( &MacCtx.RxWindowTimer1, MacCtx.RxWindow1Delay - offset );
     TimerStart( &MacCtx.RxWindowTimer1 );
-    printf("RxWindowTimer2: %d\n", MacCtx.RxWindow2Delay - offset); // DEBUG
     TimerSetValue( &MacCtx.RxWindowTimer2, MacCtx.RxWindow2Delay - offset );
     TimerStart( &MacCtx.RxWindowTimer2 );
     CRITICAL_SECTION_END( );
@@ -1516,7 +1514,6 @@ static void ProcessRadioRxTimeout( void )
 static void LoRaMacHandleIrqEvents( void )
 {
     LoRaMacRadioEvents_t events;
-
     CRITICAL_SECTION_BEGIN( );
     events = LoRaMacRadioEvents;
     LoRaMacRadioEvents.Value = 0;
@@ -1936,7 +1933,7 @@ static void OnTxDelayedTimerEvent( void* context )
 
 static void OnRxWindow1TimerEvent( void* context )
 {
-	//printf("OnRxWindowTimerEvent\n");
+	//printf("OnRxWindow1TimerEvent\n");
 
     MacCtx.RxWindow1Config.Channel = MacCtx.Channel;
     MacCtx.RxWindow1Config.DrOffset = Nvm.MacGroup2.MacParams.Rx1DrOffset;
