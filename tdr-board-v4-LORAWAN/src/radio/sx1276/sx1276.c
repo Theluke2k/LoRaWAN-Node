@@ -890,6 +890,7 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
         break;
     }
 
+    printf("Starting transmission...\n");
     SX1276SetTx( txTimeout );
 }
 

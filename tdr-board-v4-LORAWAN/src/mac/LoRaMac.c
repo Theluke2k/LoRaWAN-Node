@@ -813,8 +813,10 @@ static void ProcessRadioTxDone( void )
     // Setup timers
     CRITICAL_SECTION_BEGIN( );
     uint32_t offset = TimerGetCurrentTime( ) - TxDoneParams.CurTime;
+    printf("RxWindowTimer1: %d\n", MacCtx.RxWindow1Delay - offset); // DEBUG
     TimerSetValue( &MacCtx.RxWindowTimer1, MacCtx.RxWindow1Delay - offset );
     TimerStart( &MacCtx.RxWindowTimer1 );
+    printf("RxWindowTimer2: %d\n", MacCtx.RxWindow2Delay - offset); // DEBUG
     TimerSetValue( &MacCtx.RxWindowTimer2, MacCtx.RxWindow2Delay - offset );
     TimerStart( &MacCtx.RxWindowTimer2 );
     CRITICAL_SECTION_END( );
@@ -1934,7 +1936,7 @@ static void OnTxDelayedTimerEvent( void* context )
 
 static void OnRxWindow1TimerEvent( void* context )
 {
-	printf("OnRxWindowTimerEvent\n");
+	//printf("OnRxWindowTimerEvent\n");
 
     MacCtx.RxWindow1Config.Channel = MacCtx.Channel;
     MacCtx.RxWindow1Config.DrOffset = Nvm.MacGroup2.MacParams.Rx1DrOffset;
@@ -1948,7 +1950,7 @@ static void OnRxWindow1TimerEvent( void* context )
 
 static void OnRxWindow2TimerEvent( void* context )
 {
-	printf("OnRxWindow2TimerEvent\n");
+	//printf("OnRxWindow2TimerEvent\n");
 
     // Check if we are processing Rx1 window.
     // If yes, we don't setup the Rx2 window.
