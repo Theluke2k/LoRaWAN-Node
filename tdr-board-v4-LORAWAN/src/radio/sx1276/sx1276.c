@@ -877,11 +877,11 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
             //SX1276Write(0x01, 0x80 | 0x00);
 
             /* Set the frequency to 868 MHz */
-            SX1276Write(0x06, 0xD9);
-            SX1276Write(0x07, 0x06);
-            SX1276Write(0x08, 0x66);
+            //SX1276Write(0x06, 0xD9);
+            //SX1276Write(0x07, 0x06);
+            //SX1276Write(0x08, 0x66);
 
-            SX1276Write(0x39, 0x34);
+            //SX1276Write(0x39, 0x34);
 
             /* Set base addresses */
             //SX1276Write(0x0e, 0x00);
@@ -901,9 +901,9 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
             //uint8_t ocpTrim = (140 + 30) / 10; /* Here 140 is the current limit in mA */
             //SX1276Write(0x0b, 0x20 | (0x1F & ocpTrim));
 
-            SX1276Write(0x1e, 0x74);
+            //SX1276Write(0x1e, 0x74);
             //SX1276Write(0x23, 0xff);
-            SX1276Write(0x26, 0x04); //LowDataRateOptimize slået fra!
+            //SX1276Write(0x26, 0x04); //LowDataRateOptimize slået fra!
             //SX1276Write(0x39, 0x12);
             //SX1276Write(0x5b, 0x00);
             //SX1276Write(0x65, 0x00);
