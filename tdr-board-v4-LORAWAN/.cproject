@@ -21,11 +21,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<<<<<<< HEAD
 				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="clean" description="" errorParsers="com.analog.crosscore.core.CCESARMErrorParser" id="arm.toolchain.gcc.target.exe.debug.1160186472" name="Debug" parent="arm.toolchain.gcc.target.exe.debug" postbuildStep="">
-=======
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="clean" description="" errorParsers="com.analog.crosscore.core.CCESARMErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.CWDLocator;org.eclipse.cdt.core.GmakeErrorParser" id="arm.toolchain.gcc.target.exe.debug.1160186472" name="Debug" parent="arm.toolchain.gcc.target.exe.debug" postbuildStep="">
->>>>>>> refs/heads/LoRaWAN-1.0-OTAA-RadioReset-2-Fix
 					<folderInfo id="arm.toolchain.gcc.target.exe.debug.1160186472." name="/" resourcePath="">
 						<toolChain id="arm.gcc.toolchain.exe.debug.575966247" name="CrossCore GCC ARM Embedded Toolchain" superClass="arm.gcc.toolchain" targetTool="arm.toolchain.gcc.c.linker">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="arm.toolchain.platform.base.1673104848" name="Development Platform" osList="all" superClass="arm.toolchain.platform.base"/>
@@ -647,14 +643,6 @@
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="arm.toolchain.gcc.target.exe.debug.1160186472;arm.toolchain.gcc.target.exe.debug.1160186472.;arm.toolchain.gcc.c.compiler.333508623;arm.toolchain.gcc.c.input.75551923">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="arm.toolchain.gcc.target.exe.release.1170218110;arm.toolchain.gcc.target.exe.release.1170218110.;arm.toolchain.gcc.c.compiler.1655460220;arm.toolchain.gcc.c.input.1053802256">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+	<storageModule moduleId="scannerConfiguration"/>
 </cproject>
