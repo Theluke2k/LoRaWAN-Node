@@ -490,7 +490,7 @@ static void OnPingSlotPeriodicityChanged( uint8_t pingSlotPeriodicity )
  */
 static void OnTxTimerEvent( void* context )
 {
-	printf("OnTxTimerEvent\n");
+	//printf("OnTxTimerEvent\n");
 
     TimerStop( &TxTimer );
 
