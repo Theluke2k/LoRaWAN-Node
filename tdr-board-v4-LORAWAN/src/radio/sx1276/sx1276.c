@@ -879,12 +879,12 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
             //SX1276Write(0x01, 0x81); // Operation register
 
             /* Set the frequency to 868 MHz */
-            SX1276Write(0x06, 0xD8);
-            SX1276Write(0x07, 0x40);
-            SX1276Write(0x08, 0x00);
 
-            //SX1276Write(0x0B, 0x31); // Overcurrent
-            //SX1276Write(0x0C, 0x23); // LNA boost
+            //SX1276Write(0x06, 0xD9);
+            //SX1276Write(0x07, 0x06);
+            //SX1276Write(0x08, 0x66);
+
+            //SX1276Write(0x39, 0x34);
 
             /* Set base addresses */
             //SX1276Write(0x0e, 0x80);
@@ -904,15 +904,15 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
             //uint8_t ocpTrim = (140 + 30) / 10; /* Here 140 is the current limit in mA */
             //SX1276Write(0x0b, 0x20 | (0x1F & ocpTrim));
 
-            SX1276Write(0x1e, 0x74); // Spreading factor 7, CRC enabled
-            /*SX1276Write(0x23, 0xff);
-            SX1276Write(0x26, 0x4);
-            SX1276Write(0x39, 0x12);
-            SX1276Write(0x5b, 0x00);
-            SX1276Write(0x65, 0x00);
-            SX1276Write(0x6b, 0x00);
-            SX1276Write(0x6c, 0x12);
-            SX1276Write(0x6e, 0x12);*/
+            //SX1276Write(0x1e, 0x74);
+            //SX1276Write(0x23, 0xff);
+            //SX1276Write(0x26, 0x04); //LowDataRateOptimize slået fra!
+            //SX1276Write(0x39, 0x12);
+            //SX1276Write(0x5b, 0x00);
+            //SX1276Write(0x65, 0x00);
+            //SX1276Write(0x6b, 0x00);
+            //SX1276Write(0x6c, 0x12);
+            //SX1276Write(0x6e, 0x12);
 
 
             // Initializes the payload size
@@ -929,31 +929,9 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
                 SX1276SetStby( );
                 DelayMs( 1 );
             }
-            //DEBUG
-            /*for(int i = 1; i < 113; i++) {
-                printf("Register: %x = %x\n", i, SX1276Read(i));
-            }*/
+
             // Write payload buffer
             SX1276WriteFifo( buffer, size );
-
-            //Write the buffer that was written
-            for (int i = 0; i < size; i++) {
-            	//printf("FIFO BUFFER: %x\n", buffer[i]);
-            }
-
-            SX1276Write( REG_LR_FIFOADDRPTR, 0 );
-            uint8_t RXBuffer[255];
-
-            SX1276ReadFifo(RXBuffer, size);
-            for (int i = 0; i < size; i++) {
-            	printf("RXBuffer: %x\n", RXBuffer[i]);
-            }
-
-            //DEBUG
-            /*for(int i = 1; i < 113; i++) {
-            	printf("Register: %x = %x\n", i, SX1276Read(i));
-            }*/
-
 
             txTimeout = SX1276.Settings.LoRa.TxTimeout;
         }

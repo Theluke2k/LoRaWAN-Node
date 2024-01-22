@@ -55,7 +55,7 @@
  * Defines a random delay for application data transmission duty cycle. 1s,
  * value in [ms].
  */
-#define APP_TX_DUTYCYCLE_RND                        1000
+#define APP_TX_DUTYCYCLE_RND                        0
 
 /*!
  * LoRaWAN Adaptive Data Rate (Skal den være til eller fra?)
@@ -208,7 +208,6 @@ int main(void) {
 	NVIC_SetPriority(SPI0_EVT_IRQn, 0);
 	NVIC_SetPriority(RTC1_EVT_IRQn, 1);
 	//NVIC_SetPriority(SPI0_EVT_IRQn, 1);
-
 
 
 	// Initialize transmission perhiodicity variable
