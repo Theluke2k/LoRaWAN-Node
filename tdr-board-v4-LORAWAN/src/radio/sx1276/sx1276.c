@@ -822,7 +822,7 @@ void SX1276Send( uint8_t *buffer, uint8_t size )
     {
     case MODEM_FSK:
         {
-        	printf("SX1276Send: mode=FSK\n");
+        	//printf("SX1276Send: mode=FSK\n");
             SX1276.Settings.FskPacketHandler.NbBytes = 0;
             SX1276.Settings.FskPacketHandler.Size = size;
 
