@@ -31,24 +31,29 @@
 
 uint16_t NvmmWrite( uint8_t* src, uint16_t size, uint16_t offset )
 {
+	//printf("NvmmWrite\n");
     if( EepromMcuWriteBuffer( offset, src, size ) == LMN_STATUS_OK )
     {
         return size;
     }
+    //printf("Status not okay\n");
     return 0;
 }
 
 uint16_t NvmmRead( uint8_t* dest, uint16_t size, uint16_t offset )
 {
+	//printf("NvmmRead\n");
     if( EepromMcuReadBuffer( offset, dest, size ) == LMN_STATUS_OK )
     {
         return size;
     }
+    //printf("Status not okay\n");
     return 0;
 }
 
 bool NvmmCrc32Check( uint16_t size, uint16_t offset )
 {
+	//printf("NvmmCrc32Check\n");
     uint8_t data = 0;
     uint32_t calculatedCrc32 = 0;
     uint32_t readCrc32 = 0;
@@ -78,6 +83,7 @@ bool NvmmCrc32Check( uint16_t size, uint16_t offset )
 
 bool NvmmReset( uint16_t size, uint16_t offset )
 {
+	//printf("NvmmReset\n");
     uint32_t crc32 = 0;
 
     if( EepromMcuWriteBuffer( offset + size - sizeof( crc32 ),

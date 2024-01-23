@@ -498,6 +498,7 @@ LmHandlerFlagStatus_t LmHandlerJoinStatus( void )
 
 LmHandlerErrorStatus_t LmHandlerSend( LmHandlerAppData_t *appData, LmHandlerMsgTypes_t isTxConfirmed )
 {
+	PAJ("LmHandlerSend\n");
     LoRaMacStatus_t status;
     McpsReq_t mcpsReq;
     LoRaMacTxInfo_t txInfo;
@@ -508,7 +509,6 @@ LmHandlerErrorStatus_t LmHandlerSend( LmHandlerAppData_t *appData, LmHandlerMsgT
         LmHandlerJoinRequest( CommissioningParams.IsOtaaActivation );
         return LORAMAC_HANDLER_ERROR;
     }
-
     TxParams.MsgType = isTxConfirmed;
     mcpsReq.Type = ( isTxConfirmed == LORAMAC_HANDLER_UNCONFIRMED_MSG ) ? MCPS_UNCONFIRMED : MCPS_CONFIRMED;
     mcpsReq.Req.Unconfirmed.Datarate = LmHandlerParams->TxDatarate;
@@ -528,13 +528,18 @@ LmHandlerErrorStatus_t LmHandlerSend( LmHandlerAppData_t *appData, LmHandlerMsgT
 
     TxParams.AppData = *appData;
     TxParams.Datarate = LmHandlerParams->TxDatarate;
-
+    PAJ("LmHandlerSend: 4\n");
     status = LoRaMacMcpsRequest( &mcpsReq );
+    PAJ("LmHandlerSend: 5\n");
     if( LmHandlerCallbacks->OnMacMcpsRequest != NULL )
     {
+    	PAJ("LmHandlerSend: 6\n");
         LmHandlerCallbacks->OnMacMcpsRequest( status, &mcpsReq, mcpsReq.ReqReturn.DutyCycleWaitTime );
+        PAJ("LmHandlerSend: 7\n");
     }
     DutyCycleWaitTime = mcpsReq.ReqReturn.DutyCycleWaitTime;
+
+    PAJ("LmHandlerSend: 8\n");
 
     if( status == LORAMAC_STATUS_OK )
     {
@@ -545,6 +550,7 @@ LmHandlerErrorStatus_t LmHandlerSend( LmHandlerAppData_t *appData, LmHandlerMsgT
     {
         return LORAMAC_HANDLER_ERROR;
     }
+    PAJ("LmHandlerSend: 9\n");
 }
 
 LmHandlerErrorStatus_t LmHandlerDeviceTimeReq( void )

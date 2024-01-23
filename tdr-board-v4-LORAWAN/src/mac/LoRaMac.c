@@ -49,6 +49,7 @@
 #include "LoRaMac.h"
 #include "sx1276.h"
 
+
 /*!
  * Maximum PHY layer payload size
  */
@@ -818,7 +819,7 @@ static void ProcessRadioTxDone( void )
     //printf("RxWindow1Delay: %d\n", MacCtx.RxWindow2Delay - offset);
 
     TimerSetValue( &MacCtx.RxWindowTimer1, MacCtx.RxWindow1Delay - offset );
-    //TimerSetValue( &MacCtx.RxWindowTimer1, 4500);
+    //TimerSetValue( &MacCtx.RxWindowTimer1, 2500);
 
     TimerStart( &MacCtx.RxWindowTimer1 );
     TimerSetValue( &MacCtx.RxWindowTimer2, MacCtx.RxWindow2Delay - offset );
@@ -1955,7 +1956,7 @@ static void OnRxWindow1TimerEvent( void* context )
 
 static void OnRxWindow2TimerEvent( void* context )
 {
-	//printf("OnRxWindow2TimerEvent\n");
+
 
     // Check if we are processing Rx1 window.
     // If yes, we don't setup the Rx2 window.
@@ -1971,6 +1972,7 @@ static void OnRxWindow2TimerEvent( void* context )
     MacCtx.RxWindow2Config.NetworkActivation = Nvm.MacGroup2.NetworkActivation;
 
     RxWindowSetup( &MacCtx.RxWindowTimer2, &MacCtx.RxWindow2Config );
+    //printf("OnRxWindow2TimerEvent\n");
 }
 
 static void OnRetransmitTimeoutTimerEvent( void* context )
@@ -2676,6 +2678,7 @@ static void ProcessMacCommands( uint8_t *payload, uint8_t macIndex, uint8_t comm
 
 LoRaMacStatus_t Send( LoRaMacHeader_t* macHdr, uint8_t fPort, void* fBuffer, uint16_t fBufferSize )
 {
+	PAJ("Send: 1\n");
     LoRaMacFrameCtrl_t fCtrl;
     LoRaMacStatus_t status = LORAMAC_STATUS_PARAMETER_INVALID;
     int8_t datarate = Nvm.MacGroup1.ChannelsDatarate;
@@ -2728,15 +2731,17 @@ LoRaMacStatus_t Send( LoRaMacHeader_t* macHdr, uint8_t fPort, void* fBuffer, uin
     fCtrl.Bits.AdrAckReq = LoRaMacAdrCalcNext( &adrNext, &Nvm.MacGroup1.ChannelsDatarate,
                                                &Nvm.MacGroup1.ChannelsTxPower,
                                                &Nvm.MacGroup2.MacParams.ChannelsNbTrans, &adrAckCounter );
-
+    PAJ("Send: 2\n");
     // Prepare the frame
     status = PrepareFrame( macHdr, &fCtrl, fPort, fBuffer, fBufferSize );
-
+    PAJ("Send: 3\n");
     // Validate status
     if( ( status == LORAMAC_STATUS_OK ) || ( status == LORAMAC_STATUS_SKIPPED_APP_DATA ) )
     {
         // Schedule frame, do not allow delayed transmissions
+    	PAJ("Send: 4\n");
         status = ScheduleTx( false );
+        PAJ("Send: 5\n");
     }
 
     // Post processing
@@ -2749,15 +2754,22 @@ LoRaMacStatus_t Send( LoRaMacHeader_t* macHdr, uint8_t fPort, void* fBuffer, uin
     }
     else
     {
+    	PAJ("Send: 6\n");
         // Good case
         Nvm.MacGroup1.SrvAckRequested = false;
         Nvm.MacGroup1.AdrAckCounter = adrAckCounter;
         // Remove all none sticky MAC commands
+        PAJ("Send: 7\n");
+
         if( LoRaMacCommandsRemoveNoneStickyCmds( ) != LORAMAC_COMMANDS_SUCCESS )
         {
+        	PAJ("Send: 8\n");
             return LORAMAC_STATUS_MAC_COMMAD_ERROR;
         }
+
+        PAJ("Send: 9\n");
     }
+
     return status;
 }
 
@@ -5494,6 +5506,7 @@ LoRaMacStatus_t LoRaMacMlmeRequest( MlmeReq_t* mlmeRequest )
 
 LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest )
 {
+	PAJ("LoRaMacMcpsRequest: 1\n");
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
     LoRaMacStatus_t status = LORAMAC_STATUS_SERVICE_UNKNOWN;
@@ -5512,7 +5525,6 @@ LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest )
     // Initialize mcpsRequest->ReqReturn.DutyCycleWaitTime to 0 in order to
     // return a valid value in case the MAC is busy.
     mcpsRequest->ReqReturn.DutyCycleWaitTime = 0;
-
     if( LoRaMacIsBusy( ) == true )
     {
         return LORAMAC_STATUS_BUSY;
@@ -5523,7 +5535,6 @@ LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest )
     macHdr.Value = 0;
     memset1( ( uint8_t* ) &MacCtx.McpsConfirm, 0, sizeof( MacCtx.McpsConfirm ) );
     MacCtx.McpsConfirm.Status = LORAMAC_EVENT_INFO_STATUS_ERROR;
-
     // Apply confirmed uplinks, if the device has not received a valid
     // downlink after a join accept.
     if( ( Nvm.MacGroup2.NetworkActivation == ACTIVATION_TYPE_OTAA ) &&
@@ -5533,7 +5544,6 @@ LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest )
     {
         request.Type = MCPS_CONFIRMED;
     }
-
     switch( request.Type )
     {
         case MCPS_UNCONFIRMED:
@@ -5571,7 +5581,6 @@ LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest )
         default:
             break;
     }
-
     // Make sure that the input datarate is compliant
     // to the regional specification.
     getPhy.Attribute = PHY_MIN_TX_DR;
@@ -5580,14 +5589,12 @@ LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest )
     // Apply the minimum possible datarate.
     // Some regions have limitations for the minimum datarate.
     datarate = MAX( datarate, ( int8_t )phyParam.Value );
-
     // Apply minimum datarate in this special case.
     if( CheckForMinimumAbpDatarate( Nvm.MacGroup2.AdrCtrlOn, Nvm.MacGroup2.NetworkActivation,
                                     Nvm.MacGroup2.ChannelsDatarateChangedLinkAdrReq ) == true )
     {
         datarate = ( int8_t )phyParam.Value;
     }
-
     if( readyToSend == true )
     {
         if( ( Nvm.MacGroup2.AdrCtrlOn == false ) ||
@@ -5606,12 +5613,12 @@ LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest )
                 return LORAMAC_STATUS_PARAMETER_INVALID;
             }
         }
-
         // Verification of response timeout for class b and class c
         LoRaMacHandleResponseTimeout( REGION_COMMON_CLASS_B_C_RESP_TIMEOUT,
                                       MacCtx.ResponseTimeoutStartTime );
-
+        PAJ("LoRaMacMcpsRequest: 2\n");
         status = Send( &macHdr, fPort, fBuffer, fBufferSize );
+        PAJ("LoRaMacMcpsRequest: 3\n");
         if( status == LORAMAC_STATUS_OK )
         {
             MacCtx.McpsConfirm.McpsRequest = request.Type;
@@ -5625,7 +5632,7 @@ LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest )
 
     // Fill return structure
     mcpsRequest->ReqReturn.DutyCycleWaitTime = MacCtx.DutyCycleWaitTime;
-
+    PAJ("LoRaMacMcpsRequest: 4\n");
     return status;
 }
 

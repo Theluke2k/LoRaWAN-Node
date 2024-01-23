@@ -1157,7 +1157,11 @@ LoRaMacCryptoStatus_t LoRaMacCryptoHandleJoinAccept( JoinReqIdentifier_t joinReq
     }
 
     memcpy1( macMsg->Buffer, decJoinAccept, macMsg->BufSize );
-
+    /*
+    for(int i = 0; i < macMsg->BufSize; i++) {
+    	printf("JoinAccept: %x\n", macMsg->Buffer[i]);
+    }
+    */
     // Parse the message
     if( LoRaMacParserJoinAccept( macMsg ) != LORAMAC_PARSER_SUCCESS )
     {
