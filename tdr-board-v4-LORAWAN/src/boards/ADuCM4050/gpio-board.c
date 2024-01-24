@@ -254,7 +254,6 @@ void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t
 			triggerPin = i;
 		}
 	}
-	//printf("TriggerPin: %d\n", triggerPin);
 
 	// Check which port the interrupt came from. And call the corresponding callback function.
 	if (Port == (uint32_t) ADI_GPIO_PORT0) {
@@ -263,11 +262,7 @@ void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t
 		}
 	}
 	else if (Port == (uint32_t) ADI_GPIO_PORT1) {
-		int value = 16+triggerPin;
-		//printf("Trigger: %d\n", value);
-
 		if (array[16 + triggerPin] != NULL) {
-			//printf("Calling function in array index: %d\n", value);
 			array[16 + triggerPin](NULL);
 		}
 	}
@@ -303,78 +298,6 @@ void GpioMcuRemoveInterrupt( Gpio_t *obj )
 	 * This function is not used anywhere in loramac.
 	*/
 }
-
-/*
- * Lucas (12-11-23):
- * Old functions for interrupt, used in testing. The new must also be tested.
- */
-//static void pinIntCallback(void* pCBParam, uint32_t Port,  void* PinIntData) //uint32_t Pins
-//{
-//
-////	if ((Port == (uint32_t) ADI_GPIO_PORT1) && (*(uint32_t*) PinIntData & ADI_GPIO_PIN_5)) {
-////		printf("D0\n");
-////	}
-////	if ((Port == (uint32_t) ADI_GPIO_PORT1) && (*(uint32_t*) PinIntData & ADI_GPIO_PIN_2)) {
-////		printf("D2\n");
-////	}
-//
-//	/* Loop for checking the interrupt status of port 1: REG_GPIO1_INT
-//	 * REG_GPIO1_INT. TODO: implement dynamic checking
-//	 */
-//
-//	volatile int *register_ptr = (volatile int *)0x40020070;
-//	printf("INT STATUS: %x\n", *register_ptr);
-//
-//	for (int i = 0; i <= 15; i++) {
-//		//uint32_t interruptStatus = *((volatile uint32_t *)REG_GPIO1_INT);
-//		if (*(uint32_t*) PinIntData & (1 << i)) {
-//			switch (i) {
-//			case 2:
-//				array[2](NULL);
-//				break;
-//			case 3:
-//				array[3](NULL);
-//				break;
-//			case 4:
-//				array[4](NULL);
-//				break;
-//			case 5:
-//				array[5](NULL);
-//				break;
-//			}
-//		}
-//	}
-//}
-//uint8_t tester = 0;
-//void GpioMcuSetInterrupt( Gpio_t *obj, IrqModes irqMode, IrqPriorities irqPriority, GpioIrqHandler *irqHandler )
-//{
-//	//groups the pins for the LoRaDIO0 - LoRaDIO3 in "pinsToEnable"
-//	obj->IrqHandler = irqHandler;
-//
-//	if((obj->pin & 0x0F) == 2){
-//		array[2] = irqHandler;
-//	} else if ((obj->pin & 0x0F) == 3){
-//		array[3] = irqHandler;
-//	} else if ((obj->pin & 0x0F) == 4){
-//		array[4] = irqHandler;
-//	} else if ((obj->pin & 0x0F) == 5){
-//		array[5] = irqHandler;
-//	}
-//
-////	printf("Pin: \n");
-////	printf("Port: %d\n", *(ADI_GPIO_PORT*)obj->port);
-////	printf("PinIndex: %d\n", (ADI_GPIO_DATA)(obj->pinIndex));
-//
-//	if(irqMode == IRQ_RISING_EDGE){
-//		//adi_gpio_SetGroupInterruptPolarity(*(ADI_GPIO_PORT*)obj->port, (ADI_GPIO_DATA)(obj->pinIndex));
-//	}
-//	//Sets pins, use pinsToEnable when testing the real program
-//	//adi_gpio_SetGroupInterruptPins(*(ADI_GPIO_PORT*)obj->port, SYS_GPIO_INTA_IRQn, (ADI_GPIO_DATA)(obj->pinIndex));
-//
-//	adi_gpio_SetGroupInterruptPolarity(ADI_GPIO_PORT1, ADI_GPIO_PIN_5 | ADI_GPIO_PIN_4 |ADI_GPIO_PIN_3 | ADI_GPIO_PIN_2);
-//	adi_gpio_SetGroupInterruptPins(ADI_GPIO_PORT1, ADI_GPIO_INTA_IRQ, ADI_GPIO_PIN_5 | ADI_GPIO_PIN_4 |ADI_GPIO_PIN_3 | ADI_GPIO_PIN_2);
-//	adi_gpio_RegisterCallback(ADI_GPIO_INTA_IRQ, pinIntCallback, (void*)ADI_GPIO_INTA_IRQ);
-//}
 
 /*
  * Lucas:

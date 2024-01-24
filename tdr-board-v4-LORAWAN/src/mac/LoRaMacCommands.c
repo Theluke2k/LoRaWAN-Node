@@ -403,37 +403,31 @@ LoRaMacCommandStatus_t LoRaMacCommandsGetCmd( uint8_t cid, MacCommand_t** macCmd
 
 LoRaMacCommandStatus_t LoRaMacCommandsRemoveNoneStickyCmds( void )
 {
-	PAJ("LoRaMacCommandsRemoveNoneStickyCmds: 1\n");
     MacCommand_t* curElement;
     MacCommand_t* nexElement;
 
     // Start at the head of the list
     curElement = CommandsCtx.MacCommandList.First;
 
-    //printf("curElement: %d\n", curElement->IsSticky);
-    printf("curElement: %d\n", false);
+    printf("%d\n", curElement->IsConfirmationRequired);
+    printf("%d\n", curElement->IsSticky);
+
+
 
     // Loop through all elements
     while( curElement != NULL )
     {
-    	PAJ("LoRaMacCommandsRemoveNoneStickyCmds: Start While\n");
-    	printf("curElement: %d\n", curElement->IsSticky);
         if( curElement->IsSticky == false )
         {
-        	PAJ("LoRaMacCommandsRemoveNoneStickyCmds: 3\n");
             nexElement = curElement->Next;
-            PAJ("LoRaMacCommandsRemoveNoneStickyCmds: 4\n");
             LoRaMacCommandsRemoveCmd( curElement );
-            PAJ("LoRaMacCommandsRemoveNoneStickyCmds: 5\n");
             curElement = nexElement;
         }
         else
         {
-        	PAJ("LoRaMacCommandsRemoveNoneStickyCmds: else\n");
             curElement = curElement->Next;
         }
     }
-    PAJ("LoRaMacCommandsRemoveNoneStickyCmds: END\n");
 
     return LORAMAC_COMMANDS_SUCCESS;
 }

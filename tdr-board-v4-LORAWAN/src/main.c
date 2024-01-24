@@ -33,6 +33,8 @@
 // DEBUG
 uint8_t tester = 0;
 
+#define ACTIVE_REGION LORAMAC_REGION_EU868
+
 //LoRaMac
 #ifndef ACTIVE_REGION
 

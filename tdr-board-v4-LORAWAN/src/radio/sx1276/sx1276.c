@@ -2048,24 +2048,15 @@ static void SX1276OnDio2Irq( void* context )
 
 static void SX1276OnDio3Irq( void* context )
 {
-	printf("DIO3\n");
-	volatile int *status = (volatile int *)0x40020070;
-	//printf("STATUS: %x\n", *status);
-
-	volatile int *IENA = (volatile int *)0x40020068;
-	//printf("IENA: %x\n", *IENA);
     switch( SX1276.Settings.Modem )
     {
     case MODEM_FSK:
-    	//printf("DIO3: 1\n");
 
         break;
     case MODEM_LORA:
-    	//printf("DIO3: 2\n");
 
         if( ( SX1276Read( REG_LR_IRQFLAGS ) & RFLR_IRQFLAGS_CADDETECTED ) == RFLR_IRQFLAGS_CADDETECTED )
         {
-        	printf("DIO3: 3\n");
             // Clear Irq
             SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_CADDETECTED | RFLR_IRQFLAGS_CADDONE );
             if( ( RadioEvents != NULL ) && ( RadioEvents->CadDone != NULL ) )
@@ -2075,10 +2066,8 @@ static void SX1276OnDio3Irq( void* context )
         }
         else
         {
-        	//printf("DIO3: 4\n");
             // Clear Irq
             SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_CADDONE );
-            //printf("DIO3: 5\n");
             if( ( RadioEvents != NULL ) && ( RadioEvents->CadDone != NULL ) )
             {
                 RadioEvents->CadDone( false );
@@ -2086,15 +2075,12 @@ static void SX1276OnDio3Irq( void* context )
         }
         break;
     default:
-    	//printf("DIO3: 6\n");
         break;
     }
-    //printf("DIO3: end\n");
 }
 
 static void SX1276OnDio4Irq( void* context )
 {
-	printf("DIO4\n");
     switch( SX1276.Settings.Modem )
     {
     case MODEM_FSK:
