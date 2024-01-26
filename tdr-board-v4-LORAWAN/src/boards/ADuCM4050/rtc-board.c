@@ -450,7 +450,7 @@ void RtcStartAlarm( uint32_t timeout )
 	 * Lucas:
 	 * Don't know if we need this.
 	 */
-	//RtcStopAlarm( );
+	RtcStopAlarm( );
 
 	eResult = adi_rtc_SetAlarm(hDevRtc1, RtcTimerContext + timeout);
 	DEBUG_RESULT("\n Failed to set alarm",eResult,ADI_RTC_SUCCESS);

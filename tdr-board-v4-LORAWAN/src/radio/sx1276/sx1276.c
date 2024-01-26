@@ -601,7 +601,7 @@ void SX1276SetRxConfig( RadioModems_t modem, uint32_t bandwidth,
             if( SX1276.Settings.LoRa.FreqHopOn == true )
             {
                 SX1276Write( REG_LR_PLLHOP, ( SX1276Read( REG_LR_PLLHOP ) & RFLR_PLLHOP_FASTHOP_MASK ) | RFLR_PLLHOP_FASTHOP_ON );
-                printf("Freqhop1\n");
+                //printf("Freqhop1\n");
                 SX1276Write( REG_LR_HOPPERIOD, SX1276.Settings.LoRa.HopPeriod );
             }
 
@@ -736,7 +736,7 @@ void SX1276SetTxConfig( RadioModems_t modem, int8_t power, uint32_t fdev,
             if( SX1276.Settings.LoRa.FreqHopOn == true )
             {
                 SX1276Write( REG_LR_PLLHOP, ( SX1276Read( REG_LR_PLLHOP ) & RFLR_PLLHOP_FASTHOP_MASK ) | RFLR_PLLHOP_FASTHOP_ON );
-                printf("Freqhop2\n");
+                //printf("Freqhop2\n");
                 SX1276Write( REG_LR_HOPPERIOD, SX1276.Settings.LoRa.HopPeriod );
             }
 
@@ -1666,9 +1666,16 @@ static void SX1276OnTimeoutIrq( void* context )
     }
 }
 
+extern uint8_t tester; // DEBUG
+// MACRO FOR DEBUG
+#define PAJ(ARG) \
+    if (tester == 1) { \
+        printf("%s", (ARG)); \
+    }
+
 static void SX1276OnDio0Irq( void* context )
 {
-	//printf("DIO0\n");
+	PAJ("DIO0\n");
     volatile uint8_t irqFlags = 0;
 
     switch( SX1276.Settings.State )
@@ -1858,7 +1865,7 @@ static void SX1276OnDio0Irq( void* context )
 
 static void SX1276OnDio1Irq( void* context )
 {
-	//printf("DIO1\n");
+	PAJ("DIO1\n");
     switch( SX1276.Settings.State )
     {
         case RF_RX_RUNNING:
@@ -1978,7 +1985,7 @@ static void SX1276OnDio1Irq( void* context )
 
 static void SX1276OnDio2Irq( void* context )
 {
-	printf("DIO2\n");
+	PAJ("DIO2\n");
     switch( SX1276.Settings.State )
     {
         case RF_RX_RUNNING:
@@ -2048,6 +2055,7 @@ static void SX1276OnDio2Irq( void* context )
 
 static void SX1276OnDio3Irq( void* context )
 {
+	PAJ("DIO3\n");
     switch( SX1276.Settings.Modem )
     {
     case MODEM_FSK:

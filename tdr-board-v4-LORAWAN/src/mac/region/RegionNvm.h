@@ -40,6 +40,8 @@ extern "C"
 
 #include "LoRaMacTypes.h"
 
+#define REGION_EU868 //DEBUG
+
 /*!
  * Channel plan for region CN470
  */

@@ -409,11 +409,6 @@ LoRaMacCommandStatus_t LoRaMacCommandsRemoveNoneStickyCmds( void )
     // Start at the head of the list
     curElement = CommandsCtx.MacCommandList.First;
 
-    printf("%d\n", curElement->IsConfirmationRequired);
-    printf("%d\n", curElement->IsSticky);
-
-
-
     // Loop through all elements
     while( curElement != NULL )
     {

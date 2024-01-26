@@ -498,13 +498,13 @@ LmHandlerFlagStatus_t LmHandlerJoinStatus( void )
 
 LmHandlerErrorStatus_t LmHandlerSend( LmHandlerAppData_t *appData, LmHandlerMsgTypes_t isTxConfirmed )
 {
-	PAJ("LmHandlerSend\n");
     LoRaMacStatus_t status;
     McpsReq_t mcpsReq;
     LoRaMacTxInfo_t txInfo;
 
     if( LmHandlerJoinStatus( ) != LORAMAC_HANDLER_SET )
     {
+    	printf("Network aint joined\n");
         // The network isn't joined, try again.
         LmHandlerJoinRequest( CommissioningParams.IsOtaaActivation );
         return LORAMAC_HANDLER_ERROR;
@@ -528,18 +528,13 @@ LmHandlerErrorStatus_t LmHandlerSend( LmHandlerAppData_t *appData, LmHandlerMsgT
 
     TxParams.AppData = *appData;
     TxParams.Datarate = LmHandlerParams->TxDatarate;
-    PAJ("LmHandlerSend: 4\n");
     status = LoRaMacMcpsRequest( &mcpsReq );
-    PAJ("LmHandlerSend: 5\n");
     if( LmHandlerCallbacks->OnMacMcpsRequest != NULL )
     {
-    	PAJ("LmHandlerSend: 6\n");
         LmHandlerCallbacks->OnMacMcpsRequest( status, &mcpsReq, mcpsReq.ReqReturn.DutyCycleWaitTime );
-        PAJ("LmHandlerSend: 7\n");
     }
     DutyCycleWaitTime = mcpsReq.ReqReturn.DutyCycleWaitTime;
 
-    PAJ("LmHandlerSend: 8\n");
 
     if( status == LORAMAC_STATUS_OK )
     {
@@ -550,7 +545,6 @@ LmHandlerErrorStatus_t LmHandlerSend( LmHandlerAppData_t *appData, LmHandlerMsgT
     {
         return LORAMAC_HANDLER_ERROR;
     }
-    PAJ("LmHandlerSend: 9\n");
 }
 
 LmHandlerErrorStatus_t LmHandlerDeviceTimeReq( void )

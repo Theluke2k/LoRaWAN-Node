@@ -52,9 +52,9 @@ uint8_t tester = 0;
 #endif
 
 /*!
- * Defines the application data transmission duty cycle. 5s, value in [ms].
+ * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            10000
+#define APP_TX_DUTYCYCLE                            5500
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -211,9 +211,9 @@ int main(void) {
 	BoardInitMcu( );
 
 	// Set interrup priorities. SPI must have highest prioriy!
-	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 1);
-	NVIC_SetPriority(SPI0_EVT_IRQn, 0);
-	NVIC_SetPriority(RTC1_EVT_IRQn, 1);
+	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
+	NVIC_SetPriority(SPI0_EVT_IRQn, 1);
+	NVIC_SetPriority(RTC1_EVT_IRQn, 2);
 
 	// Initialize transmission perhiodicity variable
 	TxPeriodicity = APP_TX_DUTYCYCLE
@@ -246,18 +246,18 @@ int main(void) {
 
 	while (1) {
 		if( LmHandlerJoinStatus( ) == LORAMAC_HANDLER_SET ) {
-			tester = 0;
+			tester = 1;
 		}
-		PAJ("LmHandlerProcess...\n");
+		//PAJ("LmHandlerProcess...\n");
 		// Processes the LoRaMac events
 		LmHandlerProcess();
 
-		PAJ("UplinkProcess...\n");
+		//PAJ("UplinkProcess...\n");
 		// Process application uplinks management
 		UplinkProcess();
 
 		//printf("Critical begin...\n");
-		//CRITICAL_SECTION_BEGIN( );
+		CRITICAL_SECTION_BEGIN( );
 		if (IsMacProcessPending == 1) {
 			// Clear flag and prevent MCU to go into low power modes.
 			IsMacProcessPending = 0;
@@ -267,10 +267,10 @@ int main(void) {
 		{
 			//printf("BoardLowPower...\n");
 			// The MCU wakes up through events
-			BoardLowPowerHandler();
+			//BoardLowPowerHandler();
 		}
 		//printf("Critical end...\n");
-		//CRITICAL_SECTION_END( );
+		CRITICAL_SECTION_END( );
 		//printf("end\n");
 	}
 
@@ -400,6 +400,7 @@ static void PrepareTxFrame( void )
 {
     if( LmHandlerIsBusy( ) == true )
     {
+    	printf("LmHandlerBusy\n");
         return;
     }
 
@@ -429,14 +430,12 @@ static void PrepareTxFrame( void )
     memcpy1(AppData.Buffer, AppDataBuffer, LORAWAN_APP_DATA_BUFFER_MAX_SIZE); // DEBUG
     AppData.BufferSize = LORAWAN_APP_DATA_BUFFER_MAX_SIZE;
 
-    PAJ("LmHandlerSend\n");
     if( LmHandlerSend( &AppData, LmHandlerParams.IsTxConfirmed ) == LORAMAC_HANDLER_SUCCESS )
     {
         // Switch LED 1 ON
         //GpioWrite( &Led1, 1 );
         //TimerStart( &Led1Timer );
     }
-    PAJ("PrepareTxFrame Done\n");
 }
 
 static void StartTxProcess( LmHandlerTxEvents_t txEvent )
@@ -470,10 +469,8 @@ static void UplinkProcess( void )
 
     if( isPending == 1 )
     {
-    	PAJ("PrepareTxFrame...\n");
         PrepareTxFrame( );
     }
-    PAJ("UplinkEnd...\n");
 }
 
 static void OnTxPeriodicityChanged( uint32_t periodicity )
@@ -506,10 +503,10 @@ static void OnPingSlotPeriodicityChanged( uint8_t pingSlotPeriodicity )
  */
 static void OnTxTimerEvent( void* context )
 {
-	//printf("OnTxTimerEvent\n");
 	if( LmHandlerJoinStatus( ) == LORAMAC_HANDLER_SET ) {
-		tester = 0;
+		tester = 1;
 	}
+	PAJ("OnTxTimerEvent\n");
     TimerStop( &TxTimer );
 
     IsTxFramePending = 1;

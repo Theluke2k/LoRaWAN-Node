@@ -179,7 +179,7 @@ bool TimerIsStarted( TimerEvent_t *obj )
 {
     return obj->IsStarted;
 }
-
+extern uint8_t tester; // DEBUG
 void TimerIrqHandler( void )
 {
     TimerEvent_t* cur;
@@ -219,6 +219,9 @@ void TimerIrqHandler( void )
     // Remove all the expired object from the list
     while( ( TimerListHead != NULL ) && ( TimerListHead->Timestamp < RtcGetTimerElapsedTime( ) ) )
     {
+    	if(tester) { // DEBUG
+    		printf("While loop\n");
+    	}
         cur = TimerListHead;
         TimerListHead = TimerListHead->Next;
         cur->IsStarted = false;
@@ -373,6 +376,7 @@ static void TimerSetTimeout( TimerEvent_t *obj )
         obj->Timestamp = RtcGetTimerElapsedTime( ) + minTicks;
     }
     //printf("Calling RtcSetAlarm!\n");
+    //printf("Current Count: %d\n", RtcGetTimerValue());
     RtcSetAlarm( obj->Timestamp );
 }
 

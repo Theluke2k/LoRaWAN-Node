@@ -2678,7 +2678,6 @@ static void ProcessMacCommands( uint8_t *payload, uint8_t macIndex, uint8_t comm
 
 LoRaMacStatus_t Send( LoRaMacHeader_t* macHdr, uint8_t fPort, void* fBuffer, uint16_t fBufferSize )
 {
-	PAJ("Send: 1\n");
     LoRaMacFrameCtrl_t fCtrl;
     LoRaMacStatus_t status = LORAMAC_STATUS_PARAMETER_INVALID;
     int8_t datarate = Nvm.MacGroup1.ChannelsDatarate;
@@ -2731,17 +2730,13 @@ LoRaMacStatus_t Send( LoRaMacHeader_t* macHdr, uint8_t fPort, void* fBuffer, uin
     fCtrl.Bits.AdrAckReq = LoRaMacAdrCalcNext( &adrNext, &Nvm.MacGroup1.ChannelsDatarate,
                                                &Nvm.MacGroup1.ChannelsTxPower,
                                                &Nvm.MacGroup2.MacParams.ChannelsNbTrans, &adrAckCounter );
-    PAJ("Send: 2\n");
     // Prepare the frame
     status = PrepareFrame( macHdr, &fCtrl, fPort, fBuffer, fBufferSize );
-    PAJ("Send: 3\n");
     // Validate status
     if( ( status == LORAMAC_STATUS_OK ) || ( status == LORAMAC_STATUS_SKIPPED_APP_DATA ) )
     {
         // Schedule frame, do not allow delayed transmissions
-    	PAJ("Send: 4\n");
         status = ScheduleTx( false );
-        PAJ("Send: 5\n");
     }
 
     // Post processing
@@ -2754,12 +2749,10 @@ LoRaMacStatus_t Send( LoRaMacHeader_t* macHdr, uint8_t fPort, void* fBuffer, uin
     }
     else
     {
-    	PAJ("Send: 6\n");
         // Good case
         Nvm.MacGroup1.SrvAckRequested = false;
         Nvm.MacGroup1.AdrAckCounter = adrAckCounter;
         // Remove all none sticky MAC commands
-        PAJ("Send: 7\n");
 
         if( LoRaMacCommandsRemoveNoneStickyCmds( ) != LORAMAC_COMMANDS_SUCCESS )
         {
@@ -2767,7 +2760,6 @@ LoRaMacStatus_t Send( LoRaMacHeader_t* macHdr, uint8_t fPort, void* fBuffer, uin
             return LORAMAC_STATUS_MAC_COMMAD_ERROR;
         }
 
-        PAJ("Send: 9\n");
     }
 
     return status;
@@ -5506,7 +5498,6 @@ LoRaMacStatus_t LoRaMacMlmeRequest( MlmeReq_t* mlmeRequest )
 
 LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest )
 {
-	PAJ("LoRaMacMcpsRequest: 1\n");
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
     LoRaMacStatus_t status = LORAMAC_STATUS_SERVICE_UNKNOWN;
@@ -5616,9 +5607,7 @@ LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest )
         // Verification of response timeout for class b and class c
         LoRaMacHandleResponseTimeout( REGION_COMMON_CLASS_B_C_RESP_TIMEOUT,
                                       MacCtx.ResponseTimeoutStartTime );
-        PAJ("LoRaMacMcpsRequest: 2\n");
         status = Send( &macHdr, fPort, fBuffer, fBufferSize );
-        PAJ("LoRaMacMcpsRequest: 3\n");
         if( status == LORAMAC_STATUS_OK )
         {
             MacCtx.McpsConfirm.McpsRequest = request.Type;
@@ -5632,7 +5621,6 @@ LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest )
 
     // Fill return structure
     mcpsRequest->ReqReturn.DutyCycleWaitTime = MacCtx.DutyCycleWaitTime;
-    PAJ("LoRaMacMcpsRequest: 4\n");
     return status;
 }
 

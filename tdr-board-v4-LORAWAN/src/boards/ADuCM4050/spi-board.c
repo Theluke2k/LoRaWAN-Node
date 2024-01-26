@@ -65,7 +65,7 @@ void SpiInit( Spi_t *obj, SpiId_t spiId, PinNames mosi, PinNames miso, PinNames 
 	ADI_SPI_RESULT eResult;
 
 
-	//CRITICAL_SECTION_BEGIN( );
+	CRITICAL_SECTION_BEGIN( );
 
 
 	 /* Initialize SPI */
@@ -106,7 +106,7 @@ void SpiInit( Spi_t *obj, SpiId_t spiId, PinNames mosi, PinNames miso, PinNames 
 		GpioInit(&obj->Nss, nss, PIN_ALTERNATE_FCT, PIN_PUSH_PULL, PIN_NO_PULL, GPIO_MUL1);
 	}
 
-	//CRITICAL_SECTION_END( );
+	CRITICAL_SECTION_END( );
 }
 
 void SpiDeInit( Spi_t *obj )
@@ -160,8 +160,7 @@ uint32_t x = 0;
 uint16_t SpiInOut( Spi_t *obj, uint16_t outData )
 {
 	//printf("-- SpiInOut --\n");
-	//ADI_INT_STATUS_ALLOC();
-	//ADI_ENTER_CRITICAL_REGION();
+	//CRITICAL_SECTION_BEGIN( );
 	if(obj == NULL )
 	{
 	    return 0;
@@ -222,7 +221,7 @@ uint16_t SpiInOut( Spi_t *obj, uint16_t outData )
 
 	//printf("overrx[0]: %x\n", overrx[0]);
 	//printf("overrx[1]: %d\n", overrx[1]);
-	//ADI_EXIT_CRITICAL_REGION();
+	//CRITICAL_SECTION_END( );
 	return overrx[0];
 }
 

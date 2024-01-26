@@ -199,13 +199,16 @@ void print_tdr_data_to_uart(struct tdr_data tdr_data[])
  */
 uint8_t enter_hibernation()
 {
+	/*
 	ADI_PWR_RESULT eResult;
 	if((eResult = adi_pwr_EnterLowPowerMode(ADI_PWR_MODE_HIBERNATE, &iHibernateExitFlag, 0)) != ADI_PWR_SUCCESS)
 	{
 		DEBUG_RESULT("Error during entering hibernation", eResult, ADI_PWR_SUCCESS);
 		return 1;
 	}
+	*/
 	return 0;
+
 }
 
 /**

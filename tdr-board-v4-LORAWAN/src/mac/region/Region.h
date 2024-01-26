@@ -65,6 +65,8 @@ extern "C"
 #include "RegionCommon.h"
 //#include "Region.h"
 
+#define REGION_EU868
+
 /*!
  * Macro to compute bit of a channel index.
  */
