@@ -138,10 +138,6 @@ void SpiFrequency( Spi_t *obj, uint32_t hz )
 
 }
 
-uint8_t tx[1000];
-uint8_t rx[1000];
-uint32_t x = 0;
-
 /*
  * Lucas (22-10-23):
  * Function to read and write data over SPI. We use the built-in
@@ -159,8 +155,6 @@ uint32_t x = 0;
  */
 uint16_t SpiInOut( Spi_t *obj, uint16_t outData )
 {
-	//printf("-- SpiInOut --\n");
-	//CRITICAL_SECTION_BEGIN( );
 	if(obj == NULL )
 	{
 	    return 0;
@@ -192,36 +186,13 @@ uint16_t SpiInOut( Spi_t *obj, uint16_t outData )
 	transceive.nRxIncrement = 1;
 	transceive.bDMA = false;
 	transceive.bRD_CTL = false;
-	//printf("SpiInOut: Sending byte: %x\n", outData);
-	tx[x] = outData;
-	/*
-	if (x >= 400) {
-		for (int i = 0; i < x; i++) {
-			printf("TX: %x    |    RX: %x\n", tx[i], rx[i]);
-		}
-		printf("\n");
-	}*/
-	//ADI_EXIT_CRITICAL_REGION();
-	if(x >= 340) {
-		//printf("SpiInOut: trying to send: %x\n", outData);
-	}
+
 	if (ADI_SPI_SUCCESS != (result = adi_spi_MasterReadWrite(spiDevice, &transceive)))
 	{
 		printf("Failed: %d\n", result);
 	    return result;
 	}
-	if(x >= 340) {
-		//printf("SpiInOut: received: %x\n", overrx[0]);
-	}
-	//ADI_ENTER_CRITICAL_REGION();
-	rx[x] = overrx[0];
-	x++;
 
-	//printf("SpiInOut: done sending\n");
-
-	//printf("overrx[0]: %x\n", overrx[0]);
-	//printf("overrx[1]: %d\n", overrx[1]);
-	//CRITICAL_SECTION_END( );
 	return overrx[0];
 }
 

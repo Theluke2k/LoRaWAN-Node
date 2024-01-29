@@ -54,13 +54,13 @@ uint8_t tester = 0;
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            5500
+#define APP_TX_DUTYCYCLE                            4000 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
  * value in [ms].
  */
-#define APP_TX_DUTYCYCLE_RND                        0
+#define APP_TX_DUTYCYCLE_RND                        1000
 
 /*!
  * LoRaWAN Adaptive Data Rate (Skal den være til eller fra?)
@@ -91,7 +91,7 @@ uint8_t tester = 0;
  *
  * \remark Please note that ETSI mandates duty cycled transmissions. Use only for test purposes
  */
-#define LORAWAN_DUTYCYCLE_ON                        true
+#define LORAWAN_DUTYCYCLE_ON                        false //DEBUG
 
 /*!
  * LoRaWAN application port (Hvad skal denne sættes til?)
@@ -400,7 +400,6 @@ static void PrepareTxFrame( void )
 {
     if( LmHandlerIsBusy( ) == true )
     {
-    	printf("LmHandlerBusy\n");
         return;
     }
 
@@ -497,7 +496,7 @@ static void OnPingSlotPeriodicityChanged( uint8_t pingSlotPeriodicity )
 {
     LmHandlerParams.PingSlotPeriodicity = pingSlotPeriodicity;
 }
-
+uint32_t x = 0;
 /*!
  * Function executed on TxTimer event
  */
@@ -505,6 +504,10 @@ static void OnTxTimerEvent( void* context )
 {
 	if( LmHandlerJoinStatus( ) == LORAMAC_HANDLER_SET ) {
 		tester = 1;
+		x++;
+	}
+	if(x >= 50) {
+		printf("Now\n");
 	}
 	PAJ("OnTxTimerEvent\n");
     TimerStop( &TxTimer );
