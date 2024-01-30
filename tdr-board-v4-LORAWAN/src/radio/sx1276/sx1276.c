@@ -1675,7 +1675,7 @@ extern uint8_t tester; // DEBUG
 
 static void SX1276OnDio0Irq( void* context )
 {
-	PAJ("DIO0\n");
+	//PAJ("DIO0\n");
     volatile uint8_t irqFlags = 0;
 
     switch( SX1276.Settings.State )
@@ -1865,7 +1865,7 @@ static void SX1276OnDio0Irq( void* context )
 
 static void SX1276OnDio1Irq( void* context )
 {
-	PAJ("DIO1\n");
+	//PAJ("DIO1\n");
     switch( SX1276.Settings.State )
     {
         case RF_RX_RUNNING:
