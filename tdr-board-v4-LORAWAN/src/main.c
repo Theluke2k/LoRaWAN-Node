@@ -54,7 +54,7 @@ uint8_t tester = 0;
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            10000 // minimum 4
+#define APP_TX_DUTYCYCLE                            5000 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
