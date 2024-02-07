@@ -54,7 +54,7 @@ uint8_t tester = 0;
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            6000 // minimum 4
+#define APP_TX_DUTYCYCLE                            120000 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -67,7 +67,7 @@ uint8_t tester = 0;
  *
  * \remark Please note that when ADR is enabled the end-device should be static
  */
-#define LORAWAN_ADR_STATE                           LORAMAC_HANDLER_ADR_ON
+#define LORAWAN_ADR_STATE                           LORAMAC_HANDLER_ADR_OFF
 
 /*!
  * Default datarate
