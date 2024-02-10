@@ -54,7 +54,7 @@ uint8_t tester = 0;
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            120000 // minimum 4
+#define APP_TX_DUTYCYCLE                            300000 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -74,7 +74,7 @@ uint8_t tester = 0;
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_0
+#define LORAWAN_DEFAULT_DATARATE                    DR_1
 
 /*!
  * LoRaWAN confirmed messages
@@ -207,7 +207,6 @@ static volatile uint32_t TxPeriodicity = 0;
  * Main program.
  */
 int main(void) {
-	printf("Program Start...\n");
 	BoardInitMcu( );
 
 	// Set interrup priorities. SPI must have highest prioriy!
@@ -256,22 +255,17 @@ int main(void) {
 		// Process application uplinks management
 		UplinkProcess();
 
-		//printf("Critical begin...\n");
 		CRITICAL_SECTION_BEGIN( );
 		if (IsMacProcessPending == 1) {
 			// Clear flag and prevent MCU to go into low power modes.
 			IsMacProcessPending = 0;
-			//printf("ProcessPending...\n");
 		}
 		else
 		{
-			//printf("BoardLowPower...\n");
 			// The MCU wakes up through events
 			//BoardLowPowerHandler();
 		}
-		//printf("Critical end...\n");
 		CRITICAL_SECTION_END( );
-		//printf("end\n");
 	}
 
 	return 0;

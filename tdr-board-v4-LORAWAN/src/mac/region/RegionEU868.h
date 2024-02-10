@@ -92,7 +92,7 @@ extern "C"
 /*!
  * Maximal Rx1 receive datarate offset
  */
-#define EU868_MAX_RX1_DR_OFFSET                     5
+#define EU868_MAX_RX1_DR_OFFSET                     5 // DEBUG Default 5
 
 /*!
  * Minimal Tx output power that can be used by the node
