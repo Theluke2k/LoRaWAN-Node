@@ -127,7 +127,7 @@ extern "C"
 /*!
  * Maximum RX window duration
  */
-#define EU868_MAX_RX_WINDOW                         2000 // DEBUG (1000 default)
+#define EU868_MAX_RX_WINDOW                         5000 // DEBUG (1000 default)
 
 #if ( EU868_DEFAULT_DATARATE > DR_5 )
 #error "A default DR higher than DR_5 may lead to connectivity loss."

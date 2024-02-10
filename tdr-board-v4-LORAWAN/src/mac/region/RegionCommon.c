@@ -139,7 +139,7 @@ static uint16_t UpdateTimeCredits( Band_t* band, bool joined, bool dutyCycleEnab
                                    bool lastTxIsJoinRequest, SysTime_t elapsedTimeSinceStartup,
                                    TimerTime_t currentTime, TimerTime_t lastBandUpdateTime )
 {
-
+    uint16_t dutyCycle = SetMaxTimeCredits( band, joined, elapsedTimeSinceStartup,
                                             dutyCycleEnabled, lastTxIsJoinRequest );
     TimerTime_t observation = DUTY_CYCLE_TIME_PERIOD;
 
