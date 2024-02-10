@@ -54,7 +54,7 @@ uint8_t tester = 0;
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            5000 // minimum 4
+#define APP_TX_DUTYCYCLE                            120000 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -91,7 +91,7 @@ uint8_t tester = 0;
  *
  * \remark Please note that ETSI mandates duty cycled transmissions. Use only for test purposes
  */
-#define LORAWAN_DUTYCYCLE_ON                        false //DEBUG
+#define LORAWAN_DUTYCYCLE_ON                        true //DEBUG
 
 /*!
  * LoRaWAN application port (Hvad skal denne sættes til?)
