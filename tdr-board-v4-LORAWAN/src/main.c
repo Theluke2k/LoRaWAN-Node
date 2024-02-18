@@ -344,7 +344,7 @@ static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
  */
 void CLIHandler() {
 	// Define expected CLI functions:
-	uint8_t deep_sleep_code = {}
+
 }
 
 static void OnClassChange( DeviceClass_t deviceClass )
