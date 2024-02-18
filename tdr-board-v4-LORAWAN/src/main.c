@@ -54,7 +54,7 @@ uint8_t tester = 0;
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            120000 // minimum 4
+#define APP_TX_DUTYCYCLE                            10000 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -324,7 +324,8 @@ static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
     case 1: // The application LED can be controlled on port 1 or 2
     case LORAWAN_APP_PORT:
         {
-            //AppLedStateOn = appData->Buffer[0] & 0x01;
+        	CLIHandler();
+        	//AppLedStateOn = appData->Buffer[0] & 0x01;
             //GpioWrite( &Led4, ( ( AppLedStateOn & 0x01 ) != 0 ) ? 1 : 0 );
         }
         break;
@@ -335,6 +336,15 @@ static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
     // Switch LED 2 ON for each received downlink
     //GpioWrite( &Led3, 1 );
     //TimerStart( &Led3Timer );
+}
+
+/*
+ * Lucas:
+ * Function to handle the CLI interface functions.
+ */
+void CLIHandler() {
+	// Define expected CLI functions:
+	uint8_t deep_sleep_code = {}
 }
 
 static void OnClassChange( DeviceClass_t deviceClass )
