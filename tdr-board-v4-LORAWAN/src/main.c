@@ -5,6 +5,9 @@
  *      Author: lselm
  */
 #include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdbool.h>
 #include "firmwareVersion.h"
 #include "apps/LoRaMac/common/githubVersion.h"
 #include "utilities.h"
@@ -91,7 +94,7 @@ uint8_t tester = 0;
  *
  * \remark Please note that ETSI mandates duty cycled transmissions. Use only for test purposes
  */
-#define LORAWAN_DUTYCYCLE_ON                        true //DEBUG
+#define LORAWAN_DUTYCYCLE_ON                        false //DEBUG
 
 /*!
  * LoRaWAN application port (Hvad skal denne sættes til?)
@@ -271,6 +274,50 @@ int main(void) {
 	return 0;
 }
 
+/*
+ * Lucas:
+ * Function to handle the CLI interface functions.
+ */
+bool CLIHandler(LmHandlerAppData_t* appData) {
+	// Define expected CLI functions:
+	if(appData->Buffer == NULL || appData->BufferSize == 0) {
+		return false;
+	}
+
+	// Create new buffer to add null terminator
+	char receiveBuffer[appData->BufferSize + 1]; // Add extra space for null terminator
+	memcpy(receiveBuffer, appData->Buffer, appData->BufferSize); // Copy original array
+	receiveBuffer[appData->BufferSize] = '\0'; // Add null terminator
+
+	// Check the different commands
+	if(strcmp(receiveBuffer, "123") == 0) {
+		// Execute handler for command
+		printf("ping\n");
+		return true;
+	}
+	else if(strncmp(receiveBuffer, "Sleep", 5) == 0) {
+		int sleepTime = 0;
+		if(sscanf(receiveBuffer, "Sleep %d", &sleepTime) == 1) {
+			// Execute handler for command
+			printf("deep sleep: %d\n", sleepTime);
+			return true;
+		}
+	}
+	else if(strncmp(receiveBuffer, "{\"config\":{\"adr\":\"", 18) == 0) {
+		bool setADR = 0;
+		if(sscanf(receiveBuffer, "{\"config\":{\"adr\":\"%d", &setADR) == 1) {
+			// Execute handler for command
+			printf("setadr: %d\n", setADR);
+			return true;
+		}
+	}
+
+	else {
+		printf("unknown command\n");
+	}
+
+	return false;
+}
 
 static void OnMacProcessNotify( void )
 {
@@ -324,7 +371,7 @@ static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
     case 1: // The application LED can be controlled on port 1 or 2
     case LORAWAN_APP_PORT:
         {
-        	CLIHandler();
+        	CLIHandler(appData);
         	//AppLedStateOn = appData->Buffer[0] & 0x01;
             //GpioWrite( &Led4, ( ( AppLedStateOn & 0x01 ) != 0 ) ? 1 : 0 );
         }
@@ -336,15 +383,6 @@ static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
     // Switch LED 2 ON for each received downlink
     //GpioWrite( &Led3, 1 );
     //TimerStart( &Led3Timer );
-}
-
-/*
- * Lucas:
- * Function to handle the CLI interface functions.
- */
-void CLIHandler() {
-	// Define expected CLI functions:
-
 }
 
 static void OnClassChange( DeviceClass_t deviceClass )
