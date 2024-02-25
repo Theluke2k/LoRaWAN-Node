@@ -57,7 +57,7 @@ uint8_t tester = 0;
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            10000 // minimum 4
+#define APP_TX_DUTYCYCLE                            120000 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -77,7 +77,7 @@ uint8_t tester = 0;
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_0
+#define LORAWAN_DEFAULT_DATARATE                    DR_3
 
 /*!
  * LoRaWAN confirmed messages
@@ -87,14 +87,14 @@ uint8_t tester = 0;
 /*!
  * User application data buffer size (Er 242 rigtigt?)
  */
-#define LORAWAN_APP_DATA_BUFFER_MAX_SIZE            4
+#define LORAWAN_APP_DATA_BUFFER_MAX_SIZE            100
 
 /*!
  * LoRaWAN ETSI duty cycle control enable/disable
  *
  * \remark Please note that ETSI mandates duty cycled transmissions. Use only for test purposes
  */
-#define LORAWAN_DUTYCYCLE_ON                        false //DEBUG
+#define LORAWAN_DUTYCYCLE_ON                        true //DEBUG
 
 /*!
  * LoRaWAN application port (Hvad skal denne sættes til?)
@@ -112,12 +112,13 @@ typedef enum {
 /*!
  * User application data
  */
-static uint8_t AppDataBuffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE] = {0x1, 0x2, 0x3, 0x4};
+static uint8_t AppDataBuffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE];
+//static uint8_t AppDataBuffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE] = {0x1, 0x2, 0x3, 0x4}; // DEBUG
 
 /*!preap
  * User application data structure
  */
-static LmHandlerAppData_t AppData = { .Buffer = AppDataBuffer, .BufferSize = 0,
+static LmHandlerAppData_t AppData = { .Buffer = AppDataBuffer, .BufferSize = 0, //Debug standard: .BufferSize = 0 .Port = 0,
 		.Port = 0, };
 
 
@@ -206,6 +207,12 @@ static volatile uint8_t IsTxFramePending = 0;
 static volatile uint32_t TxPeriodicity = 0;
 
 /*
+ * Lucas (25-02-2024)
+ * TDR data struct definition. Holds information about all of the measurements done in the measurement phase.
+ */
+struct tdr_data tdr_data[1];
+
+/*
  * Lucas (22-10-23):
  * Main program.
  */
@@ -247,14 +254,15 @@ int main(void) {
 	StartTxProcess( LORAMAC_HANDLER_TX_ON_TIMER );
 
 	while (1) {
+		// DEBUG start
 		if( LmHandlerJoinStatus( ) == LORAMAC_HANDLER_SET ) {
 			tester = 1;
 		}
-		//PAJ("LmHandlerProcess...\n");
+		// DEBUG end
+
 		// Processes the LoRaMac events
 		LmHandlerProcess();
 
-		//PAJ("UplinkProcess...\n");
 		// Process application uplinks management
 		UplinkProcess();
 
@@ -307,6 +315,16 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 		bool setADR = 0;
 		if(sscanf(receiveBuffer, "{\"config\":{\"adr\":\"%d", &setADR) == 1) {
 			// Execute handler for command
+			LmHandlerParams.AdrEnable = setADR;
+
+			if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
+				printf("LoRaMac wasn't properly initialized\n");
+				// Fatal error, endless loop.
+				while (1)
+				{
+				}
+			}
+
 			printf("setadr: %d\n", setADR);
 			return true;
 		}
@@ -380,9 +398,7 @@ static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
         break;
     }
 
-    // Switch LED 2 ON for each received downlink
-    //GpioWrite( &Led3, 1 );
-    //TimerStart( &Led3Timer );
+
 }
 
 static void OnClassChange( DeviceClass_t deviceClass )
@@ -445,38 +461,67 @@ static void PrepareTxFrame( void )
         return;
     }
 
-    //uint8_t channel = 0;
 
+    // DEBUG start (fill some test data to send)
+    tdr_data[0].int1_integer = 1;
+	tdr_data[0].int1_decimal = 2;
+	tdr_data[0].int2_integer = 3;
+	tdr_data[0].int2_decimal = 4;
+	tdr_data[0].th1_temp = 5;
+	tdr_data[0].th2_temp = 6;
+	tdr_data[0].th3_temp = 7;
+	tdr_data[0].th4_temp = 8;
+	tdr_data[0].honey_rh_integer = 9;
+	tdr_data[0].honey_rh_decimal = 10;
+	tdr_data[0].honey_temp_integer = 11;
+	tdr_data[0].honey_temp_decimal = 12;
+
+    // DEBUG end
+
+
+    // Specify the port on which to send
     AppData.Port = LORAWAN_APP_PORT;
-    //AppDataBuffer
-    /*
-     * Lucas (17-11-23):
-     * We do not need anything related to Cayenne. We must define our
-     * own structure of what we want to send.
-     *
-     * Use the AppDataBuffer to specify what to send!
-    */
-    /*
-    CayenneLppReset( );
-    CayenneLppAddDigitalInput( channel++, AppLedStateOn );
-    CayenneLppAddAnalogInput( channel++, BoardGetBatteryLevel( ) * 100 / 254 );
 
-    CayenneLppCopy( AppData.Buffer );
-    AppData.BufferSize = CayenneLppGetSize( );
-	*/
+    // Buffer to convert the numbers to char
+    char buffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE]={0};
 
-    //memcpy1(AppData.Buffer, AppDataBuffer, LORAWAN_APP_DATA_BUFFER_MAX_SIZE);
-    //AppData.BufferSize = LORAWAN_APP_DATA_BUFFER_MAX_SIZE;
+    // Current package count, if we send more than one package at a time.
+    int packageCount = 0;
 
-    memcpy1(AppData.Buffer, AppDataBuffer, LORAWAN_APP_DATA_BUFFER_MAX_SIZE); // DEBUG
-    AppData.BufferSize = LORAWAN_APP_DATA_BUFFER_MAX_SIZE;
+    // Increment total package number
+    packageNumber++;
 
+    uint8_t packet_length = snprintf(buffer, LORAWAN_APP_DATA_BUFFER_MAX_SIZE, "[%d]{$%3u.%02u/%3u.%02u$%2d/%2d/%2d/%2d$%2u.%2u/%2u.%2u} -> Package %d",
+    						packageCount,
+							tdr_data[0].int1_integer,
+							tdr_data[0].int1_decimal,
+							tdr_data[0].int2_integer,
+							tdr_data[0].int2_decimal,
+							tdr_data[0].th1_temp,
+							tdr_data[0].th2_temp,
+							tdr_data[0].th3_temp,
+							tdr_data[0].th4_temp,
+							tdr_data[0].honey_rh_integer,
+							tdr_data[0].honey_rh_decimal,
+							tdr_data[0].honey_temp_integer,
+							tdr_data[0].honey_temp_decimal,
+							packageNumber
+    						);
+
+    // Copy the contents of the tdr_data variable into the appdata buffer
+    //memcpy1(AppData.Buffer, (const uint8_t*)&tdr_data[0], LORAWAN_APP_DATA_BUFFER_MAX_SIZE); // DEBUG
+    memcpy1(AppData.Buffer, (const uint8_t*)buffer, packet_length); // DEBUG
+
+    // The size of the buffer should always be equal to the maximum size
+    AppData.BufferSize = packet_length;
+
+
+    // Send package
     if( LmHandlerSend( &AppData, LmHandlerParams.IsTxConfirmed ) == LORAMAC_HANDLER_SUCCESS )
     {
-        // Switch LED 1 ON
-        //GpioWrite( &Led1, 1 );
-        //TimerStart( &Led1Timer );
     }
+
+
 }
 
 static void StartTxProcess( LmHandlerTxEvents_t txEvent )
@@ -544,14 +589,13 @@ uint32_t x = 0;
  */
 static void OnTxTimerEvent( void* context )
 {
+	// DEBUG start
 	if( LmHandlerJoinStatus( ) == LORAMAC_HANDLER_SET ) {
 		tester = 1;
 		x++;
 	}
-	if(x >= 50) {
-		printf("Now\n");
-	}
 	PAJ("OnTxTimerEvent\n");
+	// DEBUG end
     TimerStop( &TxTimer );
 
     IsTxFramePending = 1;
