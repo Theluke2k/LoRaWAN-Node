@@ -50,7 +50,6 @@
 "src/mac/region/Region.o"
 "src/mac/region/RegionCommon.o"
 "src/mac/region/RegionEU868.o"
-"src/mac/region/RegionIN865.o"
 "src/main.o"
 "src/peripherals/gpio-ioe.o"
 "src/peripherals/mag3110.o"
