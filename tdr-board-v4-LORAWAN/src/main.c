@@ -85,7 +85,7 @@ uint8_t tester = 0;
 #define LORAWAN_DEFAULT_CONFIRMED_MSG_STATE         LORAMAC_HANDLER_UNCONFIRMED_MSG
 
 /*!
- * User application data buffer size (Er 242 rigtigt?)
+ * User application data buffer size
  */
 #define LORAWAN_APP_DATA_BUFFER_MAX_SIZE            100
 
