@@ -313,18 +313,19 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 	else if(strncmp(receiveBuffer, "{\"config\":{\"adr\":\"", 18) == 0) {
 		bool setADR = 0;
 		if(sscanf(receiveBuffer, "{\"config\":{\"adr\":\"%d", &setADR) == 1) {
-			// Execute handler for command
-			LmHandlerParams.AdrEnable = setADR;
+			if(LmHandlerParams.AdrEnable != setADR) {
+				// Execute handler for command
+				LmHandlerParams.AdrEnable = setADR;
 
-			if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
-				printf("LoRaMac wasn't properly initialized\n");
-				// Fatal error, endless loop.
-				while (1)
-				{
+				if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
+					printf("LoRaMac wasn't properly initialized\n");
+					// Fatal error, endless loop.
+					while (1) {}
 				}
 			}
 
-			printf("setadr: %d\n", setADR);
+
+			printf("setadr: %d\n", setADR); // DEBUG
 			return true;
 		}
 	}
