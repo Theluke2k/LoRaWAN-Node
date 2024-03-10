@@ -335,7 +335,6 @@ void SX1276Init( RadioEvents_t *events )
     }
 
     SX1276SetModem( MODEM_FSK );
-    //SX1276SetModem( MODEM_LORA );// DEBUG
 
     SX1276.Settings.State = RF_IDLE;
 }

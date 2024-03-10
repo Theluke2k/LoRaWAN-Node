@@ -63,7 +63,6 @@ extern "C"
 #include "LoRaMac.h"
 #include "timer.h"
 #include "RegionCommon.h"
-//#include "Region.h"
 
 #define REGION_EU868
 

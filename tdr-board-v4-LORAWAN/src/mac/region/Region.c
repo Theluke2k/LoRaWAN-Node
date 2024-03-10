@@ -31,13 +31,6 @@
 #include "LoRaMac.h"
 #include "Region.h"
 
-/*
- * Lucas:
- * This must be defined. If not, LoRaMac initialisation will fail because it thinks the
- * EU868 region is not defined.
- */
-//#define REGION_EU868 //DEBUG
-
 // Setup regions
 #ifdef REGION_AS923
 #include "RegionAS923.h"

@@ -993,7 +993,7 @@ LoRaMacCryptoStatus_t LoRaMacCryptoPrepareJoinRequest( LoRaMacMessageJoinRequest
 #else
     CryptoNvm->DevNonce++;
 #endif
-    macMsg->DevNonce = CryptoNvm->DevNonce; //DEBUG
+    macMsg->DevNonce = CryptoNvm->DevNonce;
 
 
 #if( USE_LRWAN_1_1_X_CRYPTO == 1 )

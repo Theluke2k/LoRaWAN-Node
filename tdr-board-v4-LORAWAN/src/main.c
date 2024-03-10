@@ -77,7 +77,7 @@ uint8_t tester = 0;
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_0
+#define LORAWAN_DEFAULT_DATARATE                    DR_3 // DEBUG (default: DR0)
 
 /*!
  * LoRaWAN confirmed messages
@@ -94,7 +94,7 @@ uint8_t tester = 0;
  *
  * \remark Please note that ETSI mandates duty cycled transmissions. Use only for test purposes
  */
-#define LORAWAN_DUTYCYCLE_ON                        true //DEBUG (default = true)
+#define LORAWAN_DUTYCYCLE_ON                        true
 
 /*!
  * LoRaWAN application port (Hvad skal denne sættes til?)
@@ -113,12 +113,11 @@ typedef enum {
  * User application data
  */
 static uint8_t AppDataBuffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE];
-//static uint8_t AppDataBuffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE] = {0x1, 0x2, 0x3, 0x4}; // DEBUG
 
 /*!preap
  * User application data structure
  */
-static LmHandlerAppData_t AppData = { .Buffer = AppDataBuffer, .BufferSize = 0, //Debug standard: .BufferSize = 0 .Port = 0,
+static LmHandlerAppData_t AppData = { .Buffer = AppDataBuffer, .BufferSize = 0,
 		.Port = 0, };
 
 
@@ -509,8 +508,7 @@ static void PrepareTxFrame( void )
     						);
 
     // Copy the contents of the tdr_data variable into the appdata buffer
-    //memcpy1(AppData.Buffer, (const uint8_t*)&tdr_data[0], LORAWAN_APP_DATA_BUFFER_MAX_SIZE); // DEBUG
-    memcpy1(AppData.Buffer, (const uint8_t*)buffer, packet_length); // DEBUG
+    memcpy1(AppData.Buffer, (const uint8_t*)buffer, packet_length);
 
     // The size of the buffer should always be equal to the maximum size
     AppData.BufferSize = packet_length;
