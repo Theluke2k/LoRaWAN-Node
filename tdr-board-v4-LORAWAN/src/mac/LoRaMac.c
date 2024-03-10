@@ -814,17 +814,9 @@ static void ProcessRadioTxDone( void )
     // Setup timers
     CRITICAL_SECTION_BEGIN( );
     uint32_t offset = TimerGetCurrentTime( ) - TxDoneParams.CurTime;
-    //uint32_t offset = 0; // DEBUG
-    //printf("RxWindow1Delay: %d\n", MacCtx.RxWindow1Delay - offset);
-    //printf("RxWindow1Delay: %d\n", MacCtx.RxWindow2Delay - offset);
-
-    TimerSetValue( &MacCtx.RxWindowTimer1, MacCtx.RxWindow1Delay - offset );
-    //TimerSetValue( &MacCtx.RxWindowTimer1, 2500);
-
+    TimerSetValue( &MacCtx.RxWindowTimer1, MacCtx.RxWindow1Delay - offset - 15); // DEBUG (default: MacCtx.RxWindow1Delay - offset)
     TimerStart( &MacCtx.RxWindowTimer1 );
     TimerSetValue( &MacCtx.RxWindowTimer2, MacCtx.RxWindow2Delay - offset );
-    //TimerSetValue( &MacCtx.RxWindowTimer2, 7000 );
-
     TimerStart( &MacCtx.RxWindowTimer2 );
     CRITICAL_SECTION_END( );
 
@@ -1940,6 +1932,8 @@ static void OnTxDelayedTimerEvent( void* context )
     }
 }
 
+uint8_t y = 0;
+
 static void OnRxWindow1TimerEvent( void* context )
 {
 	//printf("OnRxWindow1TimerEvent\n");
@@ -1952,6 +1946,7 @@ static void OnRxWindow1TimerEvent( void* context )
     MacCtx.RxWindow1Config.NetworkActivation = Nvm.MacGroup2.NetworkActivation;
 
     RxWindowSetup( &MacCtx.RxWindowTimer1, &MacCtx.RxWindow1Config );
+    y = 1;
 }
 
 static void OnRxWindow2TimerEvent( void* context )
@@ -1972,7 +1967,7 @@ static void OnRxWindow2TimerEvent( void* context )
     MacCtx.RxWindow2Config.NetworkActivation = Nvm.MacGroup2.NetworkActivation;
 
     RxWindowSetup( &MacCtx.RxWindowTimer2, &MacCtx.RxWindow2Config );
-    //printf("OnRxWindow2TimerEvent\n");
+    y = 2;
 }
 
 static void OnRetransmitTimeoutTimerEvent( void* context )

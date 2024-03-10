@@ -335,7 +335,6 @@ void SX1276Init( RadioEvents_t *events )
     }
 
     SX1276SetModem( MODEM_FSK );
-    //SX1276SetModem( MODEM_LORA );// DEBUG
 
     SX1276.Settings.State = RF_IDLE;
 }
@@ -587,8 +586,6 @@ void SX1276SetRxConfig( RadioModems_t modem, uint32_t bandwidth,
                          ( SX1276Read( REG_LR_MODEMCONFIG3 ) &
                            RFLR_MODEMCONFIG3_LOWDATARATEOPTIMIZE_MASK ) |
                            ( SX1276.Settings.LoRa.LowDatarateOptimize << 3 ) );
-
-            SX1276Write( REG_LR_SYMBTIMEOUTLSB, ( uint8_t )( symbTimeout & 0xFF ) );
 
             SX1276Write( REG_LR_PREAMBLEMSB, ( uint8_t )( ( preambleLen >> 8 ) & 0xFF ) );
             SX1276Write( REG_LR_PREAMBLELSB, ( uint8_t )( preambleLen & 0xFF ) );
@@ -1632,16 +1629,12 @@ static void SX1276OnTimeoutIrq( void* context )
         // the radio transceiver and putting it into a known state.
 
         // BEGIN WORKAROUND
-    	//printf("SX1276OnTimeoutIrq: 1\n");
         // Reset the radio
         SX1276Reset( );
-        //printf("SX1276OnTimeoutIrq: 2\n");
         // Calibrate Rx chain
         RxChainCalibration( );
-        //printf("SX1276OnTimeoutIrq: 3\n");
         // Initialize radio default values
         SX1276SetOpMode( RF_OPMODE_SLEEP );
-        //printf("SX1276OnTimeoutIrq: 4\n");
         for( uint8_t i = 0; i < sizeof( RadioRegsInit ) / sizeof( RadioRegisters_t ); i++ )
         {
             SX1276SetModem( RadioRegsInit[i].Modem );
@@ -1649,17 +1642,14 @@ static void SX1276OnTimeoutIrq( void* context )
         }
         SX1276SetModem( MODEM_FSK );
 
-        //printf("SX1276OnTimeoutIrq: 5\n");
         // Restore previous network type setting.
         SX1276SetPublicNetwork( SX1276.Settings.LoRa.PublicNetwork );
         // END WORKAROUND
-        //printf("SX1276OnTimeoutIrq: 6\n");
         SX1276.Settings.State = RF_IDLE;
         if( ( RadioEvents != NULL ) && ( RadioEvents->TxTimeout != NULL ) )
         {
             RadioEvents->TxTimeout( );
         }
-        //printf("SX1276OnTimeoutIrq: Done\n");
         break;
     default:
         break;

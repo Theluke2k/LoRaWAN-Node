@@ -83,12 +83,12 @@ extern "C"
 #include "secure-element-nvm.h"
 #include "LoRaMacClassBNvm.h"
 
+// DEBUG
 extern uint8_t tester;
-// MACRO FOR DEBUG
 #define PAJ(ARG) \
-    if (tester == 1) { \
-        printf("%s", (ARG)); \
-    }
+	if(tester == 1) { \
+		printf("%s", ARG); \
+	}
 
 /*!
  * LoRaWAN version definition.
