@@ -57,7 +57,7 @@ uint8_t tester = 0; //
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            8000 // minimum 4
+#define APP_TX_DUTYCYCLE                            10000 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -210,72 +210,108 @@ static volatile uint32_t TxPeriodicity = 0;
  * TDR data struct definition. Holds information about all of the measurements done in the measurement phase.
  */
 struct tdr_data tdr_data[1];
-
+volatile uint32_t iHibernateExitFlag = 0;
+volatile uint8_t print_flag = 0;
 /*
  * Lucas (22-10-23):
  * Main program.
  */
 int main(void) {
-	BoardInitMcu( );
-
-	// Set interrup priorities. SPI must have highest prioriy!
-	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
-	NVIC_SetPriority(SPI0_EVT_IRQn, 1);
-	NVIC_SetPriority(RTC1_EVT_IRQn, 2);
-
-	// Initialize transmission perhiodicity variable
-	TxPeriodicity = APP_TX_DUTYCYCLE
-			+ randr(-APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND);
-
-	const Version_t appVersion = { .Value = FIRMWARE_VERSION };
-	const Version_t gitHubVersion = { .Value = GITHUB_VERSION };
-
-	DisplayAppInfo("periodic-uplink-lpp", &appVersion, &gitHubVersion);
-
-	if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
-		printf("LoRaMac wasn't properly initialized\n");
-		// Fatal error, endless loop.
-		while (1)
-		{
-		}
-	}
-
-	// Set system maximum tolerated rx error in milliseconds
-	LmHandlerSetSystemMaxRxError( 20 );
-
-	// The LoRa-Alliance Compliance protocol package should always be
-	// initialized and activated.
-	LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams );
-
-	//printf("Joining...\n");
-	LmHandlerJoin( );
-
-	StartTxProcess( LORAMAC_HANDLER_TX_ON_TIMER );
+	uint16_t index = 0;
 
 	while (1) {
-		// DEBUG start
-		if( LmHandlerJoinStatus( ) == LORAMAC_HANDLER_SET ) {
-			tester = 1;
-		}
-		// DEBUG end
+		init_system();
+		xint_uart_disable();
+		init_store();
+		run_and_store_measurements(tdr_data, &index);
+		uart_init();
+		uint32_t delay_val = 1600; // 20ms
+		while (--delay_val) {
+		};
+		print_tdr_data_to_uart(tdr_data);
+		uart_deinit();
 
-		// Processes the LoRaMac events
-		LmHandlerProcess();
+		BoardInitMcu();
 
-		// Process application uplinks management
-		UplinkProcess();
+		// Set interrup priorities. SPI must have highest prioriy!
+		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
+		NVIC_SetPriority(SPI0_EVT_IRQn, 1);
+		NVIC_SetPriority(RTC1_EVT_IRQn, 2);
 
-		CRITICAL_SECTION_BEGIN( );
-		if (IsMacProcessPending == 1) {
-			// Clear flag and prevent MCU to go into low power modes.
-			IsMacProcessPending = 0;
+		// Initialize transmission perhiodicity variable
+		TxPeriodicity = APP_TX_DUTYCYCLE
+				+ randr(-APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND);
+
+		const Version_t appVersion = { .Value = FIRMWARE_VERSION };
+		const Version_t gitHubVersion = { .Value = GITHUB_VERSION };
+
+		DisplayAppInfo("periodic-uplink-lpp", &appVersion, &gitHubVersion);
+
+		if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams)
+				!= LORAMAC_HANDLER_SUCCESS) {
+			printf("LoRaMac wasn't properly initialized\n");
+			// Fatal error, endless loop.
+			while (1) {
+			}
 		}
-		else
-		{
-			// The MCU wakes up through events
-			//BoardLowPowerHandler();
+
+		// Set system maximum tolerated rx error in milliseconds
+		LmHandlerSetSystemMaxRxError(20);
+
+		// The LoRa-Alliance Compliance protocol package should always be
+		// initialized and activated.
+		LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
+
+		//printf("Joining...\n");
+		LmHandlerJoin();
+
+		StartTxProcess(LORAMAC_HANDLER_TX_ON_TIMER);
+
+		while (1) {
+			// DEBUG start
+			if (LmHandlerJoinStatus() == LORAMAC_HANDLER_SET) {
+				tester = 1;
+			}
+			// DEBUG end
+
+			/*
+			 * Lucas (23/03/2024):
+			 * The AU measurements should be taken here
+			 */
+			/*
+			 xint_uart_disable();
+			 init_store();
+			 run_and_store_measurements(tdr_data, &index);
+			 uart_init();
+			 uint32_t delay_val = 1600; // 20ms
+			 while(--delay_val){};
+			 print_tdr_data_to_uart(tdr_data);
+			 uart_deinit();
+			 */
+
+			// Processes the LoRaMac events
+			LmHandlerProcess();
+
+			// Process application uplinks management
+			UplinkProcess();
+
+			//CRITICAL_SECTION_BEGIN( );
+			if (IsMacProcessPending == 1) {
+				// Clear flag and prevent MCU to go into low power modes.
+				IsMacProcessPending = 0;
+			} else {
+				// The MCU wakes up through events
+				//BoardLowPowerHandler();
+				/*
+				 * Lucas (23/03/2024):
+				 * The board should enter low power mode here and wake
+				 * up on some timer.
+				 */
+				iHibernateExitFlag = 0;
+				enter_hibernation();
+			}
+			//CRITICAL_SECTION_END( );
 		}
-		CRITICAL_SECTION_END( );
 	}
 
 	return 0;
@@ -594,6 +630,8 @@ static void OnTxTimerEvent( void* context )
 	PAJ("OnTxTimerEvent\n");
 	// DEBUG end
     TimerStop( &TxTimer );
+
+    iHibernateExitFlag = 1;
 
     IsTxFramePending = 1;
 
