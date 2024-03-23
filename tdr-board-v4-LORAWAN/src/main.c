@@ -34,7 +34,7 @@
 #include "spi-au.h"
 
 // DEBUG
-uint8_t tester = 0;
+uint8_t tester = 0; //
 
 #define ACTIVE_REGION LORAMAC_REGION_EU868
 
