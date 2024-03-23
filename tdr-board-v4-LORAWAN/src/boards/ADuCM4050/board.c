@@ -111,6 +111,10 @@ void BoardInitMcu( void )
 {
 	if( McuInitialized == false )
 	{
+		/*
+		 * Lucas (23/03/2024):
+		 * Removed for merge
+		 */
 		SystemClockConfig();
 
 		/*

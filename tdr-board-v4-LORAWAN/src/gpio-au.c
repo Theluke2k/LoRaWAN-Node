@@ -129,16 +129,22 @@ void digital_pin_init()
     *((volatile uint32_t *)REG_GPIO1_CFG) |= UART1_TX_PORTP2_MUX;
     *((volatile uint32_t *)REG_GPIO2_CFG) |= UART1_RX_PORTP3_MUX;
 
+
+    /*
+	 * Lucas (23/03/2024):
+	 * Removed for merge
+	 */
     // LORA/SPI
-    *((volatile uint32_t *)REG_GPIO0_CFG) |= SPI0_CLK_PORTP0_MUX | SPI0_MOSI_PORTP0_MUX | SPI0_MISO_PORTP0_MUX | SPI0_CS_PORT0_MUX;
-	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(LORA_RST_PORT, LORA_RST_PIN, true)))
+    //*((volatile uint32_t *)REG_GPIO0_CFG) |= SPI0_CLK_PORTP0_MUX | SPI0_MOSI_PORTP0_MUX | SPI0_MISO_PORTP0_MUX | SPI0_CS_PORT0_MUX;
+	/*
+    if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(LORA_RST_PORT, LORA_RST_PIN, true)))
 	{
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
 	}
 	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_InputEnable(LORA_DIO0_PORT, LORA_DIO0_PIN, true)))
 	{
 		DEBUG_MESSAGE("adi_gpio_InputEnable failed\n");
-	}
+	}*/
 
 	//Initial states
 	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
@@ -155,7 +161,11 @@ void digital_pin_init()
 	adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN);
 
 
-	adi_gpio_SetHigh(LORA_RST_PORT, LORA_RST_PIN);
+	/*
+	 * Lucas (23/03/2024):
+	 * Removed for merge
+	 */
+	//adi_gpio_SetHigh(LORA_RST_PORT, LORA_RST_PIN);
 
 }
 

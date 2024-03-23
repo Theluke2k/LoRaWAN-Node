@@ -94,10 +94,15 @@ void init_system()
 
     i2c_init();
 
-    rtc_Init();
+    //rtc_Init();
 
-    spi_init();
-	lora_initialize();
+    /*
+     * Lucas (23/03/2024):
+     * Removed for merge
+     */
+
+    //spi_init();
+	//lora_initialize();
 
 }
 
@@ -149,9 +154,14 @@ void init_store()
     gpio_init();
     adc_init(false);
     i2c_init();
-    rtc_Init();
-    spi_init();
-    lora_initialize();
+
+    /*
+     * Lucas (23/03/2024):
+     * REMOVED FOR MERGE
+     */
+    //rtc_Init();
+    //spi_init();
+    //lora_initialize();
 
 }
 

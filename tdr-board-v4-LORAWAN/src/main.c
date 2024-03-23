@@ -212,26 +212,31 @@ static volatile uint32_t TxPeriodicity = 0;
 struct tdr_data tdr_data[1];
 volatile uint32_t iHibernateExitFlag = 0;
 volatile uint8_t print_flag = 0;
+uint8_t messagePending = 0;
+uint8_t initialized = 0;
 /*
  * Lucas (22-10-23):
  * Main program.
  */
 int main(void) {
-	uint16_t index = 0;
-
+	//uint16_t index = 0;
+	//init_system();
 	while (1) {
-		init_system();
+		BoardInitMcu();
+
+		/*
 		xint_uart_disable();
 		init_store();
 		run_and_store_measurements(tdr_data, &index);
 		uart_init();
 		uint32_t delay_val = 1600; // 20ms
-		while (--delay_val) {
-		};
+		while(--delay_val){};
 		print_tdr_data_to_uart(tdr_data);
 		uart_deinit();
+	*/
+		messagePending = 1;
 
-		BoardInitMcu();
+
 
 		// Set interrup priorities. SPI must have highest prioriy!
 		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
@@ -274,28 +279,13 @@ int main(void) {
 			}
 			// DEBUG end
 
-			/*
-			 * Lucas (23/03/2024):
-			 * The AU measurements should be taken here
-			 */
-			/*
-			 xint_uart_disable();
-			 init_store();
-			 run_and_store_measurements(tdr_data, &index);
-			 uart_init();
-			 uint32_t delay_val = 1600; // 20ms
-			 while(--delay_val){};
-			 print_tdr_data_to_uart(tdr_data);
-			 uart_deinit();
-			 */
-
 			// Processes the LoRaMac events
 			LmHandlerProcess();
 
 			// Process application uplinks management
 			UplinkProcess();
 
-			//CRITICAL_SECTION_BEGIN( );
+			CRITICAL_SECTION_BEGIN( );
 			if (IsMacProcessPending == 1) {
 				// Clear flag and prevent MCU to go into low power modes.
 				IsMacProcessPending = 0;
@@ -307,10 +297,10 @@ int main(void) {
 				 * The board should enter low power mode here and wake
 				 * up on some timer.
 				 */
-				iHibernateExitFlag = 0;
-				enter_hibernation();
+				//iHibernateExitFlag = 0;
+				//enter_hibernation();
 			}
-			//CRITICAL_SECTION_END( );
+			CRITICAL_SECTION_END( );
 		}
 	}
 
@@ -497,6 +487,7 @@ static void PrepareTxFrame( void )
 
 
     // DEBUG start (fill some test data to send)
+    /*
     tdr_data[0].int1_integer = 1;
 	tdr_data[0].int1_decimal = 2;
 	tdr_data[0].int2_integer = 3;
@@ -509,6 +500,7 @@ static void PrepareTxFrame( void )
 	tdr_data[0].honey_rh_decimal = 10;
 	tdr_data[0].honey_temp_integer = 11;
 	tdr_data[0].honey_temp_decimal = 12;
+	*/
 
     // DEBUG end
 
@@ -548,13 +540,13 @@ static void PrepareTxFrame( void )
     // The size of the buffer should always be equal to the maximum size
     AppData.BufferSize = packet_length;
 
+    LmHandlerErrorStatus_t t = LmHandlerSend( &AppData, LmHandlerParams.IsTxConfirmed );
 
     // Send package
-    if( LmHandlerSend( &AppData, LmHandlerParams.IsTxConfirmed ) == LORAMAC_HANDLER_SUCCESS )
+    if( t == LORAMAC_HANDLER_SUCCESS )
     {
+    	messagePending = 0;
     }
-
-
 }
 
 static void StartTxProcess( LmHandlerTxEvents_t txEvent )
