@@ -5,15 +5,14 @@
  *      Author: au703540
  */
 #include "rtc.h"
-
 #include "tdr-board-v4_config.h"
+#include "uart-au.h"
 #include "shared.h"
-
 #include <adi_rtc.h>
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-#include "uart-au.h"
+
 
 /*
  * RTC memory (ADI driver).
@@ -216,12 +215,12 @@ ADI_RTC_RESULT rtc_Calibrate (void)
     }
 
 
-    if(ADI_RTC_SUCCESS != (eResult = adi_rtc_SetTrim(hDevice1,ADI_RTC_TRIM_INTERVAL_14,ADI_RTC_TRIM_1,ADI_RTC_TRIM_SUB)))
+    if(ADI_RTC_SUCCESS != (eResult = adi_rtc_SetTrim(hDevice0,ADI_RTC_TRIM_INTERVAL_14,ADI_RTC_TRIM_1,ADI_RTC_TRIM_SUB)))
     {
         DEBUG_RESULT("\n Failed to set the device %04d", eResult, ADI_RTC_SUCCESS);
         return(eResult);
     }
-    if(ADI_RTC_SUCCESS != (eResult = adi_rtc_EnableTrim(hDevice1, true)))
+    if(ADI_RTC_SUCCESS != (eResult = adi_rtc_EnableTrim(hDevice0, true)))
     {
         DEBUG_RESULT("\n Failed to enable the trim %04d", eResult, ADI_RTC_SUCCESS);
         return(eResult);

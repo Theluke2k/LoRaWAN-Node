@@ -323,7 +323,6 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 				{
 				}
 			}
-
 			printf("setadr: %d\n", setADR);
 			return true;
 		}

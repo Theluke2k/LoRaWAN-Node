@@ -12,18 +12,20 @@
 
 #include "general_functions.h"
 
-#include "adc-au.h"
-#include "gpio-au.h"
-#include "i2c-au.h"
 #include "tdr.h"
 #include "rtc.h"
 #include "sensors.h"
+#include "gpio-au.h"
+#include "spi-au.h"
+#include "adc-au.h"
 #include "xint.h"
+#include "uart-au.h"
+#include "i2c-au.h"
 #include "sx1276.h"
 #include "shared.h"
-#include "spi-au.h"
+
 #include "tdr-board-v4_config.h"
-#include "uart-au.h"
+
 
 
 /**
@@ -199,14 +201,14 @@ void print_tdr_data_to_uart(struct tdr_data tdr_data[])
  */
 uint8_t enter_hibernation()
 {
-	/*
+
 	ADI_PWR_RESULT eResult;
 	if((eResult = adi_pwr_EnterLowPowerMode(ADI_PWR_MODE_HIBERNATE, &iHibernateExitFlag, 0)) != ADI_PWR_SUCCESS)
 	{
 		DEBUG_RESULT("Error during entering hibernation", eResult, ADI_PWR_SUCCESS);
 		return 1;
 	}
-	*/
+
 	return 0;
 
 }

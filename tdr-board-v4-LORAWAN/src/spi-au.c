@@ -11,8 +11,8 @@
 #include <adi_spi.h>
 #include <adi_spi_config.h>
 #include <adi_gpio.h>
-#include <drivers/general/adi_drivers_general.h>
 #include "gpio-au.h"
+#include <drivers/general/adi_drivers_general.h>
 
 
 /*
@@ -109,8 +109,9 @@ ADI_SPI_RESULT spi_write_byte(uint8_t address, uint8_t data)
     {
         return result;
     }
-    printf("RX: %d\n", transceiver.pReceiver[0]);
-    printf("RX: %d\n", transceiver.pReceiver[1]);
+    // DEBUG (added to log SPI data)
+    //printf("RX: %d\n", transceiver.pReceiver[0]);
+    //printf("RX: %d\n", transceiver.pReceiver[1]);
 
 	return ADI_SPI_SUCCESS;
 }
@@ -189,8 +190,9 @@ ADI_SPI_RESULT spi_read_byte(uint8_t address, uint8_t* ret)
 		return result;
 	}
 
-	printf("RX: %d\n", transceiver.pReceiver[0]);
-	printf("RX: %d\n", transceiver.pReceiver[1]);
+	// DEBUG (added to log SPI data)
+	//printf("RX: %d\n", transceiver.pReceiver[0]);
+	//printf("RX: %d\n", transceiver.pReceiver[1]);
 
 	*ret = spiRxBuffer[1];
 
