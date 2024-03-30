@@ -1094,3 +1094,17 @@ static void LmHandlerPackagesProcess( void )
         }
     }
 }
+
+/*
+ * Lucas (30-03-2024):
+ * Added function to be able to deinitialize LoRaMac properly.
+ */
+LmHandlerErrorStatus_t LmHandlerDeInit(void) {
+	LoRaMacStatus_t status = LoRaMacDeInitialization();
+	if(status == LORAMAC_STATUS_OK) {
+		return LORAMAC_HANDLER_SUCCESS;
+	}
+	else {
+		return LORAMAC_HANDLER_ERROR;
+	}
+}

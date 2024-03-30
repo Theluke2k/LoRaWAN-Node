@@ -57,7 +57,7 @@ uint8_t tester = 0; //
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            10000 // minimum 4
+#define APP_TX_DUTYCYCLE                            2500 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -219,12 +219,12 @@ uint8_t initialized = 0;
  * Main program.
  */
 int main(void) {
-	//uint16_t index = 0;
-	//init_system();
+	uint16_t index = 0;
+	init_system();
 	while (1) {
 		BoardInitMcu();
 
-		/*
+
 		xint_uart_disable();
 		init_store();
 		run_and_store_measurements(tdr_data, &index);
@@ -233,10 +233,9 @@ int main(void) {
 		while(--delay_val){};
 		print_tdr_data_to_uart(tdr_data);
 		uart_deinit();
-	*/
-		messagePending = 1;
 
 
+		messagePending = 0;
 
 		// Set interrup priorities. SPI must have highest prioriy!
 		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
@@ -267,12 +266,14 @@ int main(void) {
 		// initialized and activated.
 		LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
 
-		//printf("Joining...\n");
 		LmHandlerJoin();
 
 		StartTxProcess(LORAMAC_HANDLER_TX_ON_TIMER);
 
-		while (1) {
+		/*
+		 *
+		 */
+		while (messagePending < 2) {
 			// DEBUG start
 			if (LmHandlerJoinStatus() == LORAMAC_HANDLER_SET) {
 				tester = 1;
@@ -302,6 +303,7 @@ int main(void) {
 			}
 			CRITICAL_SECTION_END( );
 		}
+		//LmHandlerDeInit();
 	}
 
 	return 0;
@@ -545,7 +547,7 @@ static void PrepareTxFrame( void )
     // Send package
     if( t == LORAMAC_HANDLER_SUCCESS )
     {
-    	messagePending = 0;
+    	messagePending = 1;
     }
 }
 
@@ -623,13 +625,18 @@ static void OnTxTimerEvent( void* context )
 	// DEBUG end
     TimerStop( &TxTimer );
 
-    iHibernateExitFlag = 1;
+    //iHibernateExitFlag = 1;
+    if(messagePending == 0) {
 
-    IsTxFramePending = 1;
+    	IsTxFramePending = 1;
 
-    // Schedule next transmission
-    TimerSetValue( &TxTimer, TxPeriodicity );
-    TimerStart( &TxTimer );
+    	// Schedule next transmission
+    	TimerSetValue( &TxTimer, TxPeriodicity );
+    	TimerStart( &TxTimer );
+    }
+    else {
+    	messagePending++;
+    }
 }
 
 
