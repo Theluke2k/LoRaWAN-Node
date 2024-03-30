@@ -97,7 +97,7 @@ uint8_t tester = 0; //
 #define LORAWAN_DUTYCYCLE_ON                        true
 
 /*!
- * LoRaWAN application port (Hvad skal denne sættes til?)
+ * LoRaWAN application port
  * @remark The allowed port range is from 1 up to 223. Other values are reserved.
  */
 #define LORAWAN_APP_PORT                            2
@@ -212,7 +212,8 @@ static volatile uint32_t TxPeriodicity = 0;
 struct tdr_data tdr_data[1];
 volatile uint32_t iHibernateExitFlag = 0;
 volatile uint8_t print_flag = 0;
-uint8_t messagePending = 0;
+uint8_t desiredUplinks = 0;
+uint8_t iterations = 0;
 uint8_t initialized = 0;
 /*
  * Lucas (22-10-23):
@@ -221,10 +222,14 @@ uint8_t initialized = 0;
 int main(void) {
 	uint16_t index = 0;
 	init_system();
+
 	while (1) {
-		BoardInitMcu();
 
-
+		/*
+		 * Lucas (30-03-2024):
+		 * AU runs their measurements. The data is stored in tdr_data.
+		 * The stack uses this struct as data source when transmitting data.
+		 */
 		xint_uart_disable();
 		init_store();
 		run_and_store_measurements(tdr_data, &index);
@@ -234,13 +239,20 @@ int main(void) {
 		print_tdr_data_to_uart(tdr_data);
 		uart_deinit();
 
+		// Specify the amount of desired uplinks before going to sleep.
+		desiredUplinks = 1;
 
-		messagePending = 0;
+		/*
+		 * Lucas (30-03-2024):
+		 * Run the LoRaMac stack.
+		 */
+		BoardInitMcu();
 
 		// Set interrup priorities. SPI must have highest prioriy!
 		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
 		NVIC_SetPriority(SPI0_EVT_IRQn, 1);
 		NVIC_SetPriority(RTC1_EVT_IRQn, 2);
+		NVIC_SetPriority(RTC0_EVT_IRQn, 2);
 
 		// Initialize transmission perhiodicity variable
 		TxPeriodicity = APP_TX_DUTYCYCLE
@@ -251,8 +263,7 @@ int main(void) {
 
 		DisplayAppInfo("periodic-uplink-lpp", &appVersion, &gitHubVersion);
 
-		if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams)
-				!= LORAMAC_HANDLER_SUCCESS) {
+		if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
 			printf("LoRaMac wasn't properly initialized\n");
 			// Fatal error, endless loop.
 			while (1) {
@@ -260,20 +271,31 @@ int main(void) {
 		}
 
 		// Set system maximum tolerated rx error in milliseconds
-		LmHandlerSetSystemMaxRxError(20);
+		//LmHandlerSetSystemMaxRxError(20);
 
 		// The LoRa-Alliance Compliance protocol package should always be
 		// initialized and activated.
-		LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
+		//LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
 
-		LmHandlerJoin();
+		if(!initialized) {
+			// Set system maximum tolerated rx error in milliseconds
+			LmHandlerSetSystemMaxRxError(20);
+
+			// The LoRa-Alliance Compliance protocol package should always be initialized and activated.
+			LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
+
+			// The join process can be made here but it does not need to run. The state machine handles it.
+			//LmHandlerJoin();
+
+			// Mark the program as initiated.
+			initialized = 1;
+		}
+
+		iterations = 0;
 
 		StartTxProcess(LORAMAC_HANDLER_TX_ON_TIMER);
 
-		/*
-		 *
-		 */
-		while (messagePending < 2) {
+		while (iterations < desiredUplinks+1) {
 			// DEBUG start
 			if (LmHandlerJoinStatus() == LORAMAC_HANDLER_SET) {
 				tester = 1;
@@ -293,17 +315,20 @@ int main(void) {
 			} else {
 				// The MCU wakes up through events
 				//BoardLowPowerHandler();
-				/*
-				 * Lucas (23/03/2024):
-				 * The board should enter low power mode here and wake
-				 * up on some timer.
-				 */
-				//iHibernateExitFlag = 0;
-				//enter_hibernation();
 			}
 			CRITICAL_SECTION_END( );
 		}
-		//LmHandlerDeInit();
+		LmHandlerDeInit();
+
+
+		/*
+		 * Lucas (30-03-2024):
+		 * Enter sleep mode until next uplink.
+		 */
+		iHibernateExitFlag = 0;
+		rtc_UpdateAlarm();
+		xint_uart_enable();
+		enter_hibernation();
 	}
 
 	return 0;
@@ -547,7 +572,7 @@ static void PrepareTxFrame( void )
     // Send package
     if( t == LORAMAC_HANDLER_SUCCESS )
     {
-    	messagePending = 1;
+    	iterations++;
     }
 }
 
@@ -625,8 +650,7 @@ static void OnTxTimerEvent( void* context )
 	// DEBUG end
     TimerStop( &TxTimer );
 
-    //iHibernateExitFlag = 1;
-    if(messagePending == 0) {
+    if(iterations < desiredUplinks) {
 
     	IsTxFramePending = 1;
 
@@ -635,7 +659,7 @@ static void OnTxTimerEvent( void* context )
     	TimerStart( &TxTimer );
     }
     else {
-    	messagePending++;
+    	iterations++;
     }
 }
 

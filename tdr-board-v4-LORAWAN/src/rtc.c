@@ -28,7 +28,7 @@ static ADI_RTC_HANDLE hDevice1;
  * Sets the variable being used to wake up from the hibernation. Don't need to care about the parameters for this one. This var is available via shared.h
  * as an extern, defined in the main source file.
  */
-static void rtc1Callback(void* hWut, uint32_t nEvent, void* pArg)
+static void rtc0Callback(void* hWut, uint32_t nEvent, void* pArg)
 {
 	iHibernateExitFlag = 1;
 }
@@ -117,7 +117,7 @@ ADI_RTC_RESULT rtc_Init (void) {
     /* Use both static configuration and dynamic configuration for illustrative purpsoes */
     do
     {
-        eResult = adi_rtc_Open(RTC_DEVICE_NUM, aRtcDevMem1, ADI_RTC_MEMORY_SIZE, &hDevice1);
+        eResult = adi_rtc_Open(RTC_DEVICE_NUM_AU, aRtcDevMem1, ADI_RTC_MEMORY_SIZE, &hDevice1);
         DEBUG_RESULT("\n Failed to open the device %04d",eResult,ADI_RTC_SUCCESS);
 
         eResult = adi_rtc_EnableInterrupts(hDevice1, ADI_RTC_ALARM_INT, true);
@@ -127,19 +127,19 @@ ADI_RTC_RESULT rtc_Init (void) {
         eResult = adi_rtc_SetPreScale(hDevice1, 15);
         DEBUG_RESULT("\n Failed to set prescale to 15 (32768 ticks per 1 change of rtc reg)",eResult,ADI_RTC_SUCCESS);
 	    */
-        eResult = adi_rtc_RegisterCallback(hDevice1, rtc1Callback, hDevice1);
+        eResult = adi_rtc_RegisterCallback(hDevice1, rtc0Callback, hDevice1);
         DEBUG_RESULT("\n Failed to register callback",eResult,ADI_RTC_SUCCESS);
 
 //        eResult = adi_rtc_SetCount(hDevice1, buildTime);
 //        DEBUG_RESULT("Failed to set the count", eResult, ADI_RTC_SUCCESS);
 
-        eResult = adi_rtc_SetTrim(hDevice1, ADI_RTC_TRIM_INTERVAL, ADI_RTC_TRIM_VALUE, ADI_RTC_TRIM_DIRECTION);
-        DEBUG_RESULT("Failed to set the trim value",eResult,ADI_RTC_SUCCESS);
+//        eResult = adi_rtc_SetTrim(hDevice1, ADI_RTC_TRIM_INTERVAL, ADI_RTC_TRIM_VALUE, ADI_RTC_TRIM_DIRECTION);
+//        DEBUG_RESULT("Failed to set the trim value",eResult,ADI_RTC_SUCCESS);
 
     /* force a reset to the latest build timestamp */
-        DEBUG_MESSAGE("Resetting clock");
-        eResult = adi_rtc_SetCount(hDevice1, buildTime);
-        DEBUG_RESULT("Failed to set count",eResult,ADI_RTC_SUCCESS);
+//        DEBUG_MESSAGE("Resetting clock");
+//        eResult = adi_rtc_SetCount(hDevice1, buildTime);
+//        DEBUG_RESULT("Failed to set count",eResult,ADI_RTC_SUCCESS);
 
 //        DEBUG_MESSAGE("New time is:");
 //        rtc_ReportTime();
