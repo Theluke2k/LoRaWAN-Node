@@ -14,15 +14,15 @@
 /*
  * RTC-0 or RTC-1 can be selected.
  */
-#define RTC_DEVICE_NUM_AU    			0
+#define RTC_DEVICE_NUM    			0
 
 /* leap-year compute macro (ignores leap-seconds) */
-//#define LEAP_YEAR(x) (((0==x%4)&&(0!=x%100))||(0==x%400))
+#define LEAP_YEAR(x) (((0==x%4)&&(0!=x%100))||(0==x%400))
 
 /*
  * Amount of time the uC should sleep (in seconds).
  */
-#define SLEEP_TIME						5 // IN SECONDS
+#define SLEEP_TIME						5
 
 /* If the RTC needs to be calibrated -> uncomment the next line and add a calibration function to the init. */
 //#define ADI_RTC_CALIBRATE
@@ -36,7 +36,7 @@
 #define ADI_RTC_TRIM_VALUE       	ADI_RTC_TRIM_1
 
 
-//uint32_t BuildSeconds(void);
+uint32_t BuildSeconds(void);
 ADI_RTC_RESULT rtc_Init (void);
 ADI_RTC_RESULT rtc_Calibrate (void);
 ADI_RTC_RESULT rtc_UpdateAlarm (void);

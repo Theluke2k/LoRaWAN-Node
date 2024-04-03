@@ -29,26 +29,25 @@
 #include "eeprom-board.h"
 #include "nvmm.h"
 
-/*
- * Lucas (30-03-)
- */
-
-
 uint16_t NvmmWrite( uint8_t* src, uint16_t size, uint16_t offset )
 {
+	//printf("NvmmWrite\n");
     if( EepromMcuWriteBuffer( offset, src, size ) == LMN_STATUS_OK )
     {
         return size;
     }
+    //printf("Status not okay\n");
     return 0;
 }
 
 uint16_t NvmmRead( uint8_t* dest, uint16_t size, uint16_t offset )
 {
+	//printf("NvmmRead\n");
     if( EepromMcuReadBuffer( offset, dest, size ) == LMN_STATUS_OK )
     {
         return size;
     }
+    //printf("Status not okay\n");
     return 0;
 }
 

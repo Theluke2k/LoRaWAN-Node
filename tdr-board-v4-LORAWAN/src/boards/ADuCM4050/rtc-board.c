@@ -76,11 +76,11 @@
 
 
 //RTC memory (ADI driver).
-//static uint8_t rtc0Mem[ADI_RTC_MEMORY_SIZE]; // For RTC0 (if used)
+static uint8_t rtc0Mem[ADI_RTC_MEMORY_SIZE]; // For RTC0 (if used)
 static uint8_t rtc1Mem[ADI_RTC_MEMORY_SIZE];// For RTC1
 
 //Device handle for RTC device-0
-//static ADI_RTC_HANDLE hDevRtc0 = NULL;
+static ADI_RTC_HANDLE hDevRtc0 = NULL;
 static ADI_RTC_HANDLE hDevRtc1 = NULL;
 
 //Alarm callback
@@ -198,15 +198,14 @@ void RtcInit( void )
 	ADI_RTC_RESULT eResult;
 	uint32_t count;
 
-	/*
-	 * Lucas (30-03-2024):
-	 * Enable RTC1
-	 */
 	eResult = adi_rtc_Open(RTC_DEVICE_NUM, rtc1Mem, ADI_RTC_MEMORY_SIZE, &hDevRtc1);
 	DEBUG_RESULT("Failed to open the device",eResult,ADI_RTC_SUCCESS);
 
 	eResult = adi_rtc_RegisterCallback(hDevRtc1, rtc1Callback, hDevRtc1);
 	DEBUG_RESULT("Failed to register callback %04d",eResult,ADI_RTC_SUCCESS);
+
+	//eResult = adi_rtc_SetCount(hDevRtc1, buildTime);
+	//DEBUG_RESULT("Failed to set the count", eResult, ADI_RTC_SUCCESS);
 
 	//VIRKER KUN FOR RTC1
     eResult = adi_rtc_SetPreScale(hDevRtc1, PRESCALAR);
@@ -215,29 +214,115 @@ void RtcInit( void )
     eResult = adi_rtc_SetTrim(hDevRtc1, ADI_RTC_TRIM_INTERVAL_6, ADI_RTC_TRIM_4, ADI_RTC_TRIM_ADD);
 	DEBUG_RESULT("Failed to set Trim value  ", eResult, ADI_RTC_SUCCESS);
 
+	/*
+	 * Lucas:
+	 * DONT ENABLE TRIM
+	 * This makes the timer 2 seconds too fast per 30 seconds! Trust me i tested it...
+	 */
+	//eResult = adi_rtc_EnableTrim(hDevRtc1, true);
+	//DEBUG_RESULT("\n Failed to enable Trim ", eResult, ADI_RTC_SUCCESS);
+
+	/* force a reset to the latest build timestamp */
+	//DEBUG_MESSAGE("Resetting clock to latest build time...");
+	//eResult = adi_rtc_SetCount(hDevRtc1, buildTime);
+	//DEBUG_RESULT("Failed to set count",eResult,ADI_RTC_SUCCESS);
+
 	DEBUG_MESSAGE("New time is:");
 	rtc_ReportTime();
 
 	eResult = adi_rtc_Enable(hDevRtc1, true);
 	DEBUG_RESULT("Failed to enable the device", eResult, ADI_RTC_SUCCESS);
 
+
+/*
+	//Program to test timer.
+	RtcSetTimerContext( );
+	RtcSetAlarm( 327680/2 );
+	while(iFlag == 0) {
+
+	}
+	printf("Timer executed interrupt!\n");
+*/
 	/*
-	 * Lucas (30-03-2024):
-	 * Enable RTC0
+	 * Lucas:
+	 * PROGRAM TO TEST COUNTER
 	 */
-//	eResult = adi_rtc_Open(0, rtc0Mem, ADI_RTC_MEMORY_SIZE, &hDevRtc0);
-//	DEBUG_RESULT("Failed to open the device",eResult,ADI_RTC_SUCCESS);
-//
-//	eResult = adi_rtc_RegisterCallback(hDevRtc0, rtc1Callback, hDevRtc0);
-//	DEBUG_RESULT("Failed to register callback %04d",eResult,ADI_RTC_SUCCESS);
-//
-//	eResult = adi_rtc_SetTrim(hDevRtc0, ADI_RTC_TRIM_INTERVAL_6, ADI_RTC_TRIM_4, ADI_RTC_TRIM_ADD);
-//	DEBUG_RESULT("Failed to set Trim value  ", eResult, ADI_RTC_SUCCESS);
-//
-//	eResult = adi_rtc_Enable(hDevRtc0, true);
-//	DEBUG_RESULT("Failed to enable the device", eResult, ADI_RTC_SUCCESS);
+	/*
+	eResult = adi_rtc_EnableAlarm(hDevRtc1, false);
+	DEBUG_RESULT("adi_RTC_EnableAlarm failed",eResult,ADI_RTC_SUCCESS);
+
+	eResult = adi_rtc_EnableInterrupts(hDevRtc1, ADI_RTC_ALARM_INT, false);
+	DEBUG_RESULT("adi_RTC_EnableInterrupts failed",eResult,ADI_RTC_SUCCESS);
+
+	if (ADI_RTC_SUCCESS != (eResult = adi_rtc_GetCount(hDevRtc1, &count)))
+	{
+		DEBUG_RESULT("\n Failed to get RTC Count %04d", eResult, ADI_RTC_SUCCESS);
+	}
+	printf("Count: %d\n", count);
+
+	uint32_t rtcCounts[20];
+	uint32_t loopTimes[20];
+	uint32_t oldCount = count;
+	uint32_t loopTime = 0;
+	for(int i = 0; i < 10; i++) {
+		while(count == oldCount) {
+			if (ADI_RTC_SUCCESS != (eResult = adi_rtc_GetCount(hDevRtc1, &count)))
+			{
+				DEBUG_RESULT("\n Failed to get RTC Count %04d", eResult, ADI_RTC_SUCCESS);
+			}
+			loopTime++;
+		}
+		rtcCounts[i] = count;
+		loopTimes[i] = loopTime;
+		loopTime = 0;
+		oldCount = count;
+	}
+
+	for (int i = 0; i < 10; i++) {
+		printf("Count: %d\n", rtcCounts[i]);
+		printf("LoopTime: %d\n", loopTimes[i]);
+	}*/
+
+	/*
+	 * Lucas:
+	 * PROGRAM TO TEST ALARM
+	 */
+
+	/*
+	uint32_t counter;
+
+	if(ADI_RTC_SUCCESS != (eResult = adi_rtc_GetCount(hDevRtc1,&counter)))
+	{
+	    DEBUG_RESULT("\n Failed to get RTC Count %04d",eResult,ADI_RTC_SUCCESS);
+	}
+	if(ADI_RTC_SUCCESS != (eResult = adi_rtc_SetAlarm(hDevRtc1, counter + 163840)))
+	{
+	    DEBUG_RESULT("\n Failed to set RTC Alarm %04d",eResult,ADI_RTC_SUCCESS);
+	}
 
 
+
+	iHibernateExitFlag = 0;
+	if (ADI_RTC_SUCCESS != (eResult = adi_rtc_GetCount(hDevRtc1, &count)))
+	{
+		DEBUG_RESULT("\n Failed to get RTC Count %04d", eResult, ADI_RTC_SUCCESS);
+	}
+	printf("Count: %d\n", count);
+	if (adi_pwr_EnterLowPowerMode(ADI_PWR_MODE_HIBERNATE, &iHibernateExitFlag, 0))
+	{
+	    DEBUG_MESSAGE("System Entering to Low Power Mode failed");
+	}
+	printf("Timer Callback Called!\n");
+	if (ADI_RTC_SUCCESS != (eResult = adi_rtc_GetCount(hDevRtc1, &count)))
+	{
+		DEBUG_RESULT("\n Failed to get RTC Count %04d", eResult, ADI_RTC_SUCCESS);
+	}
+	printf("Count: %d\n", count);
+
+	while(testerInt != 1) {
+		printf("%d\n", testerInt);
+	}
+	*/
 }
 
 /*
@@ -429,22 +514,4 @@ TimerTime_t RtcTempCompensation( TimerTime_t period, float temperature )
 {
     return 0;
 }
-
-//ADI_RTC_RESULT rtc_UpdateAlarm (void) {
-//    ADI_RTC_RESULT eResult;
-//    uint32_t rtcCount;
-//
-//    if(ADI_RTC_SUCCESS != (eResult = adi_rtc_GetCount(hDevRtc0,&rtcCount)))
-//    {
-//        DEBUG_RESULT("\n Failed to get RTC Count %04d",eResult,ADI_RTC_SUCCESS);
-//        return(eResult);
-//    }
-//    if(ADI_RTC_SUCCESS != (eResult = adi_rtc_SetAlarm(hDevRtc0, rtcCount + 10000)))
-//    {
-//        DEBUG_RESULT("\n Failed to set RTC Alarm %04d",eResult,ADI_RTC_SUCCESS);
-//        return(eResult);
-//    }
-//
-//    return(eResult);
-//}
 
