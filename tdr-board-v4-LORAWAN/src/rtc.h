@@ -22,7 +22,7 @@
 /*
  * Amount of time the uC should sleep (in seconds).
  */
-#define SLEEP_TIME						20
+#define SLEEP_TIME						5
 
 /* If the RTC needs to be calibrated -> uncomment the next line and add a calibration function to the init. */
 //#define ADI_RTC_CALIBRATE

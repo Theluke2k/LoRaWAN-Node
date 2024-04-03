@@ -57,7 +57,7 @@ uint8_t tester = 0; //
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                           	5000 // minimum 4
+#define APP_TX_DUTYCYCLE                           	2500 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -240,7 +240,7 @@ int main(void) {
 		uart_deinit();
 
 		// Specify the amount of desired uplinks before going to sleep.
-		desiredUplinks = 1;
+		desiredUplinks = 2;
 
 		/*
 		 * Lucas (30-03-2024):
@@ -565,7 +565,7 @@ static void PrepareTxFrame( void )
     uint8_t packet_length = sizeof(tdr_data);
 
     // Copy the contents of the tdr_data variable into the appdata buffer
-    memcpy1(AppData.Buffer, &tdr_data, packet_length);
+    memcpy1(AppData.Buffer, tdr_data, packet_length);
 
     // The size of the buffer should always be equal to the maximum size
     AppData.BufferSize = packet_length;
