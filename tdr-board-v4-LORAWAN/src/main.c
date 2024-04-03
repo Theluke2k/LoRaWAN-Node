@@ -320,7 +320,6 @@ int main(void) {
 		}
 		LmHandlerDeInit();
 
-
 		/*
 		 * Lucas (30-03-2024):
 		 * Enter sleep mode until next uplink.
