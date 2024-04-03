@@ -77,7 +77,7 @@ uint8_t tester = 0; //
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_3 // DEBUG (default: DR0)
+#define LORAWAN_DEFAULT_DATARATE                    DR_0 // DEBUG (default: DR0)
 
 /*!
  * LoRaWAN confirmed messages
@@ -324,10 +324,10 @@ int main(void) {
 		 * Lucas (30-03-2024):
 		 * Enter sleep mode until next uplink.
 		 */
-		iHibernateExitFlag = 0;
-		rtc_UpdateAlarm();
-		xint_uart_enable();
-		enter_hibernation();
+//		iHibernateExitFlag = 0;
+//		rtc_UpdateAlarm();
+//		xint_uart_enable();
+//		enter_hibernation();
 	}
 
 	return 0;
@@ -535,33 +535,37 @@ static void PrepareTxFrame( void )
     AppData.Port = LORAWAN_APP_PORT;
 
     // Buffer to convert the numbers to char
-    char buffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE]={0};
+    //char buffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE]={0};
 
     // Current package count, if we send more than one package at a time.
-    int packageCount = 0;
+    //int packageCount = 0;
 
     // Increment total package number
-    packageNumber++;
+    //packageNumber++;
 
-    uint8_t packet_length = snprintf(buffer, LORAWAN_APP_DATA_BUFFER_MAX_SIZE, "[%d]{$%3u.%02u/%3u.%02u$%2d/%2d/%2d/%2d$%2u.%2u/%2u.%2u} -> Package %d",
-    						packageCount,
-							tdr_data[0].int1_integer,
-							tdr_data[0].int1_decimal,
-							tdr_data[0].int2_integer,
-							tdr_data[0].int2_decimal,
-							tdr_data[0].th1_temp,
-							tdr_data[0].th2_temp,
-							tdr_data[0].th3_temp,
-							tdr_data[0].th4_temp,
-							tdr_data[0].honey_rh_integer,
-							tdr_data[0].honey_rh_decimal,
-							tdr_data[0].honey_temp_integer,
-							tdr_data[0].honey_temp_decimal,
-							packageNumber
-    						);
+    // Not needed
+//    uint8_t packet_length = snprintf(buffer, LORAWAN_APP_DATA_BUFFER_MAX_SIZE, "[%d]{$%3u.%02u/%3u.%02u$%2d/%2d/%2d/%2d$%2u.%2u/%2u.%2u} -> Package %d",
+//    						packageCount,
+//							tdr_data[0].int1_integer,
+//							tdr_data[0].int1_decimal,
+//							tdr_data[0].int2_integer,
+//							tdr_data[0].int2_decimal,
+//							tdr_data[0].th1_temp,
+//							tdr_data[0].th2_temp,
+//							tdr_data[0].th3_temp,
+//							tdr_data[0].th4_temp,
+//							tdr_data[0].honey_rh_integer,
+//							tdr_data[0].honey_rh_decimal,
+//							tdr_data[0].honey_temp_integer,
+//							tdr_data[0].honey_temp_decimal,
+//							packageNumber
+//    						);
+
+
+    uint8_t packet_length = sizeof(tdr_data);
 
     // Copy the contents of the tdr_data variable into the appdata buffer
-    memcpy1(AppData.Buffer, (const uint8_t*)buffer, packet_length);
+    memcpy1(AppData.Buffer, &tdr_data, packet_length);
 
     // The size of the buffer should always be equal to the maximum size
     AppData.BufferSize = packet_length;

@@ -184,17 +184,17 @@ void print_tdr_data_to_uart(struct tdr_data tdr_data[])
 			msg_length = sprintf(buffer, "TDR %d: INT1: %u.%02u INT2: %u.%02u || THERM 1: %d | 2: %d | 3: %d | 4: %d|| HONEY: RH::%u.%u TEMP::%u.%u\r\n",
 				i,
 				tdr_data[i].int1_integer,
-				tdr_data[i].int1_decimal,
+				//tdr_data[i].int1_decimal,
 				tdr_data[i].int2_integer,
-				tdr_data[i].int2_decimal,
+				//tdr_data[i].int2_decimal,
 				tdr_data[i].th1_temp,
 				tdr_data[i].th2_temp,
 				tdr_data[i].th3_temp,
 				tdr_data[i].th4_temp,
 				tdr_data[i].honey_rh_integer,
-				tdr_data[i].honey_rh_decimal,
-				tdr_data[i].honey_temp_integer,
-				tdr_data[i].honey_temp_decimal
+				//tdr_data[i].honey_rh_decimal,
+				tdr_data[i].honey_temp_integer
+				//tdr_data[i].honey_temp_decimal
 				);
 				uart_write(buffer, msg_length);
 		}
@@ -243,17 +243,17 @@ void send_data_package(struct tdr_data integrator_vals_memory[], uint32_t num_ms
 	uint8_t packet_length = sprintf(buffer, "[%d]{$%3u.%02u/%3u.%02u$%2d/%2d/%2d/%2d$%2u.%2u/%2u.%2u} -> Package %d",
 					packageCount,
 					integrator_vals_memory[0].int1_integer,
-					integrator_vals_memory[0].int1_decimal,
+					//integrator_vals_memory[0].int1_decimal,
 					integrator_vals_memory[0].int2_integer,
-					integrator_vals_memory[0].int2_decimal,
+					//integrator_vals_memory[0].int2_decimal,
 					integrator_vals_memory[0].th1_temp,
 					integrator_vals_memory[0].th2_temp,
 					integrator_vals_memory[0].th3_temp,
 					integrator_vals_memory[0].th4_temp,
 					integrator_vals_memory[0].honey_rh_integer,
-					integrator_vals_memory[0].honey_rh_decimal,
+					//integrator_vals_memory[0].honey_rh_decimal,
 					integrator_vals_memory[0].honey_temp_integer,
-					integrator_vals_memory[0].honey_temp_decimal,
+					//integrator_vals_memory[0].honey_temp_decimal,
 					packageNumber
 					);
 
@@ -319,11 +319,11 @@ void run_and_store_measurements(struct tdr_data* tdr_data, uint16_t* index)
 
 	holder = fitting_function_int1(integrators_avg[0]);
 	tdr_data[*index].int1_integer = (uint16_t)holder;
-	tdr_data[*index].int1_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
+	//tdr_data[*index].int1_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
 
 	holder = fitting_function_int1(integrators_avg[1]);
 	tdr_data[*index].int2_integer = (uint16_t)holder;
-	tdr_data[*index].int2_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
+	//tdr_data[*index].int2_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
 
 	therm_read_temp(&thermistor_reading, THERMISTOR1);
 	tdr_data[*index].th1_temp = (int8_t)thermistor_reading;
@@ -345,11 +345,11 @@ void run_and_store_measurements(struct tdr_data* tdr_data, uint16_t* index)
 
 	holder = get_honeywell_rh(honeywell_data[0]);
 	tdr_data[*index].honey_rh_integer = (uint8_t)holder;
-	tdr_data[*index].honey_rh_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
+	//tdr_data[*index].honey_rh_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
 
 	holder = get_honeywell_temp(honeywell_data[1]);
 	tdr_data[*index].honey_temp_integer = (uint8_t)holder;
-	tdr_data[*index].honey_temp_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
+	//tdr_data[*index].honey_temp_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
 
 
 	if(++(*index) == TDR_MEMORY_SIZE)
