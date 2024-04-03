@@ -28,7 +28,7 @@ static ADI_RTC_HANDLE hDevice1;
  * Sets the variable being used to wake up from the hibernation. Don't need to care about the parameters for this one. This var is available via shared.h
  * as an extern, defined in the main source file.
  */
-static void rtc1Callback(void* hWut, uint32_t nEvent, void* pArg)
+static void rtc0Callback(void* hWut, uint32_t nEvent, void* pArg)
 {
 	iHibernateExitFlag = 1;
 }
@@ -127,7 +127,7 @@ ADI_RTC_RESULT rtc_Init (void) {
         eResult = adi_rtc_SetPreScale(hDevice1, 15);
         DEBUG_RESULT("\n Failed to set prescale to 15 (32768 ticks per 1 change of rtc reg)",eResult,ADI_RTC_SUCCESS);
 	    */
-        eResult = adi_rtc_RegisterCallback(hDevice1, rtc1Callback, hDevice1);
+        eResult = adi_rtc_RegisterCallback(hDevice1, rtc0Callback, hDevice1);
         DEBUG_RESULT("\n Failed to register callback",eResult,ADI_RTC_SUCCESS);
 
 //        eResult = adi_rtc_SetCount(hDevice1, buildTime);

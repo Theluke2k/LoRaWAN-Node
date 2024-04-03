@@ -57,7 +57,7 @@ uint8_t tester = 0; //
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            2500 // minimum 4
+#define APP_TX_DUTYCYCLE                           	5000 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -285,7 +285,7 @@ int main(void) {
 			LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
 
 			// The join process can be made here but it does not need to run. The state machine handles it.
-			//LmHandlerJoin();
+			LmHandlerJoin(); // DEBUG: should be deleted when eeprom is implemented
 
 			// Mark the program as initiated.
 			initialized = 1;
@@ -324,10 +324,10 @@ int main(void) {
 		 * Lucas (30-03-2024):
 		 * Enter sleep mode until next uplink.
 		 */
-//		iHibernateExitFlag = 0;
-//		rtc_UpdateAlarm();
-//		xint_uart_enable();
-//		enter_hibernation();
+		iHibernateExitFlag = 0;
+		rtc_UpdateAlarm();
+		xint_uart_enable();
+		enter_hibernation();
 	}
 
 	return 0;
