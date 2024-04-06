@@ -30,7 +30,9 @@ static ADI_RTC_HANDLE hDevice1;
  */
 static void rtc0Callback(void* hWut, uint32_t nEvent, void* pArg)
 {
-	iHibernateExitFlag = 1;
+	//iHibernateExitFlag = 1;
+
+	adi_pwr_ExitLowPowerMode(&iHibernateExitFlag);
 }
 
 /*
@@ -252,16 +254,6 @@ ADI_RTC_RESULT rtc_UpdateAlarm (void) {
         DEBUG_RESULT("\n Failed to set RTC Alarm %04d",eResult,ADI_RTC_SUCCESS);
         return(eResult);
     }
-
-//    char buffer[128];
-//    DEBUG_MESSAGE("UPDATE >>>>>");
-//	adi_rtc_GetCount(hDevice1, &rtcCount);
-//	sprintf(buffer, "RAW RTC time: %lu", rtcCount);
-//	DEBUG_MESSAGE(buffer);
-//	adi_rtc_GetAlarm(hDevice1, &rtcCount);
-//	sprintf(buffer, "RAW ALARM time: %lu", rtcCount);
-//	DEBUG_MESSAGE(buffer);
-//    DEBUG_MESSAGE("UPDATE <<<<<");
 
     return(eResult);
 }

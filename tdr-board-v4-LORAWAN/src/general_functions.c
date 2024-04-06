@@ -94,7 +94,7 @@ void init_system()
 
     i2c_init();
 
-    rtc_Init();
+    //rtc_Init();
 
     /*
      * Lucas (23/03/2024):
