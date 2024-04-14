@@ -49,7 +49,6 @@ void init_system()
 		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFXTAL, &clock_status);
 	};
 
-
 	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFXTAL);
 
 	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK,1);

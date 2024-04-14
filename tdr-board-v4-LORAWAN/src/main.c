@@ -216,21 +216,32 @@ uint8_t desiredUplinks = 0;
 uint8_t iterations = 0;
 uint8_t initialized = 0;
 
-void SwitchClock() {
-	/*
-	 * Lucas (06/04/2024):
-	 * We must use the internal HFOSC as clock source instead of the external
-	 * one that we are normally using. We therfore switch clock.
-	 */
-	//Enable HFOSC
-	ADI_CLOCK_SOURCE_STATUS hfosc_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
-	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_HFOSC, true);
-	while(hfosc_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
-		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFOSC, &hfosc_status);
-	}
+void SwitchClock(uint8_t clock) {
+	if (clock == 1) {
+		/*
+		 * Lucas (06/04/2024):
+		 * In shutdown mode, we must use the internal HFOSC as clock source instead of the external
+		 * one that we are normally using. We therfore switch clock.
+		 */
+		//Enable HFOSC
+		ADI_CLOCK_SOURCE_STATUS hfosc_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
+		adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_HFOSC, true);
+		while (hfosc_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
+			adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFOSC, &hfosc_status);
+		}
 
-	// Switch to HFOSC
-	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFOSC);
+		// Switch to HFOSC
+		adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFOSC);
+
+		// Update Core Clock
+		//adi_pwr_UpdateCoreClock();
+	}
+	else if(clock == 0) {
+
+	}
+	else {
+		// invalid clock
+	}
 }
 
 /*
@@ -241,12 +252,15 @@ int main(void) {
 	uint16_t index = 0;
 	init_system();
 	NVIC_SetPriority(RTC0_EVT_IRQn, 1);
+	//DelayMsMcu(5000);
 	while(1) {
 		iHibernateExitFlag = 0;
-		SwitchClock();
+		//DelayMsMcu(5000);
+		SwitchClock(1);
 		rtc_Init();
 		rtc_UpdateAlarm();
 		enter_hibernation();
+
 	}
 
 
