@@ -45,22 +45,22 @@ void adc_init(bool calibration)
 
     /* Open the ADC device */
     eResult = adi_adc_Open(ADC_DEV_NUM, DeviceMemory, sizeof(DeviceMemory), &adcDevice);
-    DEBUG_RESULT("Failed to open ADC device",eResult, ADI_ADC_SUCCESS);
+    //DEBUG_RESULT("Failed to open ADC device",eResult, ADI_ADC_SUCCESS);
 
     /* Set the delay time */
     eResult = adi_adc_SetDelayTime ( adcDevice, 10); // 10cycles for TDR is okay
-    DEBUG_RESULT("Failed to set the Delay time ", eResult, ADI_ADC_SUCCESS);
+    //DEBUG_RESULT("Failed to set the Delay time ", eResult, ADI_ADC_SUCCESS);
 
 	eResult = adi_adc_SetResolution(adcDevice, ADI_ADC_RESOLUTION_12_BIT);
-	DEBUG_RESULT("Failed to set resolution", eResult, ADI_ADC_SUCCESS);
+	//DEBUG_RESULT("Failed to set resolution", eResult, ADI_ADC_SUCCESS);
 
     /* Set ADC reference */
     eResult = adi_adc_SetVrefSource (adcDevice, ADI_ADC_VREF_SRC_EXT);
-    DEBUG_RESULT("Failed to set ADC reference", eResult, ADI_ADC_SUCCESS);
+    //DEBUG_RESULT("Failed to set ADC reference", eResult, ADI_ADC_SUCCESS);
 
 	/* Enable ADC sub system */
 	eResult = adi_adc_EnableADCSubSystem (adcDevice, true);
-	DEBUG_RESULT("Failed to enable ADC sub system", eResult, ADI_ADC_SUCCESS);
+	//DEBUG_RESULT("Failed to enable ADC sub system", eResult, ADI_ADC_SUCCESS);
 
 	uint32_t delay_val = 8000; // 10ms now
 	while(--delay_val){};
@@ -69,13 +69,13 @@ void adc_init(bool calibration)
 	if(calibration)
 	{
 		eResult = adi_adc_StartCalibration (adcDevice);
-		DEBUG_RESULT("Failed to start calibration", eResult, ADI_ADC_SUCCESS);
+		//DEBUG_RESULT("Failed to start calibration", eResult, ADI_ADC_SUCCESS);
 
 		/* Wait until calibration is done */
 		while (!bCalibrationDone)
 		{
 			eResult = adi_adc_IsCalibrationDone (adcDevice, &bCalibrationDone);
-			DEBUG_RESULT("Failed to get the calibration status", eResult, ADI_ADC_SUCCESS);
+			//DEBUG_RESULT("Failed to get the calibration status", eResult, ADI_ADC_SUCCESS);
 		}
 	}
 }
@@ -89,7 +89,7 @@ void adc_deinit()
 {
 	ADI_ADC_RESULT  eResult = ADI_ADC_SUCCESS;
 	eResult = adi_adc_Close(adcDevice);
-	DEBUG_RESULT("Failed to close ADC", eResult, ADI_ADC_SUCCESS);
+	//DEBUG_RESULT("Failed to close ADC", eResult, ADI_ADC_SUCCESS);
 }
 
 /**
@@ -105,7 +105,7 @@ void power_up_adc()
 	ADI_ADC_RESULT  eResult = ADI_ADC_SUCCESS;
 	/* Power up ADC */
 	eResult = adi_adc_PowerUp (adcDevice, true);
-	DEBUG_RESULT("Failed to power up ADC", eResult, ADI_ADC_SUCCESS);
+	//DEBUG_RESULT("Failed to power up ADC", eResult, ADI_ADC_SUCCESS);
 
 	//	usleep (700);
 	uint32_t delay_val = 1120; // 700us
@@ -124,7 +124,7 @@ void power_down_adc()
     ADI_ADC_RESULT  eResult = ADI_ADC_SUCCESS;
 
 	eResult = adi_adc_PowerUp (adcDevice, false);
-	DEBUG_RESULT("Failed to power down ADC", eResult, ADI_ADC_SUCCESS);
+	//DEBUG_RESULT("Failed to power down ADC", eResult, ADI_ADC_SUCCESS);
 }
 
 /**
@@ -152,7 +152,7 @@ void ADC_SampleData(ADI_ADC_CHANNEL channels, uint8_t acquisition_time)
 
     /* Set the acquisition time. (Application need to change it based on the impedance) */
     eResult = adi_adc_SetAcquisitionTime ( adcDevice, acquisition_time); //10 cycles for TDR is okay, max for therm?
-    DEBUG_RESULT("Failed to set the acquisition time ", eResult, ADI_ADC_SUCCESS);
+    //DEBUG_RESULT("Failed to set the acquisition time ", eResult, ADI_ADC_SUCCESS);
 
     /* Populate the buffer structure */
     Buffer.nBuffSize = sizeof(ADC_DataBuffer);
@@ -162,7 +162,7 @@ void ADC_SampleData(ADI_ADC_CHANNEL channels, uint8_t acquisition_time)
 
     /* Submit the buffer to the driver */
     eResult = adi_adc_SubmitBuffer (adcDevice, &Buffer);
-    DEBUG_RESULT("Failed to submit buffer ", eResult, ADI_ADC_SUCCESS);
+    //DEBUG_RESULT("Failed to submit buffer ", eResult, ADI_ADC_SUCCESS);
 
     /* Enable the ADC */
     eResult = adi_adc_Enable (adcDevice, true);

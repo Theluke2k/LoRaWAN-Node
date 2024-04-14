@@ -47,32 +47,32 @@ uint8_t lora_initialize() {
     /* Set the module in sleep mode */
     spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
 
-    /* Set the frequency to 868 MHz */
-    spi_write_byte(REG_FRF_MSB, 0xD9);
-    spi_write_byte(REG_FRF_MID, 0x00);
-    spi_write_byte(REG_FRF_LSB, 0x00);
-
-    /* Set base addresses */
-    spi_write_byte(REG_FIFO_TX_BASE_ADDR, 0x00);
-    spi_write_byte(REG_FIFO_RX_BASE_ADDR, 0x00);
-
-    /* Set LNA boost */
-    uint8_t lnaReg;
-    spi_read_byte(REG_LNA, &lnaReg);
-    spi_write_byte(REG_LNA, lnaReg | 0x03);
-
-    /* Set the output power at +20 dBm */
-    spi_write_byte(REG_PA_DAC, 0x87);
-    uint8_t paConfig;
-    spi_read_byte(REG_PA_CONFIG, &paConfig);
-    spi_write_byte(REG_PA_CONFIG, paConfig | PA_BOOST);
-
-    /* Set OCP */
-    uint8_t ocpTrim = (140 + 30) / 10; /* Here 140 is the current limit in mA */
-    spi_write_byte(REG_OCP, 0x20 | (0x1F & ocpTrim));
-
-    /* Set the module in LoRa and standby mode */
-    spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+//    /* Set the frequency to 868 MHz */
+//    spi_write_byte(REG_FRF_MSB, 0xD9);
+//    spi_write_byte(REG_FRF_MID, 0x00);
+//    spi_write_byte(REG_FRF_LSB, 0x00);
+//
+//    /* Set base addresses */
+//    spi_write_byte(REG_FIFO_TX_BASE_ADDR, 0x00);
+//    spi_write_byte(REG_FIFO_RX_BASE_ADDR, 0x00);
+//
+//    /* Set LNA boost */
+//    uint8_t lnaReg;
+//    spi_read_byte(REG_LNA, &lnaReg);
+//    spi_write_byte(REG_LNA, lnaReg | 0x03);
+//
+//    /* Set the output power at +20 dBm */
+//    spi_write_byte(REG_PA_DAC, 0x87);
+//    uint8_t paConfig;
+//    spi_read_byte(REG_PA_CONFIG, &paConfig);
+//    spi_write_byte(REG_PA_CONFIG, paConfig | PA_BOOST);
+//
+//    /* Set OCP */
+//    uint8_t ocpTrim = (140 + 30) / 10; /* Here 140 is the current limit in mA */
+//    spi_write_byte(REG_OCP, 0x20 | (0x1F & ocpTrim));
+//
+//    /* Set the module in LoRa and standby mode */
+//    spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
 
     return 0;
 }

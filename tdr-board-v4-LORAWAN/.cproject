@@ -21,9 +21,9 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="hex" artifactName="${ProjName}" buildArtefactType="com.analog.crosscore.managedbuilder.core.buildArtefactType.ihex" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=com.analog.crosscore.managedbuilder.core.buildArtefactType.ihex,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="clean" description="" errorParsers="com.analog.crosscore.core.CCESARMErrorParser" id="arm.toolchain.gcc.target.exe.debug.1160186472" name="Debug" parent="arm.toolchain.gcc.target.exe.debug" postbuildStep="arm-none-eabi-objcopy -O ihex ${ProjName} ${ProjName}.hex">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="clean" description="" errorParsers="com.analog.crosscore.core.CCESARMErrorParser" id="arm.toolchain.gcc.target.exe.debug.1160186472" name="Debug" parent="arm.toolchain.gcc.target.exe.debug" postbuildStep="">
 					<folderInfo id="arm.toolchain.gcc.target.exe.debug.1160186472." name="/" resourcePath="">
-						<toolChain id="arm.gcc.toolchain.exe.debug.575966247" name="CrossCore GCC ARM Embedded Toolchain" superClass="arm.gcc.toolchain" targetTool="arm.toolchain.gcc.objcopy">
+						<toolChain id="arm.gcc.toolchain.exe.debug.575966247" name="CrossCore GCC ARM Embedded Toolchain" superClass="arm.gcc.toolchain" targetTool="arm.toolchain.gcc.c.linker">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="arm.toolchain.platform.base.1673104848" name="Development Platform" osList="all" superClass="arm.toolchain.platform.base"/>
 							<builder buildPath="${workspace_loc:/tdr-board-v4}/Debug" id="arm.toolchain.builder.base.2126354754" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="arm.toolchain.builder.base"/>
 							<tool id="arm.toolchain.gcc.assembler.1550147846" name="CrossCore GCC ARM Embedded Assembler" superClass="arm.toolchain.gcc.assembler">
@@ -51,7 +51,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/apps/LoRaMac/common/LmHandler/packages}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/boards/ADuCM4050}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/radio/sx1276}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/4.5.0/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -70,7 +70,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}}/RTE/Device/ADuCM4050&quot;"/>
 								</option>
 								<option id="arm.toolchain.gcc.c.assembler.option.fpu.type.1606312490" name="-mfpu" superClass="arm.toolchain.gcc.c.assembler.option.fpu.type" useByScannerDiscovery="false" value="fpv4-sp-d16" valueType="string"/>
-								<option id="arm.toolchain.gcc.c.assembler.option.fpu.abi.2120770239" name="-mfloat-abi" superClass="arm.toolchain.gcc.c.assembler.option.fpu.abi" useByScannerDiscovery="false" value="hard" valueType="string"/>
+								<option id="arm.toolchain.gcc.c.assembler.option.fpu.abi.2120770239" name="-mfloat-abi" superClass="arm.toolchain.gcc.c.assembler.option.fpu.abi" useByScannerDiscovery="false" value="softfp" valueType="string"/>
 								<inputType id="arm.toolchain.assembler.base.input.93064446" superClass="arm.toolchain.assembler.base.input"/>
 							</tool>
 							<tool id="arm.toolchain.gcc.c.compiler.333508623" name="CrossCore GCC ARM Embedded C Compiler" superClass="arm.toolchain.gcc.c.compiler">
@@ -102,7 +102,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/apps/LoRaMac/common/LmHandler/packages}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/boards/ADuCM4050}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/radio/sx1276}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/4.5.0/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -121,7 +121,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}}/RTE/Device/ADuCM4050&quot;"/>
 								</option>
 								<option id="arm.toolchain.gcc.c.compiler.option.fpu.type.583553087" name="-mfpu" superClass="arm.toolchain.gcc.c.compiler.option.fpu.type" useByScannerDiscovery="false" value="fpv4-sp-d16" valueType="string"/>
-								<option id="arm.toolchain.gcc.c.compiler.option.fpu.abi.1802544015" name="-mfloat-abi" superClass="arm.toolchain.gcc.c.compiler.option.fpu.abi" useByScannerDiscovery="false" value="hard" valueType="string"/>
+								<option id="arm.toolchain.gcc.c.compiler.option.fpu.abi.1802544015" name="-mfloat-abi" superClass="arm.toolchain.gcc.c.compiler.option.fpu.abi" useByScannerDiscovery="false" value="softfp" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="arm.base.compiler.option.additionaloptions.1988276214" name="Additional options:" superClass="arm.base.compiler.option.additionaloptions" useByScannerDiscovery="false" valueType="stringList">
 									<listOptionValue builtIn="false" value="-std=c99"/>
 								</option>
@@ -150,7 +150,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/apps/LoRaMac/common/LmHandler/packages}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/boards/ADuCM4050}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/radio/sx1276}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/4.5.0/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -172,6 +172,7 @@
 								<option id="arm.linker.option.ldprocessing.ldfile.487611621" name="Custom linker script (-T)" superClass="arm.linker.option.ldprocessing.ldfile" useByScannerDiscovery="false" value="${workspace_loc:/${ProjName}}/RTE/Device/ADuCM4050/ADuCM4050.ld" valueType="string"/>
 								<option id="arm.toolchain.gcc.c.linker.option.specs.1164496002" name="Semihosting support" superClass="arm.toolchain.gcc.c.linker.option.specs" useByScannerDiscovery="false" value="arm.toolchain.gcc.c.linker.option.specs.nosys" valueType="enumerated"/>
 								<option id="arm.c.linker.mathslib.907377905" name="Link against system math library (-lm)" superClass="arm.c.linker.mathslib" useByScannerDiscovery="false" value="false" valueType="boolean"/>
+								<option id="arm.toolchain.gcc.c.linker.option.fpu.abi.1914896137" superClass="arm.toolchain.gcc.c.linker.option.fpu.abi" value="arm.toolchain.gcc.c.linker.option.fpu.abi.softfp" valueType="enumerated"/>
 								<inputType id="arm.linker.input.1440673899" superClass="arm.linker.input">
 									<additionalInput kind="additionaldependency" paths="$(USER_OBJS)"/>
 								</inputType>
@@ -191,7 +192,7 @@
 								</option>
 								<option id="arm.toolchain.cpp.compiler.option.coreid.779721597" name="Specify the core Id (-DCORE[A|B|0-2])" superClass="arm.toolchain.cpp.compiler.option.coreid" value="0" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="arm.base.compiler.option.include.paths.102970480" name="Additional include directories (-I):" superClass="arm.base.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/4.5.0/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -210,7 +211,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}}/RTE/Device/ADuCM4050&quot;"/>
 								</option>
 								<option id="arm.toolchain.gcc.cpp.compiler.option.fpu.type.1465085369" name="-mfpu" superClass="arm.toolchain.gcc.cpp.compiler.option.fpu.type" value="fpv4-sp-d16" valueType="string"/>
-								<option id="arm.toolchain.gcc.cpp.compiler.option.fpu.abi.571341789" name="-mfloat-abi" superClass="arm.toolchain.gcc.cpp.compiler.option.fpu.abi" value="hard" valueType="string"/>
+								<option id="arm.toolchain.gcc.cpp.compiler.option.fpu.abi.571341789" name="-mfloat-abi" superClass="arm.toolchain.gcc.cpp.compiler.option.fpu.abi" value="softfp" valueType="string"/>
 							</tool>
 							<tool id="arm.toolchain.gcc.cpp.linker.2133646122" name="CrossCore GCC ARM Embedded C++ Linker" superClass="arm.toolchain.gcc.cpp.linker">
 								<option id="arm.toolchain.gcc.cpp.linker.option.mcpu.64253921" name="-mcpu" superClass="arm.toolchain.gcc.cpp.linker.option.mcpu" value="cortex-m4" valueType="string"/>
@@ -223,7 +224,7 @@
 									<listOptionValue builtIn="false" value="__SILICON_REVISION__=0x1"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="arm.linker.option.include.paths.1810248809" name="Additional include directories (-I):" superClass="arm.linker.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/4.5.0/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -369,7 +370,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/apps/LoRaMac/common/LmHandler/packages}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/boards/ADuCM4050}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/radio/sx1276}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/4.5.0/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -419,7 +420,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/apps/LoRaMac/common/LmHandler/packages}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/boards/ADuCM4050}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/radio/sx1276}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/4.5.0/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -464,7 +465,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/apps/LoRaMac/common/LmHandler/packages}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/boards/ADuCM4050}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/radio/sx1276}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/4.5.0/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -503,7 +504,7 @@
 								</option>
 								<option id="arm.toolchain.cpp.compiler.option.coreid.1555272035" name="Specify the core Id (-DCORE[A|B|0-2])" superClass="arm.toolchain.cpp.compiler.option.coreid" value="0" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="arm.base.compiler.option.include.paths.1857173238" name="Additional include directories (-I):" superClass="arm.base.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/4.5.0/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -535,7 +536,7 @@
 									<listOptionValue builtIn="false" value="__SILICON_REVISION__=0x1"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="arm.linker.option.include.paths.1057498042" name="Additional include directories (-I):" superClass="arm.linker.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/4.5.0/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>

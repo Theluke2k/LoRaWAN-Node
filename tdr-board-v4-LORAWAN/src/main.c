@@ -210,7 +210,7 @@ static volatile uint32_t TxPeriodicity = 0;
  * TDR data struct definition. Holds information about all of the measurements done in the measurement phase.
  */
 struct tdr_data tdr_data[1];
-volatile uint32_t iHibernateExitFlag = 0;
+uint32_t volatile iHibernateExitFlag = 0;
 volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t iterations = 0;
@@ -234,7 +234,7 @@ void SwitchClock(uint8_t clock) {
 		adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFOSC);
 
 		// Update Core Clock
-		//adi_pwr_UpdateCoreClock();
+		adi_pwr_UpdateCoreClock();
 	}
 	else if(clock == 0) {
 
@@ -252,14 +252,14 @@ int main(void) {
 	uint16_t index = 0;
 	init_system();
 	NVIC_SetPriority(RTC0_EVT_IRQn, 1);
-	//DelayMsMcu(5000);
+	DelayMsMcu(10000);
 	while(1) {
-		iHibernateExitFlag = 0;
-		//DelayMsMcu(5000);
-		SwitchClock(1);
+		DelayMsMcu(10000);
+		//SwitchClock(1);
 		rtc_Init();
 		rtc_UpdateAlarm();
 		enter_hibernation();
+
 
 	}
 

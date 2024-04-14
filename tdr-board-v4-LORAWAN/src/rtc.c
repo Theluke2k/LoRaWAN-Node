@@ -31,7 +31,6 @@ static ADI_RTC_HANDLE hDevice1;
 static void rtc0Callback(void* hWut, uint32_t nEvent, void* pArg)
 {
 	//iHibernateExitFlag = 1;
-
 	adi_pwr_ExitLowPowerMode(&iHibernateExitFlag);
 }
 
@@ -120,38 +119,38 @@ ADI_RTC_RESULT rtc_Init (void) {
     do
     {
         eResult = adi_rtc_Open(RTC_DEVICE_NUM, aRtcDevMem1, ADI_RTC_MEMORY_SIZE, &hDevice1);
-        DEBUG_RESULT("\n Failed to open the device %04d",eResult,ADI_RTC_SUCCESS);
+        //DEBUG_RESULT("\n Failed to open the device %04d",eResult,ADI_RTC_SUCCESS);
 
         eResult = adi_rtc_EnableInterrupts(hDevice1, ADI_RTC_ALARM_INT, true);
-        DEBUG_RESULT("\n Failed to enable interrupts",eResult,ADI_RTC_SUCCESS);
+        //DEBUG_RESULT("\n Failed to enable interrupts",eResult,ADI_RTC_SUCCESS);
         /*
         //Why this?
         eResult = adi_rtc_SetPreScale(hDevice1, 15);
         DEBUG_RESULT("\n Failed to set prescale to 15 (32768 ticks per 1 change of rtc reg)",eResult,ADI_RTC_SUCCESS);
 	    */
         eResult = adi_rtc_RegisterCallback(hDevice1, rtc0Callback, hDevice1);
-        DEBUG_RESULT("\n Failed to register callback",eResult,ADI_RTC_SUCCESS);
+        //DEBUG_RESULT("\n Failed to register callback",eResult,ADI_RTC_SUCCESS);
 
 //        eResult = adi_rtc_SetCount(hDevice1, buildTime);
 //        DEBUG_RESULT("Failed to set the count", eResult, ADI_RTC_SUCCESS);
 
         eResult = adi_rtc_SetTrim(hDevice1, ADI_RTC_TRIM_INTERVAL, ADI_RTC_TRIM_VALUE, ADI_RTC_TRIM_DIRECTION);
-        DEBUG_RESULT("Failed to set the trim value",eResult,ADI_RTC_SUCCESS);
+        //DEBUG_RESULT("Failed to set the trim value",eResult,ADI_RTC_SUCCESS);
 
     /* force a reset to the latest build timestamp */
-        DEBUG_MESSAGE("Resetting clock");
+        //DEBUG_MESSAGE("Resetting clock");
         eResult = adi_rtc_SetCount(hDevice1, buildTime);
-        DEBUG_RESULT("Failed to set count",eResult,ADI_RTC_SUCCESS);
+        //DEBUG_RESULT("Failed to set count",eResult,ADI_RTC_SUCCESS);
 
 //        DEBUG_MESSAGE("New time is:");
 //        rtc_ReportTime();
 
         eResult = adi_rtc_Enable(hDevice1, true);
-        DEBUG_RESULT("Failed to enable the device",eResult,ADI_RTC_SUCCESS);
+        //DEBUG_RESULT("Failed to enable the device",eResult,ADI_RTC_SUCCESS);
 
         if(ADI_RTC_SUCCESS != (eResult = adi_rtc_EnableAlarm(hDevice1, true)))
     	{
-            DEBUG_RESULT("adi_RTC_EnableAlarm failed",eResult,ADI_RTC_SUCCESS);
+            //DEBUG_RESULT("adi_RTC_EnableAlarm failed",eResult,ADI_RTC_SUCCESS);
     	}
 
     } while(0);
