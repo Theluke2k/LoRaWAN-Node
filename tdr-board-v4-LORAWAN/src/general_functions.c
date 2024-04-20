@@ -67,30 +67,30 @@ void init_system()
 //	adi_pwr_UpdateCoreClock();
 
 	// Custom init for tests
-	adi_pwr_Init();
-	adi_pwr_SetHPBuckLoadMode(ADI_PWR_HPBUCK_LD_MODE_LOW);
-
-	ADI_CLOCK_SOURCE_STATUS clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
-	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_HFOSC, true);
-	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
-		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFOSC, &clock_status);
-	}
-
-	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_LFXTAL, true);
-
-	clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
-	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
-		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_LFXTAL, &clock_status);
-	};
-
-//	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK,1);
-//	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK,1);
-
-	adi_pwr_SetLFClockMux(ADI_CLOCK_MUX_LFCLK_LFXTAL);
-	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFOSC);
-
-	// Update Core Clock
-	adi_pwr_UpdateCoreClock();
+//	adi_pwr_Init();
+//	adi_pwr_SetHPBuckLoadMode(ADI_PWR_HPBUCK_LD_MODE_LOW);
+//
+//	ADI_CLOCK_SOURCE_STATUS clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
+//	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_HFOSC, true);
+//	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
+//		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFOSC, &clock_status);
+//	}
+//
+//	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_LFXTAL, true);
+//
+//	clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
+//	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
+//		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_LFXTAL, &clock_status);
+//	};
+//
+////	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK,1);
+////	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK,1);
+//
+//	adi_pwr_SetLFClockMux(ADI_CLOCK_MUX_LFCLK_LFXTAL);
+//	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFOSC);
+//
+//	// Update Core Clock
+//	adi_pwr_UpdateCoreClock();
 
 /*
  * Following if we know the offset of the RTC oscillator, we can trim it if necessary
@@ -107,6 +107,17 @@ void init_system()
 //		DEBUG_RESULT("\n Failed to enable the trim %04d", eResult, ADI_RTC_SUCCESS);
 //		return(eResult);
 //	}
+
+	// Another test to get the clock right
+	common_Init();
+	ADI_PWR_RESULT eResult;
+	adi_pwr_Init();
+	adi_pwr_SetLFClockMux(ADI_CLOCK_MUX_LFCLK_LFXTAL);
+	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_LFXTAL, true);
+	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK, 1);
+	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK, 1);
+
+
 
     //uart_init();
 
@@ -173,11 +184,11 @@ void init_store()
     select_comparator_reference(REF1_0_8_REF2_1_2);
 #endif
 
-    uart_init();
-    xint_init();
-    gpio_init();
-    adc_init(false);
-    i2c_init();
+    //uart_init();
+    //xint_init();
+    //gpio_init();
+    //adc_init(false);
+    //i2c_init();
 
     /*
      * Lucas (23/03/2024):

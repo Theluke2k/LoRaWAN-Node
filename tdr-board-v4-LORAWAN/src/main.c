@@ -254,15 +254,10 @@ int main(void) {
 	//BoardInitMcu();
 	NVIC_SetPriority(RTC0_EVT_IRQn, 0);
 	DelayMsMcu(5000);
-	while(1) {
-		DelayMsMcu(5000);
-		//SwitchClock(1);
-		rtc_Init();
-		rtc_UpdateAlarm();
-		enter_hibernation();
-	}
-
-
+	//SwitchClock(1);
+	rtc_Init();
+	rtc_UpdateAlarm();
+	enter_hibernation();
 
 
 //	while (1) {
