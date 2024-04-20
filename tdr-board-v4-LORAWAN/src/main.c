@@ -251,16 +251,15 @@ void SwitchClock(uint8_t clock) {
 int main(void) {
 	uint16_t index = 0;
 	init_system();
-	NVIC_SetPriority(RTC0_EVT_IRQn, 1);
-	DelayMsMcu(10000);
+	//BoardInitMcu();
+	NVIC_SetPriority(RTC0_EVT_IRQn, 0);
+	DelayMsMcu(5000);
 	while(1) {
-		DelayMsMcu(10000);
+		DelayMsMcu(5000);
 		//SwitchClock(1);
 		rtc_Init();
 		rtc_UpdateAlarm();
 		enter_hibernation();
-
-
 	}
 
 

@@ -135,8 +135,8 @@ void digital_pin_init()
 	 * Removed for merge
 	 */
     // LORA/SPI
-    //*((volatile uint32_t *)REG_GPIO0_CFG) |= SPI0_CLK_PORTP0_MUX | SPI0_MOSI_PORTP0_MUX | SPI0_MISO_PORTP0_MUX | SPI0_CS_PORT0_MUX;
-	/*
+    *((volatile uint32_t *)REG_GPIO0_CFG) |= SPI0_CLK_PORTP0_MUX | SPI0_MOSI_PORTP0_MUX | SPI0_MISO_PORTP0_MUX | SPI0_CS_PORT0_MUX;
+
     if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(LORA_RST_PORT, LORA_RST_PIN, true)))
 	{
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
@@ -144,7 +144,7 @@ void digital_pin_init()
 	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_InputEnable(LORA_DIO0_PORT, LORA_DIO0_PIN, true)))
 	{
 		DEBUG_MESSAGE("adi_gpio_InputEnable failed\n");
-	}*/
+	}
 
 	//Initial states
 	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
@@ -165,7 +165,7 @@ void digital_pin_init()
 	 * Lucas (23/03/2024):
 	 * Removed for merge
 	 */
-	//adi_gpio_SetHigh(LORA_RST_PORT, LORA_RST_PIN);
+	adi_gpio_SetHigh(LORA_RST_PORT, LORA_RST_PIN);
 
 }
 

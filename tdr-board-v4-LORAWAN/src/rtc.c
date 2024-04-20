@@ -30,8 +30,10 @@ static ADI_RTC_HANDLE hDevice1;
  */
 static void rtc0Callback(void* hWut, uint32_t nEvent, void* pArg)
 {
-	//iHibernateExitFlag = 1;
-	adi_pwr_ExitLowPowerMode(&iHibernateExitFlag);
+	pADI_PMG0_TST->CLR_LATCH_GPIOS = 0x58FA;
+	uint32_t g = pADI_PMG0->SHDN_STAT;
+	rtc_UpdateAlarm();
+	//adi_pwr_ExitLowPowerMode(NULL);
 }
 
 /*

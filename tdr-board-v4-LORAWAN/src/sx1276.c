@@ -41,11 +41,15 @@ uint8_t lora_initialize() {
 
     /* Recover the LoRa module version */
     spi_read_byte(REG_VERSION, &loRaVersion);
-    if (loRaVersion != SX1276_ID)
-        return 1;
+	if (loRaVersion != SX1276_ID) {
+		return 1;
+	}
+
 
     /* Set the module in sleep mode */
     spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
+
+
 
 //    /* Set the frequency to 868 MHz */
 //    spi_write_byte(REG_FRF_MSB, 0xD9);
@@ -74,7 +78,17 @@ uint8_t lora_initialize() {
 //    /* Set the module in LoRa and standby mode */
 //    spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
 
-    return 0;
+
+    // Added for debug
+    spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+    spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
+    uint8_t ret;
+	spi_read_byte(REG_OP_MODE, &ret);
+
+	while ((ret & 0x07) != 0x00) {
+		spi_read_byte(REG_OP_MODE, &ret);
+	}
+	return 0;
 }
 
 
