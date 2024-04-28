@@ -73,6 +73,7 @@ uint8_t lora_initialize() {
 
     /* Set the module in LoRa and standby mode */
     spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+    spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
 
     return 0;
 }

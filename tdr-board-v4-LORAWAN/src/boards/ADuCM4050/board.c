@@ -133,7 +133,7 @@ void BoardInitMcu( void )
 		gpioStatus = adi_gpio_Init(gpioMemory, ADI_GPIO_MEMORY_SIZE);
 		DEBUG_RESULT("GPIO init failed", gpioStatus, ADI_GPIO_SUCCESS);
 
-		RtcInit();
+		//RtcInit();
 	}
 	else {
 		/*

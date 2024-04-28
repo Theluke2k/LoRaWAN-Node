@@ -222,12 +222,10 @@ uint8_t initialized = 0;
 int main(void) {
  	uint16_t index = 0;
 	init_system();
-	BoardInitMcu();
+	//BoardInitMcu();
 
 	while (1) {
-		SX1276Write(0x01, 0x80 | 0x01);
-		SX1276Write(0x01, 0x80 | 0x00);
-		DelayMsMcu(2000);
+		DelayMsMcu(5000);
 		iHibernateExitFlag = 0;
 		rtc_UpdateAlarm();
 		xint_uart_enable();
