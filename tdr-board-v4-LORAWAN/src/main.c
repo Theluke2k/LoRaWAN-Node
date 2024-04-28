@@ -323,6 +323,7 @@ int main(void) {
 		/*
 		 * Lucas (30-03-2024):
 		 * Enter sleep mode until next uplink.
+		 * Remember to also set radio to sleep mode
 		 */
 		iHibernateExitFlag = 0;
 		rtc_UpdateAlarm();
