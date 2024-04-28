@@ -133,8 +133,8 @@ ADI_RTC_RESULT rtc_Init (void) {
 //        eResult = adi_rtc_SetCount(hDevice1, buildTime);
 //        DEBUG_RESULT("Failed to set the count", eResult, ADI_RTC_SUCCESS);
 
-        eResult = adi_rtc_SetTrim(hDevice1, ADI_RTC_TRIM_INTERVAL, ADI_RTC_TRIM_VALUE, ADI_RTC_TRIM_DIRECTION);
-        DEBUG_RESULT("Failed to set the trim value",eResult,ADI_RTC_SUCCESS);
+//        eResult = adi_rtc_SetTrim(hDevice1, ADI_RTC_TRIM_INTERVAL, ADI_RTC_TRIM_VALUE, ADI_RTC_TRIM_DIRECTION);
+//        DEBUG_RESULT("Failed to set the trim value",eResult,ADI_RTC_SUCCESS);
 
     /* force a reset to the latest build timestamp */
         DEBUG_MESSAGE("Resetting clock");

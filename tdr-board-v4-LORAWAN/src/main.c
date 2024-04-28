@@ -57,7 +57,7 @@ uint8_t tester = 0; //
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                           	5000 // minimum 4
+#define APP_TX_DUTYCYCLE                           	10000 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -77,12 +77,12 @@ uint8_t tester = 0; //
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_0 // DEBUG (default: DR0)
+#define LORAWAN_DEFAULT_DATARATE                    DR_5 // DEBUG (default: DR0)
 
 /*!
  * LoRaWAN confirmed messages
  */
-#define LORAWAN_DEFAULT_CONFIRMED_MSG_STATE         LORAMAC_HANDLER_UNCONFIRMED_MSG
+#define LORAWAN_DEFAULT_CONFIRMED_MSG_STATE         LORAMAC_HANDLER_CONFIRMED_MSG
 
 /*!
  * User application data buffer size
@@ -220,114 +220,123 @@ uint8_t initialized = 0;
  * Main program.
  */
 int main(void) {
-	uint16_t index = 0;
+ 	uint16_t index = 0;
 	init_system();
+	BoardInitMcu();
+	SX1276Write(0x01, 0x80 | 0x01);
+	SX1276Write(0x01, 0x80 | 0x00);
 
 	while (1) {
 
-		/*
-		 * Lucas (30-03-2024):
-		 * AU runs their measurements. The data is stored in tdr_data.
-		 * The stack uses this struct as data source when transmitting data.
-		 */
-		xint_uart_disable();
-		init_store();
-		run_and_store_measurements(tdr_data, &index);
-		uart_init();
-		uint32_t delay_val = 1600; // 20ms
-		while(--delay_val){};
-		print_tdr_data_to_uart(tdr_data);
-		uart_deinit();
-
-		// Specify the amount of desired uplinks before going to sleep.
-		desiredUplinks = 2;
-
-		/*
-		 * Lucas (30-03-2024):
-		 * Run the LoRaMac stack.
-		 */
-		BoardInitMcu();
-
-		// Set interrup priorities. SPI must have highest prioriy!
-		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
-		NVIC_SetPriority(SPI0_EVT_IRQn, 1);
-		NVIC_SetPriority(RTC1_EVT_IRQn, 2);
-		NVIC_SetPriority(RTC0_EVT_IRQn, 2);
-
-		// Initialize transmission perhiodicity variable
-		TxPeriodicity = APP_TX_DUTYCYCLE
-				+ randr(-APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND);
-
-		const Version_t appVersion = { .Value = FIRMWARE_VERSION };
-		const Version_t gitHubVersion = { .Value = GITHUB_VERSION };
-
-		DisplayAppInfo("periodic-uplink-lpp", &appVersion, &gitHubVersion);
-
-		if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
-			printf("LoRaMac wasn't properly initialized\n");
-			// Fatal error, endless loop.
-			while (1) {
-			}
-		}
-
-		// Set system maximum tolerated rx error in milliseconds
-		//LmHandlerSetSystemMaxRxError(20);
-
-		// The LoRa-Alliance Compliance protocol package should always be
-		// initialized and activated.
-		//LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
-
-		if(!initialized) {
-			// Set system maximum tolerated rx error in milliseconds
-			LmHandlerSetSystemMaxRxError(20);
-
-			// The LoRa-Alliance Compliance protocol package should always be initialized and activated.
-			LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
-
-			// The join process can be made here but it does not need to run. The state machine handles it.
-			LmHandlerJoin(); // DEBUG: should be deleted when eeprom is implemented
-
-			// Mark the program as initiated.
-			initialized = 1;
-		}
-
-		iterations = 0;
-
-		StartTxProcess(LORAMAC_HANDLER_TX_ON_TIMER);
-
-		while (iterations < desiredUplinks+1) {
-			// DEBUG start
-			if (LmHandlerJoinStatus() == LORAMAC_HANDLER_SET) {
-				tester = 1;
-			}
-			// DEBUG end
-
-			// Processes the LoRaMac events
-			LmHandlerProcess();
-
-			// Process application uplinks management
-			UplinkProcess();
-
-			CRITICAL_SECTION_BEGIN( );
-			if (IsMacProcessPending == 1) {
-				// Clear flag and prevent MCU to go into low power modes.
-				IsMacProcessPending = 0;
-			} else {
-				// The MCU wakes up through events
-				//BoardLowPowerHandler();
-			}
-			CRITICAL_SECTION_END( );
-		}
-		LmHandlerDeInit();
-
-		/*
-		 * Lucas (30-03-2024):
-		 * Enter sleep mode until next uplink.
-		 */
+		DelayMsMcu(2000);
 		iHibernateExitFlag = 0;
 		rtc_UpdateAlarm();
 		xint_uart_enable();
 		enter_hibernation();
+//		/*
+//		 * Lucas (30-03-2024):
+//		 * AU runs their measurements. The data is stored in tdr_data.
+//		 * The stack uses this struct as data source when transmitting data.
+//		 */
+////		xint_uart_disable();
+////		init_store();
+////		run_and_store_measurements(tdr_data, &index);
+////		uart_init();
+////		uint32_t delay_val = 1600; // 20ms
+////		while(--delay_val){};
+////		print_tdr_data_to_uart(tdr_data);
+////		uart_deinit();
+//
+//		// Specify the amount of desired uplinks before going to sleep.
+//		desiredUplinks = 1;
+//
+//		/*
+//		 * Lucas (30-03-2024):
+//		 * Run the LoRaMac stack.
+//		 */
+//		BoardInitMcu();
+//
+//		// Set interrup priorities. SPI must have highest prioriy!
+//		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
+//		NVIC_SetPriority(SPI0_EVT_IRQn, 1);
+//		NVIC_SetPriority(RTC1_EVT_IRQn, 2);
+//		NVIC_SetPriority(RTC0_EVT_IRQn, 2);
+//
+//		// Initialize transmission perhiodicity variable
+//		TxPeriodicity = APP_TX_DUTYCYCLE
+//				+ randr(-APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND);
+//
+//		const Version_t appVersion = { .Value = FIRMWARE_VERSION };
+//		const Version_t gitHubVersion = { .Value = GITHUB_VERSION };
+//
+//		DisplayAppInfo("periodic-uplink-lpp", &appVersion, &gitHubVersion);
+//
+//		if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
+//			printf("LoRaMac wasn't properly initialized\n");
+//			// Fatal error, endless loop.
+//			while (1) {
+//			}
+//		}
+//
+//		// Set system maximum tolerated rx error in milliseconds
+//		//LmHandlerSetSystemMaxRxError(20);
+//
+//		// The LoRa-Alliance Compliance protocol package should always be
+//		// initialized and activated.
+//		//LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
+//
+//		if(1) {
+//			// Set system maximum tolerated rx error in milliseconds
+//			LmHandlerSetSystemMaxRxError(20);
+//
+//			// The LoRa-Alliance Compliance protocol package should always be initialized and activated.
+//			LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
+//
+//			// The join process can be made here but it does not need to run. The state machine handles it.
+//			LmHandlerJoin(); // DEBUG: should be deleted when eeprom is implemented
+//
+//			// Mark the program as initiated.
+//			initialized = 1;
+//		}
+//
+//		iterations = 0;
+//
+//		StartTxProcess(LORAMAC_HANDLER_TX_ON_TIMER);
+//
+//		while (iterations < desiredUplinks+1) { //iterations < desiredUplinks+1
+//			// DEBUG start
+//			if (LmHandlerJoinStatus() == LORAMAC_HANDLER_SET) {
+//				tester = 1;
+//			}
+//			// DEBUG end
+//
+//			// Processes the LoRaMac events
+//			LmHandlerProcess();
+//
+//			// Process application uplinks management
+//			UplinkProcess();
+//
+//			CRITICAL_SECTION_BEGIN( );
+//			if (IsMacProcessPending == 1) {
+//				// Clear flag and prevent MCU to go into low power modes.
+//				IsMacProcessPending = 0;
+//			} else {
+//				// The MCU wakes up through events
+//				//BoardLowPowerHandler();
+//			}
+//			CRITICAL_SECTION_END( );
+//		}
+//		LmHandlerDeInit();
+//
+//		/*
+//		 * Lucas (30-03-2024):
+//		 * Enter sleep mode until next uplink.
+//		 * Remember to also set radio to sleep mode!
+//		 */
+//		iHibernateExitFlag = 0;
+//		rtc_UpdateAlarm();
+//		xint_uart_enable();
+//		enter_hibernation();
 	}
 
 	return 0;

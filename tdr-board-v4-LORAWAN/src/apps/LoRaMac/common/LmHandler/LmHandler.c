@@ -504,7 +504,6 @@ LmHandlerErrorStatus_t LmHandlerSend( LmHandlerAppData_t *appData, LmHandlerMsgT
 
     if( LmHandlerJoinStatus( ) != LORAMAC_HANDLER_SET )
     {
-    	printf("Network aint joined\n");
         // The network isn't joined, try again.
         LmHandlerJoinRequest( CommissioningParams.IsOtaaActivation );
         return LORAMAC_HANDLER_ERROR;
