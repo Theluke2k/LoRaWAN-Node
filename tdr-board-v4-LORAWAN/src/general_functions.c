@@ -39,58 +39,58 @@
 
 void init_system()
 {
-//	adi_pwr_Init();
-//	adi_pwr_SetHPBuckLoadMode(ADI_PWR_HPBUCK_LD_MODE_LOW);
-//
-//	ADI_CLOCK_SOURCE_STATUS clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
-//	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_HFXTAL, true);
-//	while(clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE)
-//	{
-//		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFXTAL, &clock_status);
-//	};
-//
-//	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFXTAL);
-//
-//	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK,1);
-//	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK,1);
-//
-//	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_LFXTAL, true);
-//
-//	clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
-//	while(clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE)
-//	{
-//		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_LFXTAL, &clock_status);
-//	};
-//
-//	adi_pwr_SetLFClockMux(ADI_CLOCK_MUX_LFCLK_LFXTAL);
-//
-//	adi_pwr_UpdateCoreClock();
-
-	// Custom init for tests
 	adi_pwr_Init();
 	adi_pwr_SetHPBuckLoadMode(ADI_PWR_HPBUCK_LD_MODE_LOW);
 
 	ADI_CLOCK_SOURCE_STATUS clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
-	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_HFOSC, true);
-	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
-		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFOSC, &clock_status);
-	}
+	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_HFXTAL, true);
+	while(clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE)
+	{
+		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFXTAL, &clock_status);
+	};
+
+	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFXTAL);
+
+	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK,1);
+	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK,1);
 
 	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_LFXTAL, true);
 
 	clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
-	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
+	while(clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE)
+	{
 		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_LFXTAL, &clock_status);
 	};
 
-//	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK,1);
-//	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK,1);
-
 	adi_pwr_SetLFClockMux(ADI_CLOCK_MUX_LFCLK_LFXTAL);
-	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFOSC);
 
-	// Update Core Clock
 	adi_pwr_UpdateCoreClock();
+
+	// Custom init for tests
+//	adi_pwr_Init();
+//	adi_pwr_SetHPBuckLoadMode(ADI_PWR_HPBUCK_LD_MODE_LOW);
+//
+//	ADI_CLOCK_SOURCE_STATUS clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
+//	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_HFOSC, true);
+//	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
+//		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFOSC, &clock_status);
+//	}
+//
+//	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_LFXTAL, true);
+//
+//	clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
+//	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
+//		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_LFXTAL, &clock_status);
+//	};
+//
+////	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK,1);
+////	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK,1);
+//
+//	adi_pwr_SetLFClockMux(ADI_CLOCK_MUX_LFCLK_LFXTAL);
+//	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFOSC);
+//
+//	// Update Core Clock
+//	adi_pwr_UpdateCoreClock();
 
 /*
  * Following if we know the offset of the RTC oscillator, we can trim it if necessary
@@ -126,8 +126,8 @@ void init_system()
      * Removed for merge
      */
 
-    spi_init();
-	lora_initialize();
+    //spi_init();
+	//lora_initialize();
 
 }
 
