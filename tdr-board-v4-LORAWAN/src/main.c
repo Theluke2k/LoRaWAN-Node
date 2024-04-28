@@ -223,11 +223,10 @@ int main(void) {
  	uint16_t index = 0;
 	init_system();
 	BoardInitMcu();
-	SX1276Write(0x01, 0x80 | 0x01);
-	SX1276Write(0x01, 0x80 | 0x00);
 
 	while (1) {
-
+		SX1276Write(0x01, 0x80 | 0x01);
+		SX1276Write(0x01, 0x80 | 0x00);
 		DelayMsMcu(2000);
 		iHibernateExitFlag = 0;
 		rtc_UpdateAlarm();
