@@ -57,7 +57,7 @@ uint8_t tester = 0; //
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                           	10000 // minimum 4
+#define APP_TX_DUTYCYCLE                           	1000 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -213,7 +213,7 @@ struct tdr_data tdr_data[1];
 volatile uint32_t iHibernateExitFlag = 0;
 volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
-uint8_t iterations = 0;
+uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
 /*
  * Lucas (22-10-23):
@@ -277,14 +277,8 @@ int main(void) {
 			}
 		}
 
-		// Set system maximum tolerated rx error in milliseconds
-		//LmHandlerSetSystemMaxRxError(20);
-
-		// The LoRa-Alliance Compliance protocol package should always be
-		// initialized and activated.
-		//LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
-
-		if(1) {
+		// Only execute on board life start
+		if(!initialized) {
 			// Set system maximum tolerated rx error in milliseconds
 			LmHandlerSetSystemMaxRxError(20);
 
@@ -298,11 +292,12 @@ int main(void) {
 			initialized = 1;
 		}
 
-		iterations = 0;
+		// Reset number of uplinks for this power cycle.
+		uplinksSent = 0;
 
-		StartTxProcess(LORAMAC_HANDLER_TX_ON_TIMER);
+		//StartTxProcess(LORAMAC_HANDLER_TX_ON_TIMER);
 
-		while (iterations < desiredUplinks+1) { //iterations < desiredUplinks+1
+		do  { //iterations < desiredUplinks+1
 			// DEBUG start
 			if (LmHandlerJoinStatus() == LORAMAC_HANDLER_SET) {
 				tester = 1;
@@ -324,18 +319,32 @@ int main(void) {
 				//BoardLowPowerHandler();
 			}
 			CRITICAL_SECTION_END( );
-		}
+
+			// Run state machine until LmHandler is no longer busy, and the desired amount of uplinks have been sent.
+			if ((LmHandlerIsBusy() == false))
+			{
+				if(uplinksSent < desiredUplinks) {
+					PrepareTxFrame();
+				}
+				else {
+					break;
+				}
+			}
+		}while(1); //iterations < desiredUplinks+1
+
+		// Deinitialize Loramac
 		LmHandlerDeInit();
 
-		/*
-		 * Lucas (30-03-2024):
-		 * Enter sleep mode until next uplink.
-		 * Remember to also set radio to sleep mode!
-		 */
+		// Set radio to sleep
 		Radio.Write(0x01, 0x00);
+
+		// Reset Sleep Flag
 		iHibernateExitFlag = 0;
+
+		// Set Wakeup Alarm
 		rtc_UpdateAlarm();
-		xint_uart_enable();
+
+		// Enter Hibernate Mode
 		enter_hibernation();
 	}
 
@@ -520,7 +529,6 @@ static void PrepareTxFrame( void )
         return;
     }
 
-
     // DEBUG start (fill some test data to send)
     /*
     tdr_data[0].int1_integer = 1;
@@ -536,40 +544,11 @@ static void PrepareTxFrame( void )
 	tdr_data[0].honey_temp_integer = 11;
 	tdr_data[0].honey_temp_decimal = 12;
 	*/
-
     // DEBUG end
 
 
     // Specify the port on which to send
     AppData.Port = LORAWAN_APP_PORT;
-
-    // Buffer to convert the numbers to char
-    //char buffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE]={0};
-
-    // Current package count, if we send more than one package at a time.
-    //int packageCount = 0;
-
-    // Increment total package number
-    //packageNumber++;
-
-    // Not needed
-//    uint8_t packet_length = snprintf(buffer, LORAWAN_APP_DATA_BUFFER_MAX_SIZE, "[%d]{$%3u.%02u/%3u.%02u$%2d/%2d/%2d/%2d$%2u.%2u/%2u.%2u} -> Package %d",
-//    						packageCount,
-//							tdr_data[0].int1_integer,
-//							tdr_data[0].int1_decimal,
-//							tdr_data[0].int2_integer,
-//							tdr_data[0].int2_decimal,
-//							tdr_data[0].th1_temp,
-//							tdr_data[0].th2_temp,
-//							tdr_data[0].th3_temp,
-//							tdr_data[0].th4_temp,
-//							tdr_data[0].honey_rh_integer,
-//							tdr_data[0].honey_rh_decimal,
-//							tdr_data[0].honey_temp_integer,
-//							tdr_data[0].honey_temp_decimal,
-//							packageNumber
-//    						);
-
 
     uint8_t packet_length = sizeof(tdr_data);
 
@@ -581,10 +560,8 @@ static void PrepareTxFrame( void )
 
     LmHandlerErrorStatus_t t = LmHandlerSend( &AppData, LmHandlerParams.IsTxConfirmed );
 
-    // Send package
-    if( t == LORAMAC_HANDLER_SUCCESS )
-    {
-    	iterations++;
+    if(t == LORAMAC_HANDLER_SUCCESS) {
+    	uplinksSent++;
     }
 }
 
@@ -660,20 +637,16 @@ static void OnTxTimerEvent( void* context )
 	}
 	PAJ("OnTxTimerEvent\n");
 	// DEBUG end
-    TimerStop( &TxTimer );
+	TimerStop(&TxTimer);
 
-    if(iterations < desiredUplinks) {
+	IsTxFramePending = 1;
 
-    	IsTxFramePending = 1;
-
-    	// Schedule next transmission
-    	TimerSetValue( &TxTimer, TxPeriodicity );
-    	TimerStart( &TxTimer );
-    }
-    else {
-    	iterations++;
-    }
+	// Schedule next transmission
+	TimerSetValue(&TxTimer, TxPeriodicity);
+	TimerStart(&TxTimer);
 }
+
+
 
 
 
