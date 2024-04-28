@@ -77,7 +77,7 @@ uint8_t tester = 0; //
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_5 // DEBUG (default: DR0)
+#define LORAWAN_DEFAULT_DATARATE                    DR_3 // DEBUG (default: DR0)
 
 /*!
  * LoRaWAN confirmed messages
@@ -307,30 +307,34 @@ int main(void) {
 			// Processes the LoRaMac events
 			LmHandlerProcess();
 
-			// Process application uplinks management
-			UplinkProcess();
-
 			CRITICAL_SECTION_BEGIN( );
-			if (IsMacProcessPending == 1) {
-				// Clear flag and prevent MCU to go into low power modes.
-				IsMacProcessPending = 0;
-			} else {
-				// The MCU wakes up through events
-				//BoardLowPowerHandler();
-			}
-			CRITICAL_SECTION_END( );
 
-			// Run state machine until LmHandler is no longer busy, and the desired amount of uplinks have been sent.
-			if ((LmHandlerIsBusy() == false))
+			/*
+			 * Lucas (28-04-2024):
+			 * The following first checks if there is a MAC process pending. If there is
+			 * the flag is cleared and the board does not send another frame or goes to sleep,
+			 * allowing the state machine to run one more time to processes the MAC layer. If
+			 * There is no MAC process pending, it checks if the LmHandler is busy. If it is not busy
+			 * then we check if we have sent all of our frames. If we have not, we send the next frame.
+			 * If we have sent all frames, the loop breaks and the board goes to sleep, until the next
+			 * power cycle.
+			 */
+			if (IsMacProcessPending == 1) {
+				IsMacProcessPending = 0;
+			}
+			else if ((LmHandlerIsBusy() == false))
 			{
 				if(uplinksSent < desiredUplinks) {
+					CRITICAL_SECTION_END( );
 					PrepareTxFrame();
 				}
 				else {
+					CRITICAL_SECTION_END( );
 					break;
 				}
 			}
-		}while(1); //iterations < desiredUplinks+1
+			CRITICAL_SECTION_END( );
+		}while(1);
 
 		// Deinitialize Loramac
 		LmHandlerDeInit();
