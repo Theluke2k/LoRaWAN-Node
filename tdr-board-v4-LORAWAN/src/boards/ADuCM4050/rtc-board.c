@@ -91,6 +91,9 @@ static void           rtc1Callback (void *pCBParam, uint32_t Event, void *EventA
  */
 static uint32_t RtcTimerContext = 0;
 
+// Sleep flag
+extern iHibernateExitFlag;
+
 /*
  * Lucas:
  * Callback function for the alarm that is set.
@@ -98,6 +101,9 @@ static uint32_t RtcTimerContext = 0;
 static void rtc1Callback(void *pCBParam, uint32_t Event, void *EventArg)
 {
 	TimerIrqHandler();
+	if(iHibernateExitFlag == 0) {
+		iHibernateExitFlag = 1;
+	}
 }
 
 /*

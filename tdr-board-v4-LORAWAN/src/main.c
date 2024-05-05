@@ -57,7 +57,7 @@ uint8_t tester = 0; //
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                           	1000 // minimum 4
+#define APP_TX_DUTYCYCLE                           	1000 // Currently unused
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -77,12 +77,12 @@ uint8_t tester = 0; //
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_3 // DEBUG (default: DR0)
+#define LORAWAN_DEFAULT_DATARATE                    DR_0 // DEBUG (default: DR0)
 
 /*!
  * LoRaWAN confirmed messages
  */
-#define LORAWAN_DEFAULT_CONFIRMED_MSG_STATE         LORAMAC_HANDLER_UNCONFIRMED_MSG
+#define LORAWAN_DEFAULT_CONFIRMED_MSG_STATE         LORAMAC_HANDLER_CONFIRMED_MSG
 
 /*!
  * User application data buffer size
@@ -205,6 +205,10 @@ static volatile uint8_t IsTxFramePending = 0;
 
 static volatile uint32_t TxPeriodicity = 0;
 
+static void sleepTimerEvent( void* context ) {
+	//iHibernateExitFlag = 1;
+}
+
 /*
  * Lucas (25-02-2024)
  * TDR data struct definition. Holds information about all of the measurements done in the measurement phase.
@@ -212,54 +216,51 @@ static volatile uint32_t TxPeriodicity = 0;
 struct tdr_data tdr_data[1];
 volatile uint32_t iHibernateExitFlag = 0;
 volatile uint8_t print_flag = 0;
-uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
+static TimerEvent_t sleepTimer;
+
+/*
+ * Lucas (05/05/2024):
+ * User defined variables
+ */
+// Specify the amount of desired uplinks before going to sleep.
+uint8_t desiredUplinks = 1;
+
+
 /*
  * Lucas (22-10-23):
  * Main program.
  */
 int main(void) {
  	uint16_t index = 0;
+ 	// Set interrup priorities. SPI must have highest prioriy!
+	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
+	NVIC_SetPriority(SPI0_EVT_IRQn, 1);
+	NVIC_SetPriority(RTC1_EVT_IRQn, 2);
+	NVIC_SetPriority(RTC0_EVT_IRQn, 2);
+
+	// Timer used for waking processor up during joint period
+	TimerInit(&sleepTimer, sleepTimerEvent);
+
+	// Initialize system
 	init_system();
-	//BoardInitMcu();
-	//Radio.Write(0x01, 0x01);
-	//Radio.Write(0x01, 0x00);
+
+	// Start system loop
 	while (1) {
-//		DelayMsMcu(5000);
-//		iHibernateExitFlag = 0;
-//
-//		rtc_UpdateAlarm();
-//		xint_uart_enable();
-//		enter_hibernation();
 		/*
 		 * Lucas (30-03-2024):
 		 * AU runs their measurements. The data is stored in tdr_data.
 		 * The stack uses this struct as data source when transmitting data.
 		 */
-//		xint_uart_disable();
-//		init_store();
-//		run_and_store_measurements(tdr_data, &index);
-//		uart_init();
-//		uint32_t delay_val = 1600; // 20ms
-//		while(--delay_val){};
-//		print_tdr_data_to_uart(tdr_data);
-//		uart_deinit();
-
-		// Specify the amount of desired uplinks before going to sleep.
-		desiredUplinks = 1;
+		init_store();
+		run_and_store_measurements(tdr_data, &index);
 
 		/*
 		 * Lucas (30-03-2024):
 		 * Run the LoRaMac stack.
 		 */
 		BoardInitMcu();
-
-		// Set interrup priorities. SPI must have highest prioriy!
-		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
-		NVIC_SetPriority(SPI0_EVT_IRQn, 1);
-		NVIC_SetPriority(RTC1_EVT_IRQn, 2);
-		NVIC_SetPriority(RTC0_EVT_IRQn, 2);
 
 		// Initialize transmission perhiodicity variable
 		TxPeriodicity = APP_TX_DUTYCYCLE
@@ -295,14 +296,7 @@ int main(void) {
 		// Reset number of uplinks for this power cycle.
 		uplinksSent = 0;
 
-		//StartTxProcess(LORAMAC_HANDLER_TX_ON_TIMER);
-
-		do  { //iterations < desiredUplinks+1
-			// DEBUG start
-			if (LmHandlerJoinStatus() == LORAMAC_HANDLER_SET) {
-				tester = 1;
-			}
-			// DEBUG end
+		do  {
 
 			// Processes the LoRaMac events
 			LmHandlerProcess();
@@ -321,26 +315,25 @@ int main(void) {
 			 */
 			if (IsMacProcessPending == 1) {
 				IsMacProcessPending = 0;
-			}
-			else if ((LmHandlerIsBusy() == false))
-			{
-				if(uplinksSent < desiredUplinks) {
+			} else if ((LmHandlerIsBusy() == false)) {
+				if (uplinksSent < desiredUplinks) {
 					CRITICAL_SECTION_END( );
 					PrepareTxFrame();
-				}
-				else {
+				} else {
 					CRITICAL_SECTION_END( );
 					break;
 				}
 			}
 			CRITICAL_SECTION_END( );
-		}while(1);
+
+		} while(1);
 
 		// Deinitialize Loramac
 		LmHandlerDeInit();
 
 		// Set radio to sleep
-		Radio.Write(0x01, 0x00);
+		//Radio.Write(0x01, 0x00);
+		Radio.Sleep();
 
 		// Reset Sleep Flag
 		iHibernateExitFlag = 0;
@@ -408,6 +401,7 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 
 	return false;
 }
+
 
 static void OnMacProcessNotify( void )
 {

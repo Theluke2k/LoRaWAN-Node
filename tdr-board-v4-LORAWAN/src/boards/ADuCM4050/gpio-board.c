@@ -47,6 +47,9 @@ ADI_GPIO_PORT port1 = ADI_GPIO_PORT1;
 ADI_GPIO_PORT port2 = ADI_GPIO_PORT2;
 ADI_GPIO_PORT port3 = ADI_GPIO_PORT3;
 
+// Sleep flag
+extern iHibernateExitFlag;
+
 /*
  * Lucas (12-11-23):
  * To know which callbacks to use when different pins trigger an interrupt,
@@ -270,6 +273,11 @@ void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t
 		if (array[32 + triggerPin] != NULL) {
 			array[32 + triggerPin](NULL);
 		}
+	}
+
+	// Exit sleep mode if we are sleeping.
+	if (iHibernateExitFlag == 0) {
+		iHibernateExitFlag = 1;
 	}
 }
 void GpioMcuSetInterrupt( Gpio_t *obj, IrqModes irqMode, IrqPriorities irqPriority, GpioIrqHandler *irqHandler )
