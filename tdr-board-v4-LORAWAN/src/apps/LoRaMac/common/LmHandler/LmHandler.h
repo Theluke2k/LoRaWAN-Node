@@ -230,6 +230,12 @@ typedef struct LmHandlerCallbacks_s
 LmHandlerErrorStatus_t LmHandlerInit( LmHandlerCallbacks_t *callbacks,
                                       LmHandlerParams_t *handlerParams );
 
+/*
+ * Lucas (30-03-2024):
+ * Added to be able to deinitialize the stack properly
+ */
+LmHandlerErrorStatus_t LmHandlerDeInit(void);
+
 /*!
  * Indicates if the LoRaMacHandler is busy
  * 

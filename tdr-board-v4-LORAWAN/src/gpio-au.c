@@ -12,7 +12,7 @@
 #include "gpio.h"
 #include "board-config.h"
 #include "gpio-board.h"
-//#include "gpio-board.c"
+
 /*
  * Renamed macros for the MUXes for GPIO pins. In ADuCM4050 this is how you select the special function of the GPIO pin (f.e. pin X may be a simple GPIO,
  * clock for I2C or MOSI for SPI - you can select this with pinMuxing). This is nicely described in the reference manual of the uC.
@@ -32,11 +32,10 @@
 #define I2C0_SDA0_PORTP0_MUX  ((uint16_t) ((uint16_t) 1<<10))
 
 // SPI
-#define SPI0_CLK_PORTP0_MUX   	((uint16_t) ((uint16_t) 1<<0)) // 0000000000000001
-#define SPI0_MOSI_PORTP0_MUX  	((uint16_t) ((uint16_t) 1<<2)) // 0000000000000100
-#define SPI0_MISO_PORTP0_MUX  	((uint16_t) ((uint16_t) 1<<4)) // 0000000000010000
-#define SPI0_CS_PORT0_MUX		((uint16_t) ((uint16_t) 1<<6)) // 0000000001000000
-															//    0000000001010101
+#define SPI0_CLK_PORTP0_MUX   	((uint16_t) ((uint16_t) 1<<0))
+#define SPI0_MOSI_PORTP0_MUX  	((uint16_t) ((uint16_t) 1<<2))
+#define SPI0_MISO_PORTP0_MUX  	((uint16_t) ((uint16_t) 1<<4))
+#define SPI0_CS_PORT0_MUX		((uint16_t) ((uint16_t) 1<<6))
 
 // UART0
 #define UART0_TX_PORTP0_MUX  ((uint32_t) ((uint32_t) 0x1 << 20))
@@ -130,25 +129,22 @@ void digital_pin_init()
     *((volatile uint32_t *)REG_GPIO1_CFG) |= UART1_TX_PORTP2_MUX;
     *((volatile uint32_t *)REG_GPIO2_CFG) |= UART1_RX_PORTP3_MUX;
 
+
+    /*
+	 * Lucas (23/03/2024):
+	 * Removed for merge
+	 */
     // LORA/SPI
-    //*((volatile uint32_t *)REG_GPIO0_CFG) |= SPI0_CLK_PORTP0_MUX | SPI0_MOSI_PORTP0_MUX | SPI0_MISO_PORTP0_MUX | SPI0_CS_PORT0_MUX;
-    //*((volatile uint32_t *)REG_GPIO0_CFG) |= SPI0_CLK_PORTP0_MUX | SPI0_MISO_PORTP0_MUX | SPI0_CS_PORT0_MUX;
-/*
-    if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(LORA_RST_PORT, LORA_RST_PIN, true)))
-	{
-		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
-	}
-	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_InputEnable(LORA_DIO0_PORT, LORA_DIO0_PIN, true)))
-	{
-		DEBUG_MESSAGE("adi_gpio_InputEnable failed\n");
-	}*/
-
-    GpioInit(&SX1276.Spi.Mosi, RADIO_MOSI, PIN_ALTERNATE_FCT, PIN_PUSH_PULL, PIN_NO_PULL, GPIO_MUL1);
-    GpioInit(&SX1276.Spi.Miso, RADIO_MISO, PIN_ALTERNATE_FCT, PIN_PUSH_PULL, PIN_NO_PULL, GPIO_MUL1);
-    GpioInit(&SX1276.Spi.Sclk, RADIO_SCLK, PIN_ALTERNATE_FCT, PIN_PUSH_PULL, PIN_NO_PULL, GPIO_MUL1);
-    GpioInit(&SX1276.Spi.Nss, RADIO_NSS, PIN_ALTERNATE_FCT, PIN_PUSH_PULL, PIN_NO_PULL, GPIO_MUL1);
-
-    GpioInit( &SX1276.DIO0, RADIO_DIO_0, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_UP, 0 );
+//    *((volatile uint32_t *)REG_GPIO0_CFG) |= SPI0_CLK_PORTP0_MUX | SPI0_MOSI_PORTP0_MUX | SPI0_MISO_PORTP0_MUX | SPI0_CS_PORT0_MUX;
+//
+//    if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(LORA_RST_PORT, LORA_RST_PIN, true)))
+//	{
+//		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
+//	}
+//	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_InputEnable(LORA_DIO0_PORT, LORA_DIO0_PIN, true)))
+//	{
+//		DEBUG_MESSAGE("adi_gpio_InputEnable failed\n");
+//	}
 
 	//Initial states
 	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
@@ -165,8 +161,11 @@ void digital_pin_init()
 	adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN);
 
 
-	//adi_gpio_SetHigh(LORA_RST_PORT, LORA_RST_PIN);
-	GpioInit(&SX1276.Reset, RADIO_RESET, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1);
+	/*
+	 * Lucas (23/03/2024):
+	 * Removed for merge
+	 */
+//	adi_gpio_SetHigh(LORA_RST_PORT, LORA_RST_PIN);
 
 }
 
@@ -188,7 +187,6 @@ void i2c_pin_init()
 void gpio_init()
 {
 	ADI_GPIO_RESULT gpioStatus = ADI_GPIO_SUCCESS;
-
 	gpioStatus = adi_gpio_Init(gpioMemory, ADI_GPIO_MEMORY_SIZE);
 	DEBUG_RESULT("GPIO init failed", gpioStatus, ADI_GPIO_SUCCESS);
     digital_pin_init();

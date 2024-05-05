@@ -7,9 +7,9 @@
 
 #include "tdr.h"
 
-#include "adc-au.h"
 #include "general_functions.h"
 #include "gpio-au.h"
+#include "adc-au.h"
 #include "tdr-board-v4_config.h"
 
 /*

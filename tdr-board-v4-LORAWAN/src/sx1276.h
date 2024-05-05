@@ -69,7 +69,6 @@ int8_t lora_read();
 int8_t lora_waitACK(char* ackMsg, uint16_t timeOutDelay);
 
 uint8_t fsk_initialize();
-void fsk_send_frame(uint8_t address, uint8_t* data, uint8_t packet_length,
-		uint8_t request_ack, uint8_t send_ack);
+void fsk_send_frame(uint8_t address, uint8_t* data, uint8_t packet_length, uint8_t request_ack, uint8_t send_ack);
 
 #endif /* SX1276_H_ */
