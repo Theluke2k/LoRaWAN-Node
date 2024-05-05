@@ -92,7 +92,7 @@ static void           rtc1Callback (void *pCBParam, uint32_t Event, void *EventA
 static uint32_t RtcTimerContext = 0;
 
 // Sleep flag
-extern iHibernateExitFlag;
+extern volatile uint32_t iHibernateExitFlag;
 
 /*
  * Lucas:
@@ -100,10 +100,9 @@ extern iHibernateExitFlag;
  */
 static void rtc1Callback(void *pCBParam, uint32_t Event, void *EventArg)
 {
+	iHibernateExitFlag = 1;
 	TimerIrqHandler();
-	if(iHibernateExitFlag == 0) {
-		iHibernateExitFlag = 1;
-	}
+
 }
 
 /*

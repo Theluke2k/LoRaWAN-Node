@@ -57,7 +57,7 @@ uint8_t tester = 0; //
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                           	1000 // Currently unused
+#define APP_TX_DUTYCYCLE                           	1000 // Currently Unused
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -205,10 +205,6 @@ static volatile uint8_t IsTxFramePending = 0;
 
 static volatile uint32_t TxPeriodicity = 0;
 
-static void sleepTimerEvent( void* context ) {
-	//iHibernateExitFlag = 1;
-}
-
 /*
  * Lucas (25-02-2024)
  * TDR data struct definition. Holds information about all of the measurements done in the measurement phase.
@@ -216,37 +212,17 @@ static void sleepTimerEvent( void* context ) {
 struct tdr_data tdr_data[1];
 volatile uint32_t iHibernateExitFlag = 0;
 volatile uint8_t print_flag = 0;
+uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-static TimerEvent_t sleepTimer;
-
-/*
- * Lucas (05/05/2024):
- * User defined variables
- */
-// Specify the amount of desired uplinks before going to sleep.
-uint8_t desiredUplinks = 1;
-
-
 /*
  * Lucas (22-10-23):
  * Main program.
  */
 int main(void) {
  	uint16_t index = 0;
- 	// Set interrup priorities. SPI must have highest prioriy!
-	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
-	NVIC_SetPriority(SPI0_EVT_IRQn, 1);
-	NVIC_SetPriority(RTC1_EVT_IRQn, 2);
-	NVIC_SetPriority(RTC0_EVT_IRQn, 2);
-
-	// Timer used for waking processor up during joint period
-	TimerInit(&sleepTimer, sleepTimerEvent);
-
-	// Initialize system
 	init_system();
 
-	// Start system loop
 	while (1) {
 		/*
 		 * Lucas (30-03-2024):
@@ -256,11 +232,20 @@ int main(void) {
 		init_store();
 		run_and_store_measurements(tdr_data, &index);
 
+		// Specify the amount of desired uplinks before going to sleep.
+		desiredUplinks = 1;
+
 		/*
 		 * Lucas (30-03-2024):
 		 * Run the LoRaMac stack.
 		 */
 		BoardInitMcu();
+
+		// Set interrup priorities. SPI must have highest prioriy!
+		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
+		NVIC_SetPriority(SPI0_EVT_IRQn, 1);
+		NVIC_SetPriority(RTC1_EVT_IRQn, 2);
+		NVIC_SetPriority(RTC0_EVT_IRQn, 2);
 
 		// Initialize transmission perhiodicity variable
 		TxPeriodicity = APP_TX_DUTYCYCLE
@@ -296,8 +281,8 @@ int main(void) {
 		// Reset number of uplinks for this power cycle.
 		uplinksSent = 0;
 
-		do  {
 
+		do  {
 			// Processes the LoRaMac events
 			LmHandlerProcess();
 
@@ -314,26 +299,28 @@ int main(void) {
 			 * power cycle.
 			 */
 			if (IsMacProcessPending == 1) {
-				IsMacProcessPending = 0;
-			} else if ((LmHandlerIsBusy() == false)) {
-				if (uplinksSent < desiredUplinks) {
+				//IsMacProcessPending = 0;
+			}
+			else if ((LmHandlerIsBusy() == false))
+			{
+				if(uplinksSent < desiredUplinks) {
 					CRITICAL_SECTION_END( );
 					PrepareTxFrame();
-				} else {
+				}
+				else {
 					CRITICAL_SECTION_END( );
 					break;
 				}
 			}
 			CRITICAL_SECTION_END( );
-
-		} while(1);
+		}while(1);
 
 		// Deinitialize Loramac
 		LmHandlerDeInit();
 
 		// Set radio to sleep
-		//Radio.Write(0x01, 0x00);
-		Radio.Sleep();
+		Radio.Write(0x01, 0x00);
+		//Radio.Sleep();
 
 		// Reset Sleep Flag
 		iHibernateExitFlag = 0;
@@ -401,7 +388,6 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 
 	return false;
 }
-
 
 static void OnMacProcessNotify( void )
 {
@@ -527,24 +513,6 @@ static void PrepareTxFrame( void )
         return;
     }
 
-    // DEBUG start (fill some test data to send)
-    /*
-    tdr_data[0].int1_integer = 1;
-	tdr_data[0].int1_decimal = 2;
-	tdr_data[0].int2_integer = 3;
-	tdr_data[0].int2_decimal = 4;
-	tdr_data[0].th1_temp = 5;
-	tdr_data[0].th2_temp = 6;
-	tdr_data[0].th3_temp = 7;
-	tdr_data[0].th4_temp = 8;
-	tdr_data[0].honey_rh_integer = 9;
-	tdr_data[0].honey_rh_decimal = 10;
-	tdr_data[0].honey_temp_integer = 11;
-	tdr_data[0].honey_temp_decimal = 12;
-	*/
-    // DEBUG end
-
-
     // Specify the port on which to send
     AppData.Port = LORAWAN_APP_PORT;
 
@@ -563,40 +531,7 @@ static void PrepareTxFrame( void )
     }
 }
 
-static void StartTxProcess( LmHandlerTxEvents_t txEvent )
-{
-    switch( txEvent )
-    {
-    default:
-        // Intentional fall through
-    case LORAMAC_HANDLER_TX_ON_TIMER:
-        {
-            // Schedule 1st packet transmission
-            TimerInit( &TxTimer, OnTxTimerEvent );
-            TimerSetValue( &TxTimer, TxPeriodicity );
-            OnTxTimerEvent( NULL );
-        }
-        break;
-    case LORAMAC_HANDLER_TX_ON_EVENT:
-        {
-        }
-        break;
-    }
-}
 
-static void UplinkProcess( void )
-{
-    uint8_t isPending = 0;
-    CRITICAL_SECTION_BEGIN( );
-    isPending = IsTxFramePending;
-    IsTxFramePending = 0;
-    CRITICAL_SECTION_END( );
-
-    if( isPending == 1 )
-    {
-        PrepareTxFrame( );
-    }
-}
 
 static void OnTxPeriodicityChanged( uint32_t periodicity )
 {

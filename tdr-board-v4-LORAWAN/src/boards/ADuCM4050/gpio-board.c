@@ -48,7 +48,7 @@ ADI_GPIO_PORT port2 = ADI_GPIO_PORT2;
 ADI_GPIO_PORT port3 = ADI_GPIO_PORT3;
 
 // Sleep flag
-extern iHibernateExitFlag;
+extern volatile uint32_t iHibernateExitFlag;
 
 /*
  * Lucas (12-11-23):
@@ -247,6 +247,8 @@ void GpioMcuSetContext( Gpio_t *obj, void* context )
  */
 void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t Pins
 {
+	// Exit sleep mode if we are sleeping.
+	iHibernateExitFlag = 1;
 	/* Lucas (12-11-23):
 	 * Loop for checking the interrupt status of all ports.
 	 */
@@ -275,10 +277,7 @@ void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t
 		}
 	}
 
-	// Exit sleep mode if we are sleeping.
-	if (iHibernateExitFlag == 0) {
-		iHibernateExitFlag = 1;
-	}
+
 }
 void GpioMcuSetInterrupt( Gpio_t *obj, IrqModes irqMode, IrqPriorities irqPriority, GpioIrqHandler *irqHandler )
  {
