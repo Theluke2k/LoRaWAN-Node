@@ -111,7 +111,11 @@ void BoardInitMcu( void )
 {
 	if( McuInitialized == false )
 	{
-		SystemClockConfig();
+		/*
+		 * Lucas (23/03/2024):
+		 * Removed for merge
+		 */
+		//SystemClockConfig();
 
 		/*
 		 * Lucas:
@@ -125,9 +129,9 @@ void BoardInitMcu( void )
 		 * Lucas:
 		 * Initialize Gpio pins
 		 */
-		ADI_GPIO_RESULT gpioStatus = ADI_GPIO_SUCCESS;
-		gpioStatus = adi_gpio_Init(gpioMemory, ADI_GPIO_MEMORY_SIZE);
-		DEBUG_RESULT("GPIO init failed", gpioStatus, ADI_GPIO_SUCCESS);
+//		ADI_GPIO_RESULT gpioStatus = ADI_GPIO_SUCCESS;
+//		gpioStatus = adi_gpio_Init(gpioMemory, ADI_GPIO_MEMORY_SIZE);
+//		DEBUG_RESULT("GPIO init failed", gpioStatus, ADI_GPIO_SUCCESS);
 
 		RtcInit();
 	}

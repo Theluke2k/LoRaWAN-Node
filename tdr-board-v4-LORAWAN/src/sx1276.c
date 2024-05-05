@@ -6,11 +6,11 @@
  */
 
 #include "sx1276.h"
-
-#include "gpio-au.h"
-#include "sx1276_registers.h"
-#include "shared.h"
 #include "spi-au.h"
+#include "sx1276_registers.h"
+#include "gpio-au.h"
+#include "shared.h"
+
 
 uint16_t _packetIndex;
 
@@ -23,7 +23,6 @@ void lora_reset() {
     delay(10);
     adi_gpio_SetHigh(LORA_RST_PORT, LORA_RST_PIN);
     delay(10);
-    adi_gpio_SetHigh(LORA_DIO0_PORT, LORA_DIO0_PIN);
 }
 
 /*
@@ -74,6 +73,7 @@ uint8_t lora_initialize() {
 
     /* Set the module in LoRa and standby mode */
     spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+    spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
 
     return 0;
 }
@@ -122,13 +122,18 @@ uint8_t lora_send_frame(uint8_t* data, uint8_t packet_length) {
         spi_read_byte(REG_IRQ_FLAGS, &txDone);
     }
 
-    /* Clear IRQ's */
-    spi_write_byte(REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
+	/* Clear IRQ's */
+	spi_write_byte(REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
+
+	/* Set the module in sleep mode */
+	spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
+	/* WARNING !!!
+	 * If you put the LoRa module in sleep mode, you need to call the initialize function before use it again */
 
     return 0;
 }
 
-
+/* Check if a packet was received */
 uint16_t lora_parse_packet() {
     uint8_t packetLength = 0;
     uint8_t irqFlags;
@@ -166,7 +171,7 @@ uint16_t lora_parse_packet() {
     return packetLength;
 }
 
-
+/* Check if there is available bytes in the FIFO */
 int8_t lora_available() {
     uint8_t byte;
     spi_read_byte(REG_RX_NB_BYTES, &byte);
@@ -174,7 +179,7 @@ int8_t lora_available() {
     return nbBytes;
 }
 
-
+/* Read the next byte into the FIFO, and increment the FIFO pointer */
 int8_t lora_read() {
     if (!lora_available()) {
         return -1;
@@ -187,7 +192,7 @@ int8_t lora_read() {
     return regFifo;
 }
 
-
+/* Check if an acknowledge was received */
 int8_t lora_waitACK(char* ackMsg, uint16_t timeOutDelay) {
     char rxBuffer[128] = {0};
     uint8_t packetSize = 0;

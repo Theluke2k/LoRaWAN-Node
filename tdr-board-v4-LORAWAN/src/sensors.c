@@ -11,9 +11,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "adc-au.h"
 #include "gpio-au.h"
 #include "i2c-au.h"
+#include "adc-au.h"
 
 /*
  * Array of ratios (R_measured/R_nominal(25))*1000 from the thermistor datasheet. Refer to the datasheet of the thermistor (Vishay
