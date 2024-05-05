@@ -77,7 +77,7 @@ uint8_t tester = 0; //
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_3 // DEBUG (default: DR0)
+#define LORAWAN_DEFAULT_DATARATE                    DR_0 // DEBUG (default: DR0)
 
 /*!
  * LoRaWAN confirmed messages
