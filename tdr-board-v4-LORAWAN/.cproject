@@ -6,8 +6,11 @@
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/tdr-board-v4"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/tdr-board-v4-LORAWAN"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/tdr-board-v4/Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/tdr-board-v4-LORAWAN/Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="tdr-board-v4" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="tdr-board-v4-LORAWAN" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>

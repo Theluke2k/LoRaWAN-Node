@@ -5,8 +5,9 @@
  *      Author: au703540
  */
 #include "flash.h"
-#include <adi_flash.h>
 #include "uart-au.h"
+#include <adi_flash.h>
+
 
 
 /**

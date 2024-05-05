@@ -12,18 +12,20 @@
 
 #include "general_functions.h"
 
-#include "adc-au.h"
-#include "gpio-au.h"
-#include "i2c-au.h"
 #include "tdr.h"
 #include "rtc.h"
 #include "sensors.h"
+#include "gpio-au.h"
+#include "spi-au.h"
+#include "adc-au.h"
 #include "xint.h"
+#include "uart-au.h"
+#include "i2c-au.h"
 #include "sx1276.h"
 #include "shared.h"
-#include "spi-au.h"
+
 #include "tdr-board-v4_config.h"
-#include "uart-au.h"
+
 
 
 /**
@@ -37,7 +39,7 @@
 
 void init_system()
 {
-    adi_pwr_Init();
+	adi_pwr_Init();
 	adi_pwr_SetHPBuckLoadMode(ADI_PWR_HPBUCK_LD_MODE_LOW);
 
 	ADI_CLOCK_SOURCE_STATUS clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
@@ -47,12 +49,10 @@ void init_system()
 		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFXTAL, &clock_status);
 	};
 
-
 	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFXTAL);
 
 	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK,1);
 	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK,1);
-
 
 	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_LFXTAL, true);
 
@@ -65,6 +65,32 @@ void init_system()
 	adi_pwr_SetLFClockMux(ADI_CLOCK_MUX_LFCLK_LFXTAL);
 
 	adi_pwr_UpdateCoreClock();
+
+	// Custom init for tests
+//	adi_pwr_Init();
+//	adi_pwr_SetHPBuckLoadMode(ADI_PWR_HPBUCK_LD_MODE_LOW);
+//
+//	ADI_CLOCK_SOURCE_STATUS clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
+//	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_HFOSC, true);
+//	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
+//		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFOSC, &clock_status);
+//	}
+//
+//	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_LFXTAL, true);
+//
+//	clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
+//	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
+//		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_LFXTAL, &clock_status);
+//	};
+//
+////	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK,1);
+////	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK,1);
+//
+//	adi_pwr_SetLFClockMux(ADI_CLOCK_MUX_LFCLK_LFXTAL);
+//	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFOSC);
+//
+//	// Update Core Clock
+//	adi_pwr_UpdateCoreClock();
 
 /*
  * Following if we know the offset of the RTC oscillator, we can trim it if necessary
@@ -82,20 +108,26 @@ void init_system()
 //		return(eResult);
 //	}
 
-    uart_init();
 
-    xint_init();
+    //uart_init();
+
+    //xint_init();
 
 	gpio_init();
 
-	adc_init(false); // TODO: calibration stuck. Check later.
+	//adc_init(false); // TODO: calibration stuck. Check later.
 
-    i2c_init();
+    //i2c_init();
 
     rtc_Init();
 
-    spi_init();
-	lora_initialize();
+    /*
+     * Lucas (23/03/2024):
+     * Removed for merge
+     */
+
+    //spi_init();
+	//lora_initialize();
 
 }
 
@@ -147,9 +179,14 @@ void init_store()
     gpio_init();
     adc_init(false);
     i2c_init();
-    rtc_Init();
-    spi_init();
-    lora_initialize();
+
+    /*
+     * Lucas (23/03/2024):
+     * REMOVED FOR MERGE
+     */
+    //rtc_Init();
+    //spi_init();
+    //lora_initialize();
 
 }
 
@@ -172,17 +209,17 @@ void print_tdr_data_to_uart(struct tdr_data tdr_data[])
 			msg_length = sprintf(buffer, "TDR %d: INT1: %u.%02u INT2: %u.%02u || THERM 1: %d | 2: %d | 3: %d | 4: %d|| HONEY: RH::%u.%u TEMP::%u.%u\r\n",
 				i,
 				tdr_data[i].int1_integer,
-				tdr_data[i].int1_decimal,
+				//tdr_data[i].int1_decimal,
 				tdr_data[i].int2_integer,
-				tdr_data[i].int2_decimal,
+				//tdr_data[i].int2_decimal,
 				tdr_data[i].th1_temp,
 				tdr_data[i].th2_temp,
 				tdr_data[i].th3_temp,
 				tdr_data[i].th4_temp,
 				tdr_data[i].honey_rh_integer,
-				tdr_data[i].honey_rh_decimal,
-				tdr_data[i].honey_temp_integer,
-				tdr_data[i].honey_temp_decimal
+				//tdr_data[i].honey_rh_decimal,
+				tdr_data[i].honey_temp_integer
+				//tdr_data[i].honey_temp_decimal
 				);
 				uart_write(buffer, msg_length);
 		}
@@ -199,14 +236,14 @@ void print_tdr_data_to_uart(struct tdr_data tdr_data[])
  */
 uint8_t enter_hibernation()
 {
-	/*
+
 	ADI_PWR_RESULT eResult;
 	if((eResult = adi_pwr_EnterLowPowerMode(ADI_PWR_MODE_HIBERNATE, &iHibernateExitFlag, 0)) != ADI_PWR_SUCCESS)
 	{
 		DEBUG_RESULT("Error during entering hibernation", eResult, ADI_PWR_SUCCESS);
 		return 1;
 	}
-	*/
+
 	return 0;
 
 }
@@ -231,17 +268,17 @@ void send_data_package(struct tdr_data integrator_vals_memory[], uint32_t num_ms
 	uint8_t packet_length = sprintf(buffer, "[%d]{$%3u.%02u/%3u.%02u$%2d/%2d/%2d/%2d$%2u.%2u/%2u.%2u} -> Package %d",
 					packageCount,
 					integrator_vals_memory[0].int1_integer,
-					integrator_vals_memory[0].int1_decimal,
+					//integrator_vals_memory[0].int1_decimal,
 					integrator_vals_memory[0].int2_integer,
-					integrator_vals_memory[0].int2_decimal,
+					//integrator_vals_memory[0].int2_decimal,
 					integrator_vals_memory[0].th1_temp,
 					integrator_vals_memory[0].th2_temp,
 					integrator_vals_memory[0].th3_temp,
 					integrator_vals_memory[0].th4_temp,
 					integrator_vals_memory[0].honey_rh_integer,
-					integrator_vals_memory[0].honey_rh_decimal,
+					//integrator_vals_memory[0].honey_rh_decimal,
 					integrator_vals_memory[0].honey_temp_integer,
-					integrator_vals_memory[0].honey_temp_decimal,
+					//integrator_vals_memory[0].honey_temp_decimal,
 					packageNumber
 					);
 
@@ -307,11 +344,11 @@ void run_and_store_measurements(struct tdr_data* tdr_data, uint16_t* index)
 
 	holder = fitting_function_int1(integrators_avg[0]);
 	tdr_data[*index].int1_integer = (uint16_t)holder;
-	tdr_data[*index].int1_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
+	//tdr_data[*index].int1_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
 
 	holder = fitting_function_int1(integrators_avg[1]);
 	tdr_data[*index].int2_integer = (uint16_t)holder;
-	tdr_data[*index].int2_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
+	//tdr_data[*index].int2_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
 
 	therm_read_temp(&thermistor_reading, THERMISTOR1);
 	tdr_data[*index].th1_temp = (int8_t)thermistor_reading;
@@ -333,11 +370,11 @@ void run_and_store_measurements(struct tdr_data* tdr_data, uint16_t* index)
 
 	holder = get_honeywell_rh(honeywell_data[0]);
 	tdr_data[*index].honey_rh_integer = (uint8_t)holder;
-	tdr_data[*index].honey_rh_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
+	//tdr_data[*index].honey_rh_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
 
 	holder = get_honeywell_temp(honeywell_data[1]);
 	tdr_data[*index].honey_temp_integer = (uint8_t)holder;
-	tdr_data[*index].honey_temp_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
+	//tdr_data[*index].honey_temp_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
 
 
 	if(++(*index) == TDR_MEMORY_SIZE)

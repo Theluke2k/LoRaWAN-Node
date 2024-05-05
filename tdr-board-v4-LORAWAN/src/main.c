@@ -34,7 +34,7 @@
 #include "spi-au.h"
 
 // DEBUG
-uint8_t tester = 0;
+uint8_t tester = 0; //
 
 #define ACTIVE_REGION LORAMAC_REGION_EU868
 
@@ -57,7 +57,7 @@ uint8_t tester = 0;
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            8000 // minimum 4
+#define APP_TX_DUTYCYCLE                           	1000 // minimum 4
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -66,7 +66,7 @@ uint8_t tester = 0;
 #define APP_TX_DUTYCYCLE_RND                        0
 
 /*!
- * LoRaWAN Adaptive Data Rate (Skal den være til eller fra?)
+ * LoRaWAN Adaptive Data Rate (Skal den vÃ¦re til eller fra?)
  *
  * \remark Please note that when ADR is enabled the end-device should be static
  */
@@ -97,7 +97,7 @@ uint8_t tester = 0;
 #define LORAWAN_DUTYCYCLE_ON                        true
 
 /*!
- * LoRaWAN application port (Hvad skal denne sættes til?)
+ * LoRaWAN application port
  * @remark The allowed port range is from 1 up to 223. Other values are reserved.
  */
 #define LORAWAN_APP_PORT                            2
@@ -210,72 +210,146 @@ static volatile uint32_t TxPeriodicity = 0;
  * TDR data struct definition. Holds information about all of the measurements done in the measurement phase.
  */
 struct tdr_data tdr_data[1];
-
+volatile uint32_t iHibernateExitFlag = 0;
+volatile uint8_t print_flag = 0;
+uint8_t desiredUplinks = 0;
+uint8_t uplinksSent = 0;
+uint8_t initialized = 0;
 /*
  * Lucas (22-10-23):
  * Main program.
  */
 int main(void) {
-	BoardInitMcu( );
-
-	// Set interrup priorities. SPI must have highest prioriy!
-	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
-	NVIC_SetPriority(SPI0_EVT_IRQn, 1);
-	NVIC_SetPriority(RTC1_EVT_IRQn, 2);
-
-	// Initialize transmission perhiodicity variable
-	TxPeriodicity = APP_TX_DUTYCYCLE
-			+ randr(-APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND);
-
-	const Version_t appVersion = { .Value = FIRMWARE_VERSION };
-	const Version_t gitHubVersion = { .Value = GITHUB_VERSION };
-
-	DisplayAppInfo("periodic-uplink-lpp", &appVersion, &gitHubVersion);
-
-	if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
-		printf("LoRaMac wasn't properly initialized\n");
-		// Fatal error, endless loop.
-		while (1)
-		{
-		}
-	}
-
-	// Set system maximum tolerated rx error in milliseconds
-	LmHandlerSetSystemMaxRxError( 20 );
-
-	// The LoRa-Alliance Compliance protocol package should always be
-	// initialized and activated.
-	LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams );
-
-	//printf("Joining...\n");
-	LmHandlerJoin( );
-
-	StartTxProcess( LORAMAC_HANDLER_TX_ON_TIMER );
-
+ 	uint16_t index = 0;
+	init_system();
+	//BoardInitMcu();
+	//Radio.Write(0x01, 0x01);
+	//Radio.Write(0x01, 0x00);
 	while (1) {
-		// DEBUG start
-		if( LmHandlerJoinStatus( ) == LORAMAC_HANDLER_SET ) {
-			tester = 1;
-		}
-		// DEBUG end
+//		DelayMsMcu(5000);
+//		iHibernateExitFlag = 0;
+//
+//		rtc_UpdateAlarm();
+//		xint_uart_enable();
+//		enter_hibernation();
+		/*
+		 * Lucas (30-03-2024):
+		 * AU runs their measurements. The data is stored in tdr_data.
+		 * The stack uses this struct as data source when transmitting data.
+		 */
+//		xint_uart_disable();
+//		init_store();
+//		run_and_store_measurements(tdr_data, &index);
+//		uart_init();
+//		uint32_t delay_val = 1600; // 20ms
+//		while(--delay_val){};
+//		print_tdr_data_to_uart(tdr_data);
+//		uart_deinit();
 
-		// Processes the LoRaMac events
-		LmHandlerProcess();
+		// Specify the amount of desired uplinks before going to sleep.
+		desiredUplinks = 1;
 
-		// Process application uplinks management
-		UplinkProcess();
+		/*
+		 * Lucas (30-03-2024):
+		 * Run the LoRaMac stack.
+		 */
+		BoardInitMcu();
 
-		CRITICAL_SECTION_BEGIN( );
-		if (IsMacProcessPending == 1) {
-			// Clear flag and prevent MCU to go into low power modes.
-			IsMacProcessPending = 0;
+		// Set interrup priorities. SPI must have highest prioriy!
+		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
+		NVIC_SetPriority(SPI0_EVT_IRQn, 1);
+		NVIC_SetPriority(RTC1_EVT_IRQn, 2);
+		NVIC_SetPriority(RTC0_EVT_IRQn, 2);
+
+		// Initialize transmission perhiodicity variable
+		TxPeriodicity = APP_TX_DUTYCYCLE
+				+ randr(-APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND);
+
+		const Version_t appVersion = { .Value = FIRMWARE_VERSION };
+		const Version_t gitHubVersion = { .Value = GITHUB_VERSION };
+
+		DisplayAppInfo("periodic-uplink-lpp", &appVersion, &gitHubVersion);
+
+		if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
+			printf("LoRaMac wasn't properly initialized\n");
+			// Fatal error, endless loop.
+			while (1) {
+			}
 		}
-		else
-		{
-			// The MCU wakes up through events
-			//BoardLowPowerHandler();
+
+		// Only execute on board life start
+		if(!initialized) {
+			// Set system maximum tolerated rx error in milliseconds
+			LmHandlerSetSystemMaxRxError(20);
+
+			// The LoRa-Alliance Compliance protocol package should always be initialized and activated.
+			LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
+
+			// The join process can be made here but it does not need to run. The state machine handles it.
+			LmHandlerJoin(); // DEBUG: should be deleted when eeprom is implemented
+
+			// Mark the program as initiated.
+			initialized = 1;
 		}
-		CRITICAL_SECTION_END( );
+
+		// Reset number of uplinks for this power cycle.
+		uplinksSent = 0;
+
+		//StartTxProcess(LORAMAC_HANDLER_TX_ON_TIMER);
+
+		do  { //iterations < desiredUplinks+1
+			// DEBUG start
+			if (LmHandlerJoinStatus() == LORAMAC_HANDLER_SET) {
+				tester = 1;
+			}
+			// DEBUG end
+
+			// Processes the LoRaMac events
+			LmHandlerProcess();
+
+			CRITICAL_SECTION_BEGIN( );
+
+			/*
+			 * Lucas (28-04-2024):
+			 * The following first checks if there is a MAC process pending. If there is
+			 * the flag is cleared and the board does not send another frame or goes to sleep,
+			 * allowing the state machine to run one more time to processes the MAC layer. If
+			 * There is no MAC process pending, it checks if the LmHandler is busy. If it is not busy
+			 * then we check if we have sent all of our frames. If we have not, we send the next frame.
+			 * If we have sent all frames, the loop breaks and the board goes to sleep, until the next
+			 * power cycle.
+			 */
+			if (IsMacProcessPending == 1) {
+				IsMacProcessPending = 0;
+			}
+			else if ((LmHandlerIsBusy() == false))
+			{
+				if(uplinksSent < desiredUplinks) {
+					CRITICAL_SECTION_END( );
+					PrepareTxFrame();
+				}
+				else {
+					CRITICAL_SECTION_END( );
+					break;
+				}
+			}
+			CRITICAL_SECTION_END( );
+		}while(1);
+
+		// Deinitialize Loramac
+		LmHandlerDeInit();
+
+		// Set radio to sleep
+		Radio.Write(0x01, 0x00);
+
+		// Reset Sleep Flag
+		iHibernateExitFlag = 0;
+
+		// Set Wakeup Alarm
+		rtc_UpdateAlarm();
+
+		// Enter Hibernate Mode
+		enter_hibernation();
 	}
 
 	return 0;
@@ -313,17 +387,16 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 	else if(strncmp(receiveBuffer, "{\"config\":{\"adr\":\"", 18) == 0) {
 		bool setADR = 0;
 		if(sscanf(receiveBuffer, "{\"config\":{\"adr\":\"%d", &setADR) == 1) {
-			// Execute handler for command
-			LmHandlerParams.AdrEnable = setADR;
+			if(LmHandlerParams.AdrEnable != setADR) {
+				// Execute handler for command
+				LmHandlerParams.AdrEnable = setADR;
 
-			if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
-				printf("LoRaMac wasn't properly initialized\n");
-				// Fatal error, endless loop.
-				while (1)
-				{
+				if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
+					printf("LoRaMac wasn't properly initialized\n");
+					// Fatal error, endless loop.
+					while (1) {}
 				}
 			}
-
 			printf("setadr: %d\n", setADR);
 			return true;
 		}
@@ -460,8 +533,8 @@ static void PrepareTxFrame( void )
         return;
     }
 
-
     // DEBUG start (fill some test data to send)
+    /*
     tdr_data[0].int1_integer = 1;
 	tdr_data[0].int1_decimal = 2;
 	tdr_data[0].int2_integer = 3;
@@ -474,52 +547,26 @@ static void PrepareTxFrame( void )
 	tdr_data[0].honey_rh_decimal = 10;
 	tdr_data[0].honey_temp_integer = 11;
 	tdr_data[0].honey_temp_decimal = 12;
-
+	*/
     // DEBUG end
 
 
     // Specify the port on which to send
     AppData.Port = LORAWAN_APP_PORT;
 
-    // Buffer to convert the numbers to char
-    char buffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE]={0};
-
-    // Current package count, if we send more than one package at a time.
-    int packageCount = 0;
-
-    // Increment total package number
-    packageNumber++;
-
-    uint8_t packet_length = snprintf(buffer, LORAWAN_APP_DATA_BUFFER_MAX_SIZE, "[%d]{$%3u.%02u/%3u.%02u$%2d/%2d/%2d/%2d$%2u.%2u/%2u.%2u} -> Package %d",
-    						packageCount,
-							tdr_data[0].int1_integer,
-							tdr_data[0].int1_decimal,
-							tdr_data[0].int2_integer,
-							tdr_data[0].int2_decimal,
-							tdr_data[0].th1_temp,
-							tdr_data[0].th2_temp,
-							tdr_data[0].th3_temp,
-							tdr_data[0].th4_temp,
-							tdr_data[0].honey_rh_integer,
-							tdr_data[0].honey_rh_decimal,
-							tdr_data[0].honey_temp_integer,
-							tdr_data[0].honey_temp_decimal,
-							packageNumber
-    						);
+    uint8_t packet_length = sizeof(tdr_data);
 
     // Copy the contents of the tdr_data variable into the appdata buffer
-    memcpy1(AppData.Buffer, (const uint8_t*)buffer, packet_length);
+    memcpy1(AppData.Buffer, tdr_data, packet_length);
 
     // The size of the buffer should always be equal to the maximum size
     AppData.BufferSize = packet_length;
 
+    LmHandlerErrorStatus_t t = LmHandlerSend( &AppData, LmHandlerParams.IsTxConfirmed );
 
-    // Send package
-    if( LmHandlerSend( &AppData, LmHandlerParams.IsTxConfirmed ) == LORAMAC_HANDLER_SUCCESS )
-    {
+    if(t == LORAMAC_HANDLER_SUCCESS) {
+    	uplinksSent++;
     }
-
-
 }
 
 static void StartTxProcess( LmHandlerTxEvents_t txEvent )
@@ -594,14 +641,16 @@ static void OnTxTimerEvent( void* context )
 	}
 	PAJ("OnTxTimerEvent\n");
 	// DEBUG end
-    TimerStop( &TxTimer );
+	TimerStop(&TxTimer);
 
-    IsTxFramePending = 1;
+	IsTxFramePending = 1;
 
-    // Schedule next transmission
-    TimerSetValue( &TxTimer, TxPeriodicity );
-    TimerStart( &TxTimer );
+	// Schedule next transmission
+	TimerSetValue(&TxTimer, TxPeriodicity);
+	TimerStart(&TxTimer);
 }
+
+
 
 
 

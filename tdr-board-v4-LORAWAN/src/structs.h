@@ -18,17 +18,12 @@ uint16_t packageNumber;
 struct tdr_data{
     uint16_t int1_integer;
     uint16_t int2_integer;
-    uint8_t int1_decimal;
-    uint8_t int2_decimal;
     int8_t th1_temp; //-127 to 127
     int8_t th2_temp;
     int8_t th3_temp;
     int8_t th4_temp;
     uint8_t honey_rh_integer;
-    uint8_t honey_rh_decimal;
     int8_t honey_temp_integer; //-127 to 127 if we measure above 100 then it all will be dead anyway. The sensor, I mean.
-    uint8_t honey_temp_decimal;
 }; //14B
-
 
 #endif /* STRUCTS_H_ */

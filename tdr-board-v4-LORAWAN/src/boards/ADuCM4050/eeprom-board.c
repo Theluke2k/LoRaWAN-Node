@@ -23,16 +23,41 @@
 #include "utilities.h"
 #include "eeprom-board.h"
 
+
+/*
+ * Lucas (30-03-2024)
+ * This driver emulates Eeprom by just using the flash to save the variables.
+ * For this to work, it is assumed that the device is never turned off. In
+ * the worst case if it turns off, it will just have to rejoin the network again.
+ */
+#define EMULATED_EEPROM_SIZE			65536
+
+static uint8_t emulatedEepromStorage[EMULATED_EEPROM_SIZE] = {0};
+
+uint16_t s = 0;
+
 LmnStatus_t EepromMcuWriteBuffer( uint16_t addr, uint8_t *buffer, uint16_t size )
 {
-    LmnStatus_t status = LMN_STATUS_ERROR;
+	s += size;
+    if(addr + size <= EMULATED_EEPROM_SIZE) {
+    	memcpy1(&emulatedEepromStorage[addr], buffer, size);
+    	return LMN_STATUS_OK;
+    }
+    else {
+    	printf('damn\n');
+    }
 
-    return status;
+
+    return LMN_STATUS_ERROR;
 }
 
 LmnStatus_t EepromMcuReadBuffer( uint16_t addr, uint8_t *buffer, uint16_t size )
 {
-    return LMN_STATUS_ERROR;
+	if (addr + size <= EMULATED_EEPROM_SIZE) {
+		memcpy1(buffer, &emulatedEepromStorage[addr], size);
+		return LMN_STATUS_OK;
+	}
+	return LMN_STATUS_ERROR;
 }
 
 void EepromMcuSetDeviceAddr( uint8_t addr )
