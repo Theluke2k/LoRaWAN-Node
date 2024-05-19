@@ -35,6 +35,7 @@
 
 // DEBUG
 uint8_t tester = 0; //
+#define UINT32_MAX  4294967295U
 
 #define ACTIVE_REGION LORAMAC_REGION_EU868
 
@@ -125,6 +126,7 @@ static LmHandlerAppData_t AppData = { .Buffer = AppDataBuffer, .BufferSize = 0,
  * Timer to handle the application data transmission duty cycle
  */
 static TimerEvent_t TxTimer;
+static TimerEvent_t SleepTimer;
 
 static void OnMacProcessNotify(void);
 static void OnNvmDataChange(LmHandlerNvmContextStates_t state, uint16_t size);
@@ -151,10 +153,12 @@ static void OnTxPeriodicityChanged(uint32_t periodicity);
 static void OnTxFrameCtrlChanged(LmHandlerMsgTypes_t isTxConfirmed);
 static void OnPingSlotPeriodicityChanged(uint8_t pingSlotPeriodicity);
 
+
 /*!
  * Function executed on TxTimer event
  */
 static void OnTxTimerEvent(void* context);
+static void OnSleepTimerEvent(void* context);
 
 //Function pointers for loramac callbacks.
 static LmHandlerCallbacks_t LmHandlerCallbacks =
@@ -215,6 +219,16 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
+uint32_t sleepTime = 5000;
+//int32_t sleepTimeOffset = 0;
+int32_t sleepTimeOffset = 0;
+
+bool sleepTest = false;
+
+// Function definitions
+int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
+
+
 /*
  * Lucas (22-10-23):
  * Main program.
@@ -222,6 +236,8 @@ uint8_t initialized = 0;
 int main(void) {
  	uint16_t index = 0;
 	init_system();
+
+	TimerInit( &SleepTimer, OnSleepTimerEvent );
 
 	while (1) {
 		/*
@@ -272,7 +288,7 @@ int main(void) {
 			LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
 
 			// The join process can be made here but it does not need to run. The state machine handles it.
-			LmHandlerJoin(); // DEBUG: should be deleted when eeprom is implemented
+			//LmHandlerJoin(); // DEBUG: should be deleted when eeprom is implemented
 
 			// Mark the program as initiated.
 			initialized = 1;
@@ -285,6 +301,8 @@ int main(void) {
 		do  {
 			// Processes the LoRaMac events
 			LmHandlerProcess();
+
+
 
 			CRITICAL_SECTION_BEGIN( );
 
@@ -299,11 +317,11 @@ int main(void) {
 			 * power cycle.
 			 */
 			if (IsMacProcessPending == 1) {
-				//IsMacProcessPending = 0;
+				IsMacProcessPending = 0;
+				CRITICAL_SECTION_END( );
 			}
-			else if ((LmHandlerIsBusy() == false))
-			{
-				if(uplinksSent < desiredUplinks) {
+			else if ((LmHandlerIsBusy() == false)) {
+				if (uplinksSent < desiredUplinks) {
 					CRITICAL_SECTION_END( );
 					PrepareTxFrame();
 				}
@@ -312,8 +330,15 @@ int main(void) {
 					break;
 				}
 			}
-			CRITICAL_SECTION_END( );
+			else {
+				CRITICAL_SECTION_END( );
+			}
+
+
 		}while(1);
+
+		// Generate a random uint32_t using Radio.Random(). Map value to min -3000 and max 3000
+		sleepTimeOffset = getSleepTimeOffset(Radio.Random(), -3000, 3000);
 
 		// Deinitialize Loramac
 		LmHandlerDeInit();
@@ -325,14 +350,30 @@ int main(void) {
 		// Reset Sleep Flag
 		iHibernateExitFlag = 0;
 
+		// Calculate time offset of +- 3000 ms to avoid packet collisions
+		//sleepTimeOffset = randr(-3000, 3000);
+		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset);
+		TimerStart(&SleepTimer);
+
+
 		// Set Wakeup Alarm
-		rtc_UpdateAlarm();
+		//rtc_UpdateAlarm(sleepTime + randTimeOffset/1000.0);
 
 		// Enter Hibernate Mode
 		enter_hibernation();
 	}
 
 	return 0;
+}
+
+/*
+ * The function maps a randomly generated uint32_t to an integer between -3000 and +3000.
+ */
+int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX) {
+	// Normalize random value
+	float norm = (float)random_value / (float)UINT32_MAX;
+	int32_t offset = (int32_t)((norm * (MAX - MIN)) + MIN);
+	return offset;
 }
 
 /*
@@ -357,10 +398,11 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 		return true;
 	}
 	else if(strncmp(receiveBuffer, "Sleep", 5) == 0) {
-		int sleepTime = 0;
-		if(sscanf(receiveBuffer, "Sleep %d", &sleepTime) == 1) {
+		int time = 0;
+		if(sscanf(receiveBuffer, "Sleep %d", &time) == 1) {
 			// Execute handler for command
-			printf("deep sleep: %d\n", sleepTime);
+			printf("deep sleep: %d\n", time);
+			sleepTime = time;
 			return true;
 		}
 	}
@@ -577,6 +619,11 @@ static void OnTxTimerEvent( void* context )
 	// Schedule next transmission
 	TimerSetValue(&TxTimer, TxPeriodicity);
 	TimerStart(&TxTimer);
+}
+
+static void OnSleepTimerEvent( void* context )
+{
+	printf("Hejsa");
 }
 
 

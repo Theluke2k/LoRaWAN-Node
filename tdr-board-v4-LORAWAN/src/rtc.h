@@ -39,7 +39,7 @@
 uint32_t BuildSeconds(void);
 ADI_RTC_RESULT rtc_Init (void);
 ADI_RTC_RESULT rtc_Calibrate (void);
-ADI_RTC_RESULT rtc_UpdateAlarm (void);
+ADI_RTC_RESULT rtc_UpdateAlarm (uint32_t time);
 void rtc_enable(bool flag);
 void set_iHibernateExitFlag(uint32_t x);
 uint32_t get_iHibernateExitFlag();

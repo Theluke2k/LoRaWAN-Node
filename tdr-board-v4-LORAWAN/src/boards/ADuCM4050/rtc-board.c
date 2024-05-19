@@ -100,9 +100,8 @@ extern volatile uint32_t iHibernateExitFlag;
  */
 static void rtc1Callback(void *pCBParam, uint32_t Event, void *EventArg)
 {
-	iHibernateExitFlag = 1;
 	TimerIrqHandler();
-
+	iHibernateExitFlag = 1;
 }
 
 /*

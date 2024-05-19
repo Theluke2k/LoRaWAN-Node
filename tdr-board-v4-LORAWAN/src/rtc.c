@@ -238,7 +238,7 @@ ADI_RTC_RESULT rtc_Calibrate (void)
  * As there is only one alarm being set, to ring in some fixed interval from one measurement phase to the other, the SLEEP_TIME macro is defined in rtc.h. This should
  * be called before entering hibernation to ensure the bloody thing will wake up when needed.
  */
-ADI_RTC_RESULT rtc_UpdateAlarm (void) {
+ADI_RTC_RESULT rtc_UpdateAlarm (uint32_t time) {
     ADI_RTC_RESULT eResult;
     uint32_t rtcCount;
 
@@ -247,7 +247,7 @@ ADI_RTC_RESULT rtc_UpdateAlarm (void) {
         DEBUG_RESULT("\n Failed to get RTC Count %04d",eResult,ADI_RTC_SUCCESS);
         return(eResult);
     }
-    if(ADI_RTC_SUCCESS != (eResult = adi_rtc_SetAlarm(hDevice1, rtcCount + SLEEP_TIME)))
+    if(ADI_RTC_SUCCESS != (eResult = adi_rtc_SetAlarm(hDevice1, rtcCount + time)))
     {
         DEBUG_RESULT("\n Failed to set RTC Alarm %04d",eResult,ADI_RTC_SUCCESS);
         return(eResult);

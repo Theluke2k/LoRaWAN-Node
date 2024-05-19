@@ -247,8 +247,7 @@ void GpioMcuSetContext( Gpio_t *obj, void* context )
  */
 void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t Pins
 {
-	// Exit sleep mode if we are sleeping.
-	iHibernateExitFlag = 1;
+
 	/* Lucas (12-11-23):
 	 * Loop for checking the interrupt status of all ports.
 	 */
@@ -276,8 +275,8 @@ void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t
 			array[32 + triggerPin](NULL);
 		}
 	}
-
-
+	// Exit sleep mode if we are sleeping.
+	iHibernateExitFlag = 1;
 }
 void GpioMcuSetInterrupt( Gpio_t *obj, IrqModes irqMode, IrqPriorities irqPriority, GpioIrqHandler *irqHandler )
  {
