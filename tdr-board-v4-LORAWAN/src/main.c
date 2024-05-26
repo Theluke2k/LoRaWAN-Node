@@ -67,7 +67,7 @@ uint8_t tester = 0; //
 #define APP_TX_DUTYCYCLE_RND                        0
 
 /*!
- * LoRaWAN Adaptive Data Rate (Skal den vÃ¦re til eller fra?)
+ * LoRaWAN Adaptive Data Rate (Skal den være til eller fra?)
  *
  * \remark Please note that when ADR is enabled the end-device should be static
  */
@@ -288,7 +288,7 @@ int main(void) {
 			LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
 
 			// The join process can be made here but it does not need to run. The state machine handles it.
-			//LmHandlerJoin(); // DEBUG: should be deleted when eeprom is implemented
+			LmHandlerJoin(); // DEBUG: should be deleted when eeprom is implemented
 
 			// Mark the program as initiated.
 			initialized = 1;
@@ -353,11 +353,9 @@ int main(void) {
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
 		//sleepTimeOffset = randr(-3000, 3000);
 		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset);
-		TimerStart(&SleepTimer);
-
 
 		// Set Wakeup Alarm
-		//rtc_UpdateAlarm(sleepTime + randTimeOffset/1000.0);
+		TimerStart(&SleepTimer);
 
 		// Enter Hibernate Mode
 		enter_hibernation();
@@ -625,8 +623,3 @@ static void OnSleepTimerEvent( void* context )
 {
 	printf("Hejsa");
 }
-
-
-
-
-
