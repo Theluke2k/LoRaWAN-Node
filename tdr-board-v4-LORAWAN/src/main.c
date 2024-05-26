@@ -32,6 +32,7 @@
 #include "uart-au.h"
 #include "xint.h"
 #include "spi-au.h"
+#include <adi_gpio.h> // DEBUG
 
 // DEBUG
 uint8_t tester = 0; //
@@ -219,7 +220,7 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t sleepTime = 5000;
+uint32_t sleepTime = 10000;
 //int32_t sleepTimeOffset = 0;
 int32_t sleepTimeOffset = 0;
 
@@ -256,6 +257,8 @@ int main(void) {
 		 * Run the LoRaMac stack.
 		 */
 		BoardInitMcu();
+
+		adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 
 		// Set interrup priorities. SPI must have highest prioriy!
 		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
@@ -302,7 +305,9 @@ int main(void) {
 			// Processes the LoRaMac events
 			LmHandlerProcess();
 
-
+			if (uplinksSent < desiredUplinks) {
+				PrepareTxFrame();
+			}
 
 			CRITICAL_SECTION_BEGIN( );
 
@@ -318,24 +323,27 @@ int main(void) {
 			 */
 			if (IsMacProcessPending == 1) {
 				IsMacProcessPending = 0;
-				CRITICAL_SECTION_END( );
 			}
-			else if ((LmHandlerIsBusy() == false)) {
-				if (uplinksSent < desiredUplinks) {
-					CRITICAL_SECTION_END( );
-					PrepareTxFrame();
-				}
-				else {
+			else {
+				if(uplinksSent >= desiredUplinks && LmHandlerIsBusy() == false) {
 					CRITICAL_SECTION_END( );
 					break;
 				}
-			}
-			else {
-				CRITICAL_SECTION_END( );
+				//TimerSetValue( &SleepTimer, 500);
+				//TimerStart(&SleepTimer);
+
+				//adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+				//iHibernateExitFlag = 0;
+				//enter_hibernation();
+				//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+				//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+
 			}
 
+			CRITICAL_SECTION_END( );
 
-		}while(1);
+
+		} while(1);
 
 		// Generate a random uint32_t using Radio.Random(). Map value to min -3000 and max 3000
 		sleepTimeOffset = getSleepTimeOffset(Radio.Random(), -3000, 3000);
@@ -345,18 +353,16 @@ int main(void) {
 
 		// Set radio to sleep
 		Radio.Write(0x01, 0x00);
-		//Radio.Sleep();
 
 		// Reset Sleep Flag
 		iHibernateExitFlag = 0;
 
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
-		//sleepTimeOffset = randr(-3000, 3000);
 		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset);
 
 		// Set Wakeup Alarm
 		TimerStart(&SleepTimer);
-
+		//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 		// Enter Hibernate Mode
 		enter_hibernation();
 	}
