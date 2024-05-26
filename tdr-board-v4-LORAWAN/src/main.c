@@ -237,6 +237,14 @@ int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
 int main(void) {
  	uint16_t index = 0;
 	init_system();
+	adi_system_EnableRetention(ADI_SRAM_BANK_0,true);
+	adi_system_EnableRetention(ADI_SRAM_BANK_1,true);
+	adi_system_EnableRetention(ADI_SRAM_BANK_2,true);
+	adi_system_EnableRetention(ADI_SRAM_BANK_3,true);
+	adi_system_EnableRetention(ADI_SRAM_BANK_4,true);
+	adi_system_EnableRetention(ADI_SRAM_BANK_5,true);
+	adi_system_EnableRetention(ADI_SRAM_BANK_6,true);
+	adi_system_EnableRetention(ADI_SRAM_BANK_7,true);
 
 	TimerInit( &SleepTimer, OnSleepTimerEvent );
 
@@ -323,19 +331,23 @@ int main(void) {
 			 */
 			if (IsMacProcessPending == 1) {
 				IsMacProcessPending = 0;
+				CRITICAL_SECTION_END( );
 			}
 			else {
+
 				if(uplinksSent >= desiredUplinks && LmHandlerIsBusy() == false) {
 					CRITICAL_SECTION_END( );
 					break;
 				}
-				//TimerSetValue( &SleepTimer, 500);
+				//TimerSetValue( &SleepTimer, 1000);
 				//TimerStart(&SleepTimer);
 
-				//adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
-				//iHibernateExitFlag = 0;
-				//enter_hibernation();
-				//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+				iHibernateExitFlag = 0;
+
+				CRITICAL_SECTION_END( );
+
+				enter_hibernation();
+				adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 				//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 
 			}
@@ -627,5 +639,5 @@ static void OnTxTimerEvent( void* context )
 
 static void OnSleepTimerEvent( void* context )
 {
-	printf("Hejsa");
+	iHibernateExitFlag = 1;
 }
