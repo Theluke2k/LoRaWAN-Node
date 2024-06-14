@@ -337,7 +337,6 @@ int main(void) {
 
 				CRITICAL_SECTION_END( );
 				TimerSetValue( &SleepTimer, 10000);
-
 				// Set Wakeup Alarm
 				TimerStart(&SleepTimer);
 				//adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
