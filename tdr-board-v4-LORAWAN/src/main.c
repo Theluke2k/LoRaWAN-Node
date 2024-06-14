@@ -237,18 +237,12 @@ int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
 int main(void) {
  	uint16_t index = 0;
 	init_system();
-	adi_system_EnableRetention(ADI_SRAM_BANK_0,true);
-	adi_system_EnableRetention(ADI_SRAM_BANK_1,true);
-	adi_system_EnableRetention(ADI_SRAM_BANK_2,true);
-	adi_system_EnableRetention(ADI_SRAM_BANK_3,true);
-	adi_system_EnableRetention(ADI_SRAM_BANK_4,true);
-	adi_system_EnableRetention(ADI_SRAM_BANK_5,true);
-	adi_system_EnableRetention(ADI_SRAM_BANK_6,true);
-	adi_system_EnableRetention(ADI_SRAM_BANK_7,true);
 
 	TimerInit( &SleepTimer, OnSleepTimerEvent );
 
 	while (1) {
+		adi_system_EnableRetention(ADI_SRAM_BANK_0 || ADI_SRAM_BANK_1 || ADI_SRAM_BANK_2 || ADI_SRAM_BANK_3 || ADI_SRAM_BANK_4 || ADI_SRAM_BANK_5 || ADI_SRAM_BANK_6 || ADI_SRAM_BANK_7 ,true);
+
 		/*
 		 * Lucas (30-03-2024):
 		 * AU runs their measurements. The data is stored in tdr_data.
@@ -266,15 +260,13 @@ int main(void) {
 		 */
 		BoardInitMcu();
 
-		adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
-
 		// Set interrup priorities. SPI must have highest prioriy!
 		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
 		NVIC_SetPriority(SPI0_EVT_IRQn, 1);
 		NVIC_SetPriority(RTC1_EVT_IRQn, 2);
 		NVIC_SetPriority(RTC0_EVT_IRQn, 2);
 
-		// Initialize transmission perhiodicity variable
+		// Initialize transmission periodicity variable
 		TxPeriodicity = APP_TX_DUTYCYCLE
 				+ randr(-APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND);
 
@@ -347,7 +339,6 @@ int main(void) {
 				CRITICAL_SECTION_END( );
 
 				enter_hibernation();
-				adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 				//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 
 			}

@@ -239,6 +239,10 @@ void GpioMcuSetContext( Gpio_t *obj, void* context )
 	obj->Context = context;
 }
 
+// DEBUG
+uint32_t callbackCounter = 0;
+void (*ExecutedGPIOCallbacks[100])(void* context);
+
 /*
  * Lucas (12-11-23):
  * This function is called when an interrupt occurs on interrupt line A.
@@ -247,7 +251,7 @@ void GpioMcuSetContext( Gpio_t *obj, void* context )
  */
 void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t Pins
 {
-	adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+	adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 	/* Lucas (12-11-23):
 	 * Loop for checking the interrupt status of all ports.
 	 */
@@ -262,16 +266,19 @@ void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t
 	// Check which port the interrupt came from. And call the corresponding callback function.
 	if (Port == (uint32_t) ADI_GPIO_PORT0) {
 		if (array[0 + triggerPin] != NULL) {
+			ExecutedGPIOCallbacks[callbackCounter++] = array[0 + triggerPin];
 			array[0 + triggerPin](NULL);
 		}
 	}
 	else if (Port == (uint32_t) ADI_GPIO_PORT1) {
 		if (array[16 + triggerPin] != NULL) {
+			ExecutedGPIOCallbacks[callbackCounter++] = array[16 + triggerPin];
 			array[16 + triggerPin](NULL);
 		}
 	}
 	else if (Port == (uint32_t) ADI_GPIO_PORT2) {
 		if (array[32 + triggerPin] != NULL) {
+			ExecutedGPIOCallbacks[callbackCounter++] = array[32 + triggerPin];
 			array[32 + triggerPin](NULL);
 		}
 	}

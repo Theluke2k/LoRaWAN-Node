@@ -180,6 +180,10 @@ bool TimerIsStarted( TimerEvent_t *obj )
     return obj->IsStarted;
 }
 
+// DEBUG
+uint32_t i = 0;
+void (*ExecutedCallbacks[100])(void* context);
+
 void TimerIrqHandler( void )
 {
     TimerEvent_t* cur;
@@ -213,6 +217,7 @@ void TimerIrqHandler( void )
         cur = TimerListHead;
         TimerListHead = TimerListHead->Next;
         cur->IsStarted = false;
+        ExecutedCallbacks[i++] = cur->Callback;
         ExecuteCallBack( cur->Callback, cur->Context );
     }
 
