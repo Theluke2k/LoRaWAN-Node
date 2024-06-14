@@ -300,7 +300,6 @@ int main(void) {
 		// Reset number of uplinks for this power cycle.
 		uplinksSent = 0;
 
-
 		do  {
 			// Processes the LoRaMac events
 			LmHandlerProcess();
@@ -308,8 +307,7 @@ int main(void) {
 			if (uplinksSent < desiredUplinks) {
 				PrepareTxFrame();
 			}
-
-			CRITICAL_SECTION_BEGIN( );
+			//CRITICAL_SECTION_BEGIN( );
 
 			/*
 			 * Lucas (28-04-2024):
@@ -321,14 +319,15 @@ int main(void) {
 			 * If we have sent all frames, the loop breaks and the board goes to sleep, until the next
 			 * power cycle.
 			 */
+
 			if (IsMacProcessPending == 1) {
 				IsMacProcessPending = 0;
-				CRITICAL_SECTION_END( );
+				//CRITICAL_SECTION_END( );
 			}
 			else {
 
 				if(uplinksSent >= desiredUplinks && LmHandlerIsBusy() == false) {
-					CRITICAL_SECTION_END( );
+					//CRITICAL_SECTION_END( );
 					break;
 				}
 				//TimerSetValue( &SleepTimer, 1000);
@@ -336,14 +335,15 @@ int main(void) {
 
 				iHibernateExitFlag = 0;
 
-				CRITICAL_SECTION_END( );
-
+				//CRITICAL_SECTION_END( );
+				adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
 				enter_hibernation();
+				adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
 				//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 
 			}
 
-			CRITICAL_SECTION_END( );
+			//CRITICAL_SECTION_END( );
 
 
 		} while(1);
