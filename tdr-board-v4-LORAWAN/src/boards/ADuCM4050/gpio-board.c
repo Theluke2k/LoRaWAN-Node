@@ -244,6 +244,7 @@ void GpioMcuSetContext( Gpio_t *obj, void* context )
  */
 void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t Pins
 {
+	adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG
 	/* Lucas (12-11-23):
 	 * Loop for checking the interrupt status of all ports.
 	 */
