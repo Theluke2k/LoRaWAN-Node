@@ -100,7 +100,7 @@ extern volatile uint32_t iHibernateExitFlag;
  */
 static void rtc1Callback(void *pCBParam, uint32_t Event, void *EventArg)
 {
-	//adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
+	adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
 	TimerIrqHandler();
 	iHibernateExitFlag = 1;
 }

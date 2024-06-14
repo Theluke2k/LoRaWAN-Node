@@ -307,7 +307,7 @@ int main(void) {
 			if (uplinksSent < desiredUplinks) {
 				PrepareTxFrame();
 			}
-			//CRITICAL_SECTION_BEGIN( );
+			CRITICAL_SECTION_BEGIN( );
 
 			/*
 			 * Lucas (28-04-2024):
@@ -327,7 +327,7 @@ int main(void) {
 			else {
 
 				if(uplinksSent >= desiredUplinks && LmHandlerIsBusy() == false) {
-					//CRITICAL_SECTION_END( );
+					CRITICAL_SECTION_END( );
 					break;
 				}
 				//TimerSetValue( &SleepTimer, 1000);
@@ -335,15 +335,19 @@ int main(void) {
 
 				iHibernateExitFlag = 0;
 
-				//CRITICAL_SECTION_END( );
-				adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
+				CRITICAL_SECTION_END( );
+				TimerSetValue( &SleepTimer, 10000);
+
+				// Set Wakeup Alarm
+				TimerStart(&SleepTimer);
+				//adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
 				enter_hibernation();
-				adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
+				//adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
 				//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 
 			}
 
-			//CRITICAL_SECTION_END( );
+			CRITICAL_SECTION_END( );
 
 
 		} while(1);
