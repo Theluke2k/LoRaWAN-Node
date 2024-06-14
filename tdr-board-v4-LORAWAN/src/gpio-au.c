@@ -127,7 +127,17 @@ void digital_pin_init()
 
 	// UART1
     *((volatile uint32_t *)REG_GPIO1_CFG) |= UART1_TX_PORTP2_MUX;
-    *((volatile uint32_t *)REG_GPIO2_CFG) |= UART1_RX_PORTP3_MUX;
+	*((volatile uint32_t *) REG_GPIO2_CFG) |= UART1_RX_PORTP3_MUX;
+	if (ADI_GPIO_SUCCESS
+			!= (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT2,
+					ADI_GPIO_PIN_0, true))) {
+		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
+	}
+	if (ADI_GPIO_SUCCESS
+			!= (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT1,
+					ADI_GPIO_PIN_15, true))) {
+		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
+	}
 
 
     /*
