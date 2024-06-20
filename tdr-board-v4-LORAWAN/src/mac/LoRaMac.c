@@ -743,6 +743,8 @@ struct
     int8_t Snr;
 }RxDoneParams;
 
+
+
 static void OnRadioTxDone( void )
 {
     TxDoneParams.CurTime = TimerGetCurrentTime( );
@@ -800,8 +802,11 @@ static void UpdateRxSlotIdleState( void )
     }
 }
 
+extern uint8_t enableSleepFlag; // DEBUG/added
+
 static void ProcessRadioTxDone( void )
 {
+	enableSleepFlag = 1;
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
     SetBandTxDoneParams_t txDone;

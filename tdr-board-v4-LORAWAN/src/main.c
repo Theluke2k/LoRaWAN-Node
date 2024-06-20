@@ -217,11 +217,13 @@ static volatile uint32_t TxPeriodicity = 0;
 struct tdr_data tdr_data[1];
 volatile uint32_t iHibernateExitFlag = 0;
 volatile uint8_t print_flag = 0;
+uint8_t joinFlag = 0;
+uint8_t enableSleepFlag = 0;
+
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
 uint32_t sleepTime = 10000;
-//int32_t sleepTimeOffset = 0;
 int32_t sleepTimeOffset = 0;
 
 bool sleepTest = false;
@@ -304,10 +306,24 @@ int main(void) {
 			// Processes the LoRaMac events
 			LmHandlerProcess();
 
+//			// Manual join process so we can set some flags.
+//			if (!LoRaMacIsBusy()) {
+//				if (LmHandlerJoinStatus() != LORAMAC_HANDLER_SET) {
+//					joinFlag = 1; // Join is executing
+//					LmHandlerJoin();
+//				}
+//				else {
+//					joinFlag = 0; // Join is not executing
+//				}
+//			}
+
+			// Try to send uplink
 			if (uplinksSent < desiredUplinks) {
 				PrepareTxFrame();
 			}
-			CRITICAL_SECTION_BEGIN( );
+
+			// Enter critical section.
+			CRITICAL_SECTION_BEGIN();
 
 			/*
 			 * Lucas (28-04-2024):
@@ -322,28 +338,32 @@ int main(void) {
 
 			if (IsMacProcessPending == 1) {
 				IsMacProcessPending = 0;
-				//CRITICAL_SECTION_END( );
 			}
 			else {
-
 				if(uplinksSent >= desiredUplinks && LmHandlerIsBusy() == false) {
 					CRITICAL_SECTION_END( );
 					break;
 				}
-				//TimerSetValue( &SleepTimer, 1000);
-				//TimerStart(&SleepTimer);
-
-				iHibernateExitFlag = 0;
-
 				CRITICAL_SECTION_END( );
-				TimerSetValue( &SleepTimer, 10000);
-				// Set Wakeup Alarm
-				TimerStart(&SleepTimer);
-				//adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
-				enter_hibernation();
-				//adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
-				//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+				// We can sleep for 4 seconds after TxDone is received
+				if (enableSleepFlag) {
+					// Clear flags
+					enableSleepFlag = 0;
+					iHibernateExitFlag = 0;
 
+					// Set radio to sleep.
+					Radio.Write(0x01, 0x00);
+
+					// Set sleep timer
+					TimerSetValue(&SleepTimer, 4000);
+					TimerStart(&SleepTimer);
+
+					// Start sleeping
+					enter_hibernation();
+
+					// Wake up radio
+					Radio.Write(0x01, 0x01);
+				}
 			}
 
 			CRITICAL_SECTION_END( );

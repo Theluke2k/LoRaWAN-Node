@@ -1656,12 +1656,7 @@ static void SX1276OnTimeoutIrq( void* context )
     }
 }
 
-extern uint8_t tester; // DEBUG
-// MACRO FOR DEBUG
-#define PAJ(ARG) \
-    if (tester == 1) { \
-        printf("%s", (ARG)); \
-    }
+
 
 static void SX1276OnDio0Irq( void* context )
 {
@@ -1669,7 +1664,7 @@ static void SX1276OnDio0Irq( void* context )
 
     switch( SX1276.Settings.State )
     {
-        case RF_RX_RUNNING:
+        case RF_RX_RUNNING: // RX DIO0
             //TimerStop( &RxTimeoutTimer );
             // RxDone interrupt
             switch( SX1276.Settings.Modem )
@@ -1826,7 +1821,7 @@ static void SX1276OnDio0Irq( void* context )
                 break;
             }
             break;
-        case RF_TX_RUNNING:
+        case RF_TX_RUNNING: // TX DIO0
             TimerStop( &TxTimeoutTimer );
             // TxDone interrupt
             switch( SX1276.Settings.Modem )
