@@ -306,16 +306,6 @@ int main(void) {
 			// Processes the LoRaMac events
 			LmHandlerProcess();
 
-//			// Manual join process so we can set some flags.
-//			if (!LoRaMacIsBusy()) {
-//				if (LmHandlerJoinStatus() != LORAMAC_HANDLER_SET) {
-//					joinFlag = 1; // Join is executing
-//					LmHandlerJoin();
-//				}
-//				else {
-//					joinFlag = 0; // Join is not executing
-//				}
-//			}
 
 			// Try to send uplink
 			if (uplinksSent < desiredUplinks) {
@@ -344,26 +334,27 @@ int main(void) {
 					CRITICAL_SECTION_END( );
 					break;
 				}
+
 				CRITICAL_SECTION_END( );
 				// We can sleep for 4 seconds after TxDone is received
-				if (enableSleepFlag) {
+				if (enableSleepFlag && joinFlag) {
 					// Clear flags
+					joinFlag = 0;
 					enableSleepFlag = 0;
 					iHibernateExitFlag = 0;
 
 					// Set radio to sleep.
-					Radio.Write(0x01, 0x00);
+					//Radio.Sleep();
 
 					// Set sleep timer
-					TimerSetValue(&SleepTimer, 4000);
+					TimerSetValue(&SleepTimer, 2000);
+
+					// Start sleep timer
 					TimerStart(&SleepTimer);
 
 					// Start sleeping
 					enter_hibernation();
-
-					// Wake up radio
-					Radio.Write(0x01, 0x01);
-				}
+                                                                                                                                                                                                                                                                                                                                                                                 				}
 			}
 
 			CRITICAL_SECTION_END( );
@@ -388,7 +379,7 @@ int main(void) {
 
 		// Set Wakeup Alarm
 		TimerStart(&SleepTimer);
-		//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+
 		// Enter Hibernate Mode
 		enter_hibernation();
 	}

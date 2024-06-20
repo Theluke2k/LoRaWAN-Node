@@ -1583,12 +1583,10 @@ static uint32_t SX1276GetLoRaTimeOnAirNumerator( uint32_t bandwidth,
 
 static void SX1276OnTimeoutIrq( void* context )
 {
-	printf("SX1276OnTimeoutIrq\n");
 
     switch( SX1276.Settings.State )
     {
     case RF_RX_RUNNING:
-    	//printf("SX1276OnTimeoutIrq: RF_RX_RUNNING\n");
         if( SX1276.Settings.Modem == MODEM_FSK )
         {
             SX1276.Settings.FskPacketHandler.PreambleDetected = false;

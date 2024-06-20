@@ -352,8 +352,11 @@ LmHandlerErrorStatus_t LmHandlerInit( LmHandlerCallbacks_t *handlerCallbacks,
     return LORAMAC_HANDLER_SUCCESS;
 }
 
+extern uint8_t joinFlag; // DEBUG/added
+
 bool LmHandlerIsBusy( void )
 {
+	joinFlag = !LmHandlerJoinStatus( );
     if( LoRaMacIsBusy( ) == true )
     {
         return true;
