@@ -331,6 +331,7 @@ int main(void) {
 
 			if (IsMacProcessPending == 1) {
 				IsMacProcessPending = 0;
+				CRITICAL_SECTION_END( );
 			}
 			else {
 				if((uplinksSent >= desiredUplinks) && (LmHandlerIsBusy() == false)) {
@@ -339,7 +340,7 @@ int main(void) {
 				}
 				CRITICAL_SECTION_END( );
 
-/*
+				/*
 				// We can sleep for 4 seconds after TxDone is received
 				if (enableSleepFlag && joinFlag) {
 					// Clear flags
@@ -360,8 +361,9 @@ int main(void) {
 					enter_hibernation();
 				}
 				*/
+
 			}
-			CRITICAL_SECTION_END( );
+
 		} while(1);
 
 		// Generate a random uint32_t using Radio.Random(). Map value to min -3000 and max 3000
