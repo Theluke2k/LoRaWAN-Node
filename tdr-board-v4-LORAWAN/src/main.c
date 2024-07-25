@@ -238,12 +238,16 @@ int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
  */
 int main(void) {
  	uint16_t index = 0;
+
+ 	// Initialize system (pins, rtc, clock, etc...)
 	init_system();
 
+	// Create timer to wake up processor during join accept.
 	TimerInit( &SleepTimer, OnSleepTimerEvent );
 
 	while (1) {
-		adi_system_EnableRetention(ADI_SRAM_BANK_0 || ADI_SRAM_BANK_1 || ADI_SRAM_BANK_2 || ADI_SRAM_BANK_3 || ADI_SRAM_BANK_4 || ADI_SRAM_BANK_5 || ADI_SRAM_BANK_6 || ADI_SRAM_BANK_7 ,true);
+		// Test to see if this caused the problem with the GPIO interrupts (it did not change anything)
+		//adi_system_EnableRetention(ADI_SRAM_BANK_0 || ADI_SRAM_BANK_1 || ADI_SRAM_BANK_2 || ADI_SRAM_BANK_3 || ADI_SRAM_BANK_4 || ADI_SRAM_BANK_5 || ADI_SRAM_BANK_6 || ADI_SRAM_BANK_7 ,true);
 
 		/*
 		 * Lucas (30-03-2024):
@@ -260,9 +264,10 @@ int main(void) {
 		 * Lucas (30-03-2024):
 		 * Run the LoRaMac stack.
 		 */
+		// Initlialize board (sets up pins as LoRaMac wants it)
 		BoardInitMcu();
 
-		// Set interrup priorities. SPI must have highest prioriy!
+		// Set interrup priorities. SPI must have higher priority than GPIO and RTC interrupts.
 		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
 		NVIC_SetPriority(SPI0_EVT_IRQn, 1);
 		NVIC_SetPriority(RTC1_EVT_IRQn, 2);
@@ -284,8 +289,7 @@ int main(void) {
 			}
 		}
 
-		// Only execute on board life start
-		if(!initialized) {
+		if(!initialized) {	// If the board is on first startup, run the following code:
 			// Set system maximum tolerated rx error in milliseconds
 			LmHandlerSetSystemMaxRxError(20);
 
@@ -293,7 +297,7 @@ int main(void) {
 			LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
 
 			// The join process can be made here but it does not need to run. The state machine handles it.
-			LmHandlerJoin(); // DEBUG: should be deleted when eeprom is implemented
+			LmHandlerJoin(); // DEBUG: should be deleted when eeprom is implemented. Or just save the "initialized" variable in eeprom also, so the program remembers.
 
 			// Mark the program as initiated.
 			initialized = 1;
@@ -317,25 +321,25 @@ int main(void) {
 
 			/*
 			 * Lucas (28-04-2024):
-			 * The following first checks if there is a MAC process pending. If there is
-			 * the flag is cleared and the board does not send another frame or goes to sleep,
-			 * allowing the state machine to run one more time to processes the MAC layer. If
-			 * There is no MAC process pending, it checks if the LmHandler is busy. If it is not busy
-			 * then we check if we have sent all of our frames. If we have not, we send the next frame.
-			 * If we have sent all frames, the loop breaks and the board goes to sleep, until the next
-			 * power cycle.
+			 * The following first checks if there is a MAC process pending. If there is,
+			 * the flag is cleared and the program restarts the state machine. If no MAC process is
+			 * pending, it checks if the LmHandler is busy and if all uplinks have been sent. If it is
+			 * not busy and all uplinks have been sent, it exits the LoRaWan state machine. Otherwise,
+			 * a timer of 2 seconds is started and the processor is put into hibernation. When the timer
+			 * runs out, the boards should wake and not sleep again until the next uplink has been sent.
 			 */
 
 			if (IsMacProcessPending == 1) {
 				IsMacProcessPending = 0;
 			}
 			else {
-				if(uplinksSent >= desiredUplinks && LmHandlerIsBusy() == false) {
+				if((uplinksSent >= desiredUplinks) && (LmHandlerIsBusy() == false)) {
 					CRITICAL_SECTION_END( );
 					break;
 				}
-
 				CRITICAL_SECTION_END( );
+
+/*
 				// We can sleep for 4 seconds after TxDone is received
 				if (enableSleepFlag && joinFlag) {
 					// Clear flags
@@ -354,12 +358,10 @@ int main(void) {
 
 					// Start sleeping
 					enter_hibernation();
-                                                                                                                                                                                                                                                                                                                                                                                 				}
+				}
+				*/
 			}
-
 			CRITICAL_SECTION_END( );
-
-
 		} while(1);
 
 		// Generate a random uint32_t using Radio.Random(). Map value to min -3000 and max 3000
