@@ -221,17 +221,11 @@ uint8_t initialized = 0;
  */
 int main(void) {
  	uint16_t index = 0;
+
+ 	// Initialize system (pins, rtc, clock, etc...)
 	init_system();
-	//BoardInitMcu();
-	//Radio.Write(0x01, 0x01);
-	//Radio.Write(0x01, 0x00);
+
 	while (1) {
-//		DelayMsMcu(5000);
-//		iHibernateExitFlag = 0;
-//
-//		rtc_UpdateAlarm();
-//		xint_uart_enable();
-//		enter_hibernation();
 		/*
 		 * Lucas (30-03-2024):
 		 * AU runs their measurements. The data is stored in tdr_data.
@@ -253,6 +247,7 @@ int main(void) {
 		 * Lucas (30-03-2024):
 		 * Run the LoRaMac stack.
 		 */
+		// Initlialize board (sets up pins as LoRaMac wants it)
 		BoardInitMcu();
 
 		// Set interrup priorities. SPI must have highest prioriy!
@@ -277,8 +272,7 @@ int main(void) {
 			}
 		}
 
-		// Only execute on board life start
-		if(!initialized) {
+		if(!initialized) { // If the board is on first startup, run the following code:
 			// Set system maximum tolerated rx error in milliseconds
 			LmHandlerSetSystemMaxRxError(20);
 
