@@ -125,6 +125,7 @@ static LmHandlerAppData_t AppData = { .Buffer = AppDataBuffer, .BufferSize = 0,
  * Timer to handle the application data transmission duty cycle
  */
 static TimerEvent_t TxTimer;
+static TimerEvent_t SleepTimer;
 
 static void OnMacProcessNotify(void);
 static void OnNvmDataChange(LmHandlerNvmContextStates_t state, uint16_t size);
@@ -155,6 +156,7 @@ static void OnPingSlotPeriodicityChanged(uint8_t pingSlotPeriodicity);
  * Function executed on TxTimer event
  */
 static void OnTxTimerEvent(void* context);
+static void OnSleepTimerEvent(void* context);
 
 //Function pointers for loramac callbacks.
 static LmHandlerCallbacks_t LmHandlerCallbacks =
@@ -215,6 +217,13 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
+
+uint32_t sleepTime = 3500;
+int32_t sleepTimeOffset = 0;
+
+// Function definitions
+int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
+
 /*
  * Lucas (22-10-23):
  * Main program.
@@ -224,6 +233,9 @@ int main(void) {
 
  	// Initialize system (pins, rtc, clock, etc...)
 	init_system();
+
+	// Create timer to wake up processor during join accept.
+	TimerInit( &SleepTimer, OnSleepTimerEvent );
 
 	while (1) {
 		/*
@@ -290,11 +302,6 @@ int main(void) {
 		uplinksSent = 0;
 
 		do  {
-			// DEBUG start
-			if (LmHandlerJoinStatus() == LORAMAC_HANDLER_SET) {
-				tester = 1;
-			}
-
 			// Processes the LoRaMac events
 			LmHandlerProcess();
 
@@ -327,6 +334,9 @@ int main(void) {
 			CRITICAL_SECTION_END( );
 		}while(1);
 
+		// Generate a random uint32_t using Radio.Random(). Map value to min -3000 and max 3000
+		sleepTimeOffset = getSleepTimeOffset(Radio.Random(), -3000, 3000);
+
 		// Deinitialize Loramac
 		LmHandlerDeInit();
 
@@ -336,14 +346,31 @@ int main(void) {
 		// Reset Sleep Flag
 		iHibernateExitFlag = 0;
 
+
 		// Set Wakeup Alarm
-		rtc_UpdateAlarm();
+		//rtc_UpdateAlarm();
+
+		// Calculate time offset of +- 3000 ms to avoid packet collisions
+		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset);
+
+		// Set Wakeup Alarm
+		TimerStart(&SleepTimer);
 
 		// Enter Hibernate Mode
 		enter_hibernation();
 	}
 
 	return 0;
+}
+
+/*
+ * The function maps a randomly generated uint32_t to an integer between -3000 and +3000.
+ */
+int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX) {
+	// Normalize random value
+	float norm = (float)random_value / (float)UINT32_MAX;
+	int32_t offset = (int32_t)((norm * (MAX - MIN)) + MIN);
+	return offset;
 }
 
 /*
@@ -639,6 +666,11 @@ static void OnTxTimerEvent( void* context )
 	// Schedule next transmission
 	TimerSetValue(&TxTimer, TxPeriodicity);
 	TimerStart(&TxTimer);
+}
+
+static void OnSleepTimerEvent( void* context )
+{
+	iHibernateExitFlag = 1;
 }
 
 
