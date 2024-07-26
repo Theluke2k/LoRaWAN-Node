@@ -218,6 +218,7 @@ uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
 
+uint8_t enableSleepFlag = 0;
 uint32_t sleepTime = 3500;
 int32_t sleepTimeOffset = 0;
 

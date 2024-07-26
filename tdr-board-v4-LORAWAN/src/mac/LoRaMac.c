@@ -800,8 +800,11 @@ static void UpdateRxSlotIdleState( void )
     }
 }
 
+extern uint8_t enableSleepFlag;
+
 static void ProcessRadioTxDone( void )
 {
+	enableSleepFlag = 1;
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
     SetBandTxDoneParams_t txDone;
