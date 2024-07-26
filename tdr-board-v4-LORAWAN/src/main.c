@@ -243,14 +243,8 @@ int main(void) {
 		 * AU runs their measurements. The data is stored in tdr_data.
 		 * The stack uses this struct as data source when transmitting data.
 		 */
-//		xint_uart_disable();
-//		init_store();
-//		run_and_store_measurements(tdr_data, &index);
-//		uart_init();
-//		uint32_t delay_val = 1600; // 20ms
-//		while(--delay_val){};
-//		print_tdr_data_to_uart(tdr_data);
-//		uart_deinit();
+  		init_store();
+		run_and_store_measurements(tdr_data, &index);
 
 		// Specify the amount of desired uplinks before going to sleep.
 		desiredUplinks = 1;
@@ -305,6 +299,11 @@ int main(void) {
 			// Processes the LoRaMac events
 			LmHandlerProcess();
 
+			// Try to send uplink
+			if (uplinksSent < desiredUplinks) {
+				PrepareTxFrame();
+			}
+
 			CRITICAL_SECTION_BEGIN( );
 
 			/*
@@ -322,11 +321,7 @@ int main(void) {
 			}
 			else if ((LmHandlerIsBusy() == false))
 			{
-				if(uplinksSent < desiredUplinks) {
-					CRITICAL_SECTION_END( );
-					PrepareTxFrame();
-				}
-				else {
+				if (uplinksSent >= desiredUplinks) {
 					CRITICAL_SECTION_END( );
 					break;
 				}
@@ -345,10 +340,6 @@ int main(void) {
 
 		// Reset Sleep Flag
 		iHibernateExitFlag = 0;
-
-
-		// Set Wakeup Alarm
-		//rtc_UpdateAlarm();
 
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
 		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset);
@@ -395,13 +386,14 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 		return true;
 	}
 	else if(strncmp(receiveBuffer, "Sleep", 5) == 0) {
-		int sleepTime = 0;
-		if(sscanf(receiveBuffer, "Sleep %d", &sleepTime) == 1) {
-			// Execute handler for command
-			printf("deep sleep: %d\n", sleepTime);
-			return true;
+			int time = 0;
+			if(sscanf(receiveBuffer, "Sleep %d", &time) == 1) {
+				// Execute handler for command
+				printf("deep sleep: %d\n", time);
+				sleepTime = time;
+				return true;
+			}
 		}
-	}
 	else if(strncmp(receiveBuffer, "{\"config\":{\"adr\":\"", 18) == 0) {
 		bool setADR = 0;
 		if(sscanf(receiveBuffer, "{\"config\":{\"adr\":\"%d", &setADR) == 1) {
