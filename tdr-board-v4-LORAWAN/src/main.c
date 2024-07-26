@@ -289,14 +289,11 @@ int main(void) {
 		// Reset number of uplinks for this power cycle.
 		uplinksSent = 0;
 
-		//StartTxProcess(LORAMAC_HANDLER_TX_ON_TIMER);
-
-		do  { //iterations < desiredUplinks+1
+		do  {
 			// DEBUG start
 			if (LmHandlerJoinStatus() == LORAMAC_HANDLER_SET) {
 				tester = 1;
 			}
-			// DEBUG end
 
 			// Processes the LoRaMac events
 			LmHandlerProcess();
