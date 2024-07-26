@@ -240,8 +240,9 @@ void GpioMcuSetContext( Gpio_t *obj, void* context )
 }
 
 // DEBUG
-uint32_t callbackCounter = 0;
-void (*ExecutedGPIOCallbacks[100])(void* context);
+#define GPIOCallback_MAX 100
+uint32_t GPIOcallbackCounter = 0;
+void (*ExecutedGPIOCallbacks[GPIOCallback_MAX])(void* context);
 
 /*
  * Lucas (12-11-23):
@@ -266,19 +267,25 @@ void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t
 	// Check which port the interrupt came from. And call the corresponding callback function.
 	if (Port == (uint32_t) ADI_GPIO_PORT0) {
 		if (array[0 + triggerPin] != NULL) {
-			ExecutedGPIOCallbacks[callbackCounter++] = array[0 + triggerPin];
+			if(GPIOcallbackCounter < GPIOCallback_MAX) {
+				ExecutedGPIOCallbacks[GPIOcallbackCounter++] = array[0 + triggerPin];
+			}
 			array[0 + triggerPin](NULL);
 		}
 	}
 	else if (Port == (uint32_t) ADI_GPIO_PORT1) {
 		if (array[16 + triggerPin] != NULL) {
-			ExecutedGPIOCallbacks[callbackCounter++] = array[16 + triggerPin];
+			if(GPIOcallbackCounter < GPIOCallback_MAX) {
+				ExecutedGPIOCallbacks[GPIOcallbackCounter++] = array[16 + triggerPin];
+			}
 			array[16 + triggerPin](NULL);
 		}
 	}
 	else if (Port == (uint32_t) ADI_GPIO_PORT2) {
 		if (array[32 + triggerPin] != NULL) {
-			ExecutedGPIOCallbacks[callbackCounter++] = array[32 + triggerPin];
+			if(GPIOcallbackCounter < GPIOCallback_MAX) {
+				ExecutedGPIOCallbacks[GPIOcallbackCounter++] = array[32 + triggerPin];
+			}
 			array[32 + triggerPin](NULL);
 		}
 	}

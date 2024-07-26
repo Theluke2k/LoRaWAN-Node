@@ -180,9 +180,11 @@ bool TimerIsStarted( TimerEvent_t *obj )
     return obj->IsStarted;
 }
 
-// DEBUG
-uint32_t i = 0;
-void (*ExecutedCallbacks[100])(void* context);
+// DEBUG START
+#define RTCCallback_MAX 100
+uint32_t RTCcallbackCounter = 0;
+void (*ExecutedCallbacks[RTCCallback_MAX])(void* context);
+// DEBUG END
 
 void TimerIrqHandler( void )
 {
@@ -217,7 +219,13 @@ void TimerIrqHandler( void )
         cur = TimerListHead;
         TimerListHead = TimerListHead->Next;
         cur->IsStarted = false;
-        ExecutedCallbacks[i++] = cur->Callback;
+
+        // DEBUG START
+        if(RTCcallbackCounter < RTCCallback_MAX) {
+        	ExecutedCallbacks[RTCcallbackCounter++] = cur->Callback;
+        }
+        // DEBUG END
+
         ExecuteCallBack( cur->Callback, cur->Context );
     }
 

@@ -223,7 +223,7 @@ uint8_t enableSleepFlag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t sleepTime = 10000;
+uint32_t sleepTime = 3500;
 int32_t sleepTimeOffset = 0;
 
 bool sleepTest = false;
@@ -338,7 +338,6 @@ int main(void) {
 					CRITICAL_SECTION_END( );
 					break;
 				}
-				CRITICAL_SECTION_END( );
 
 				/*
 				// We can sleep for 4 seconds after TxDone is received
@@ -363,6 +362,7 @@ int main(void) {
 				*/
 
 			}
+			CRITICAL_SECTION_END( );
 
 		} while(1);
 
