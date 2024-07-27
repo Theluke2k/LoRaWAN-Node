@@ -119,7 +119,7 @@ void init_system()
 
     //i2c_init();
 
-    rtc_Init();
+    //rtc_Init();
 
     /*
      * Lucas (23/03/2024):
@@ -136,7 +136,16 @@ void init_system()
  * Deinitializes the things we dont need while we hibernate between power cycles.
  */
 void deinit_system() {
-	//
+	// Deinitialize GPIO driver
+	adi_gpio_UnInit();
+}
+
+/*
+ * Lucas (27-07-2024):
+ * Re-initializes the systems that were deinitialized before hibernation
+ */
+void reinit_system() {
+	gpio_init();
 }
 
 /**

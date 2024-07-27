@@ -219,11 +219,16 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-
-uint8_t enableSleepFlag = 0;
-uint8_t isJoiningFlag = 0;
 uint32_t sleepTime = 10000;
 int32_t sleepTimeOffset = 0;
+
+// Logical Flags
+uint8_t enableSleepFlag = 0;
+uint8_t isJoiningFlag = 0;
+uint8_t hasHibernated = 0;
+
+
+
 
 // Function definitions
 int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
@@ -242,6 +247,12 @@ int main(void) {
 	TimerInit( &SleepTimer, OnSleepTimerEvent );
 
 	while (1) {
+		// Reinitialize system that were closed during hibernation
+		if(hasHibernated) {
+			reinit_system();
+			hasHibernated = 0;
+		}
+
 		/*
 		 * Lucas (30-03-2024):
 		 * AU runs their measurements. The data is stored in tdr_data.
@@ -377,17 +388,24 @@ int main(void) {
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
 		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset);
 
+		// De-initialize system we don't need while hibernating
+		deinit_system();
+
 		// Set Wakeup Alarm
 		TimerStart(&SleepTimer);
 
 		// Enter Hibernate Mode
 		enter_hibernation();
+
+		// Set flag to reinitialize systems
+		hasHibernated = 1;
 	}
 
 	return 0;
 }
 
 /*
+ * Lucas:
  * The function maps a randomly generated uint32_t to an integer between -3000 and +3000.
  */
 int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX) {
@@ -696,7 +714,7 @@ static void OnTxTimerEvent( void* context )
 static void OnSleepTimerEvent( void* context )
 {
 	iHibernateExitFlag = 1;
-	adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+	//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 }
 
 
