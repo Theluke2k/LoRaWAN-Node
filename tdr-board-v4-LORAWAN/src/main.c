@@ -328,12 +328,13 @@ int main(void) {
 				}
 			}
 			else if(enableSleepFlag) {
+				CRITICAL_SECTION_END( );
 				// Clear flags
 				enableSleepFlag = 0;
 				iHibernateExitFlag = 0;
 
 				// Set sleep timer
-				TimerSetValue(&SleepTimer, 3000);
+				TimerSetValue(&SleepTimer, 1000);
 
 				// Start sleep timer
 				TimerStart(&SleepTimer);
@@ -351,7 +352,7 @@ int main(void) {
 		LmHandlerDeInit();
 
 		// Set radio to sleep
-		Radio.Write(0x01, 0x00);
+		//Radio.Write(0x01, 0x00);
 
 		// Reset Sleep Flag
 		iHibernateExitFlag = 0;
