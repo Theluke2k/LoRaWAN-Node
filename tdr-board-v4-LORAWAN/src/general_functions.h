@@ -11,6 +11,7 @@
 /* Add your custom header content here */
 
 void init_system();
+void deinit_system();
 void init_store();
 
 void run_and_store_measurements(struct tdr_data integrator_vals_memory[], uint16_t* index);

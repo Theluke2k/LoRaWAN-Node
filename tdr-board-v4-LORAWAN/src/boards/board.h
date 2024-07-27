@@ -40,6 +40,11 @@ enum BoardPowerSources
 };
 
 /*!
+ * \brief Lucas: Initializes the required systems on the board after hibernate wakeup.
+ */
+void SystemReinitializerFromHibernate( void );
+
+/*!
  * \brief Initializes the mcu.
  */
 void BoardInitMcu( void );

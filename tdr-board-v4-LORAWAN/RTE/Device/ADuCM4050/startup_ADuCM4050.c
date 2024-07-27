@@ -45,7 +45,6 @@
 #include <stdint.h>
 #include <rtos_map/adi_rtos_map.h>
 
-
 /*----------------------------------------------------------------------------
   Linker generated Symbols
  *----------------------------------------------------------------------------*/
@@ -388,6 +387,5 @@ void Reset_Handler_C(void) {
   Default Handler for Exceptions / Interrupts
  *----------------------------------------------------------------------------*/
 void Default_Handler(void) {
-
   while(1);
 }

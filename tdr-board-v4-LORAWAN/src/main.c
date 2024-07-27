@@ -32,6 +32,8 @@
 #include "uart-au.h"
 #include "xint.h"
 #include "spi-au.h"
+#include <adi_gpio.h>
+#include "spi.h"
 
 // DEBUG
 uint8_t tester = 0; //
@@ -219,7 +221,8 @@ uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
 
 uint8_t enableSleepFlag = 0;
-uint32_t sleepTime = 3500;
+uint8_t isJoiningFlag = 0;
+uint32_t sleepTime = 10000;
 int32_t sleepTimeOffset = 0;
 
 // Function definitions
@@ -328,22 +331,36 @@ int main(void) {
 				}
 			}
 			else if(enableSleepFlag) {
+				// End critical section to enable interrupts
 				CRITICAL_SECTION_END( );
+
+				// Set radio to sleep
+				Radio.Write(0x01, 0x00);
+
+				// Set sleep timer depending on if we are joining or not
+				if (isJoiningFlag) {
+					TimerSetValue(&SleepTimer, 4800);
+				} else {
+					TimerSetValue(&SleepTimer, 800);
+				}
+
 				// Clear flags
 				enableSleepFlag = 0;
+				isJoiningFlag = 0;
 				iHibernateExitFlag = 0;
-
-				// Set sleep timer
-				TimerSetValue(&SleepTimer, 1000);
 
 				// Start sleep timer
 				TimerStart(&SleepTimer);
 
 				// Enter hibernation mode
 				enter_hibernation();
+
+				// Reinitializez required systems after hibernate wakeup.
+				SystemReinitializerFromHibernate();
 			}
 			CRITICAL_SECTION_END( );
-		}while(1);
+
+		} while (1);
 
 		// Generate a random uint32_t using Radio.Random(). Map value to min -3000 and max 3000
 		sleepTimeOffset = getSleepTimeOffset(Radio.Random(), -3000, 3000);
@@ -352,7 +369,7 @@ int main(void) {
 		LmHandlerDeInit();
 
 		// Set radio to sleep
-		//Radio.Write(0x01, 0x00);
+		Radio.Write(0x01, 0x00);
 
 		// Reset Sleep Flag
 		iHibernateExitFlag = 0;
@@ -679,6 +696,7 @@ static void OnTxTimerEvent( void* context )
 static void OnSleepTimerEvent( void* context )
 {
 	iHibernateExitFlag = 1;
+	adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 }
 
 

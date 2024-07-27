@@ -131,6 +131,14 @@ void init_system()
 
 }
 
+/*
+ * Lucas (27-07-2024):
+ * Deinitializes the things we dont need while we hibernate between power cycles.
+ */
+void deinit_system() {
+	//
+}
+
 /**
  * @brief    Changes the state of the board components to default (turn off).
  *

@@ -101,8 +101,16 @@ void BoardInitPeriph( void )
 /*Initializing peripherals is handled by Crosscore*/
 }
 
+/*!
+ * \brief Initializes the required systems on the board after hibernate wakeup.
+ */
+void SystemReinitializerFromHibernate( void )
+{
+	// Reinitialize SPI pins
+	SpiInit( &SX1276.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
 
-
+}
+// DEBUG END
 
 /*!
  * \brief Initializes the mcu.
