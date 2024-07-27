@@ -244,8 +244,8 @@ int main(void) {
 		 * AU runs their measurements. The data is stored in tdr_data.
 		 * The stack uses this struct as data source when transmitting data.
 		 */
-  		init_store();
-		run_and_store_measurements(tdr_data, &index);
+  		//init_store();
+		//run_and_store_measurements(tdr_data, &index);
 
 		// Specify the amount of desired uplinks before going to sleep.
 		desiredUplinks = 1;
