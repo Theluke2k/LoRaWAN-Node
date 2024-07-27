@@ -339,7 +339,8 @@ int main(void) {
 					break;
 				}
 
-				/*
+				CRITICAL_SECTION_END( );
+
 				// We can sleep for 4 seconds after TxDone is received
 				if (enableSleepFlag && joinFlag) {
 					// Clear flags
@@ -359,7 +360,7 @@ int main(void) {
 					// Start sleeping
 					enter_hibernation();
 				}
-				*/
+
 
 			}
 			CRITICAL_SECTION_END( );

@@ -47,9 +47,6 @@ ADI_GPIO_PORT port1 = ADI_GPIO_PORT1;
 ADI_GPIO_PORT port2 = ADI_GPIO_PORT2;
 ADI_GPIO_PORT port3 = ADI_GPIO_PORT3;
 
-// Sleep flag
-extern volatile uint32_t iHibernateExitFlag;
-
 /*
  * Lucas (12-11-23):
  * To know which callbacks to use when different pins trigger an interrupt,
@@ -239,11 +236,6 @@ void GpioMcuSetContext( Gpio_t *obj, void* context )
 	obj->Context = context;
 }
 
-// DEBUG
-#define GPIOCallback_MAX 100
-uint32_t GPIOcallbackCounter = 0;
-void (*ExecutedGPIOCallbacks[GPIOCallback_MAX])(void* context);
-
 /*
  * Lucas (12-11-23):
  * This function is called when an interrupt occurs on interrupt line A.
@@ -252,7 +244,7 @@ void (*ExecutedGPIOCallbacks[GPIOCallback_MAX])(void* context);
  */
 void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t Pins
 {
-	adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+	adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG
 	/* Lucas (12-11-23):
 	 * Loop for checking the interrupt status of all ports.
 	 */
@@ -267,25 +259,16 @@ void AllPinsCallback(void* pCBParam, uint32_t Port, void* PinIntData) //uint32_t
 	// Check which port the interrupt came from. And call the corresponding callback function.
 	if (Port == (uint32_t) ADI_GPIO_PORT0) {
 		if (array[0 + triggerPin] != NULL) {
-			if(GPIOcallbackCounter < GPIOCallback_MAX) {
-				ExecutedGPIOCallbacks[GPIOcallbackCounter++] = array[0 + triggerPin];
-			}
 			array[0 + triggerPin](NULL);
 		}
 	}
 	else if (Port == (uint32_t) ADI_GPIO_PORT1) {
 		if (array[16 + triggerPin] != NULL) {
-			if(GPIOcallbackCounter < GPIOCallback_MAX) {
-				ExecutedGPIOCallbacks[GPIOcallbackCounter++] = array[16 + triggerPin];
-			}
 			array[16 + triggerPin](NULL);
 		}
 	}
 	else if (Port == (uint32_t) ADI_GPIO_PORT2) {
 		if (array[32 + triggerPin] != NULL) {
-			if(GPIOcallbackCounter < GPIOCallback_MAX) {
-				ExecutedGPIOCallbacks[GPIOcallbackCounter++] = array[32 + triggerPin];
-			}
 			array[32 + triggerPin](NULL);
 		}
 	}
