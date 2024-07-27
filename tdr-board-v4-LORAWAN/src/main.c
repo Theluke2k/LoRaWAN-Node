@@ -327,6 +327,20 @@ int main(void) {
 					break;
 				}
 			}
+			else if(enableSleepFlag) {
+				// Clear flags
+				enableSleepFlag = 0;
+				iHibernateExitFlag = 0;
+
+				// Set sleep timer
+				TimerSetValue(&SleepTimer, 3000);
+
+				// Start sleep timer
+				TimerStart(&SleepTimer);
+
+				// Enter hibernation mode
+				enter_hibernation();
+			}
 			CRITICAL_SECTION_END( );
 		}while(1);
 
