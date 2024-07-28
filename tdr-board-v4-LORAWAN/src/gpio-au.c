@@ -135,22 +135,28 @@ void digital_pin_init()
 	/*
 	 * Lucas (28-07-2024):
 	 * DEBUG PINS
-	 *//*
+	 */
+	/*
 	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT2, ADI_GPIO_PIN_0, true))) {
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
 	}
 	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT1, ADI_GPIO_PIN_15, true))) {
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
-	}
-*/
+	}*/
 
+	//Initial states
+	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
+	adi_gpio_SetHigh(MICRO_TH_EN_PORT, MICRO_TH_EN_PIN);
+	adi_gpio_SetLow(MICRO_TH_S0_PORT, MICRO_TH_S0_PIN);
+	adi_gpio_SetLow(MICRO_TH_S1_PORT, MICRO_TH_S1_PIN);
+	adi_gpio_SetLow(MICRO_SENSOR_EN_PORT, MICRO_SENSOR_EN_PIN);
+	adi_gpio_SetLow(MICRO_RST_INT_PORT, MICRO_RST_INT_PIN);
+	adi_gpio_SetLow(MICRO_COMP_ON_PORT, MICRO_COMP_ON_PIN);
+	adi_gpio_SetLow(MICRO_STM_START_PORT, MICRO_STM_START_PIN);
+	adi_gpio_SetLow(MICRO_REF_S1_PORT, MICRO_REF_S1_PIN);
+	adi_gpio_SetLow(MICRO_REF_S0_PORT, MICRO_REF_S0_PORT);
+	adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN);
 
-
-	/*
-	 * Lucas (23/03/2024):
-	 * Removed for merge
-	 */
-//	adi_gpio_SetHigh(LORA_RST_PORT, LORA_RST_PIN);
 
 }
 

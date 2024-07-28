@@ -262,7 +262,7 @@ int main(void) {
 		 */
 		// Initialize measure mode
 		//InitMeasureMode();
-
+		//DelayMs(1000);
 		// Run measurements
   		init_store();
 		run_and_store_measurements(tdr_data, &index);

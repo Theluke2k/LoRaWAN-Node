@@ -36,7 +36,7 @@
  * *against* changing the clocks during the operation.
  */
 
-/*
+
 void init_system()
 {
 	// Initiliaze system clock
@@ -53,71 +53,7 @@ void init_system()
     i2c_init();
 
 }
-*/
-void init_system()
-{
 
-    adi_pwr_Init();
-	adi_pwr_SetHPBuckLoadMode(ADI_PWR_HPBUCK_LD_MODE_LOW);
-
-	ADI_CLOCK_SOURCE_STATUS clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
-	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_HFXTAL, true);
-	while(clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE)
-	{
-		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFXTAL, &clock_status);
-	};
-
-
-	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFXTAL);
-
-	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK,1);
-	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK,1);
-
-
-	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_LFXTAL, true);
-
-	clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
-	while(clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE)
-	{
-		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_LFXTAL, &clock_status);
-	};
-
-	adi_pwr_SetLFClockMux(ADI_CLOCK_MUX_LFCLK_LFXTAL);
-
-	adi_pwr_UpdateCoreClock();
-
-/*
- * Following if we know the offset of the RTC oscillator, we can trim it if necessary
- * If this is to be used the macro ADI_RTC_CALIBRATE has to be set
- */
-// #define ADI_RTC_CALIBRATE
-//	if(ADI_RTC_SUCCESS != (eResult = adi_rtc_SetTrim(hDevice0,ADI_RTC_TRIM_INTERVAL_14,ADI_RTC_TRIM_1,ADI_RTC_TRIM_SUB)))
-//	{
-//		DEBUG_RESULT("\n Failed to set the device %04d", eResult, ADI_RTC_SUCCESS);
-//		return(eResult);
-//	}
-//	if(ADI_RTC_SUCCESS != (eResult = adi_rtc_EnableTrim(hDevice0, true)))
-//	{
-//		DEBUG_RESULT("\n Failed to enable the trim %04d", eResult, ADI_RTC_SUCCESS);
-//		return(eResult);
-//	}
-
-    //uart_init();
-
-    //xint_init();
-
-	gpio_init();
-
-	//adc_init(false); // TODO: calibration stuck. Check later.
-
-    //i2c_init();
-
-    //rtc_Init();
-
-    //spi_init();
-	//lora_initialize();
-
-}
 
 /*
  * Lucas (28-07-2024):
