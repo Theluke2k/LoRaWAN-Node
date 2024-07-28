@@ -240,26 +240,36 @@ int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
 int main(void) {
  	uint16_t index = 0;
 
- 	// Initialize system (pins, rtc, clock, etc...)
-	init_system();
+ 	// Initializes the system clock and needed drivers.
+ 	init_system();
 
 	// Create timer to wake up processor during join accept.
 	TimerInit( &SleepTimer, OnSleepTimerEvent );
 
 	while (1) {
 		// Reinitialize system that were closed during hibernation
+		/*
 		if(hasHibernated) {
 			reinit_system();
 			hasHibernated = 0;
 		}
+		*/
 
 		/*
 		 * Lucas (30-03-2024):
 		 * AU runs their measurements. The data is stored in tdr_data.
 		 * The stack uses this struct as data source when transmitting data.
 		 */
-  		//init_store();
-		//run_and_store_measurements(tdr_data, &index);
+		// Initialize measure mode
+		//InitMeasureMode();
+
+		// Run measurements
+  		init_store();
+		run_and_store_measurements(tdr_data, &index);
+
+		// Deinitialize measure mode
+		//DeInitMeasureMode();
+
 
 		// Specify the amount of desired uplinks before going to sleep.
 		desiredUplinks = 1;
@@ -367,7 +377,7 @@ int main(void) {
 				enter_hibernation();
 
 				// Reinitializez required systems after hibernate wakeup.
-				SystemReinitializerFromHibernate();
+				//SystemReinitializerFromHibernate();
 			}
 			CRITICAL_SECTION_END( );
 
@@ -389,7 +399,7 @@ int main(void) {
 		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset);
 
 		// De-initialize system we don't need while hibernating
-		deinit_system();
+		//deinit_system();
 
 		// Set Wakeup Alarm
 		TimerStart(&SleepTimer);
@@ -398,7 +408,7 @@ int main(void) {
 		enter_hibernation();
 
 		// Set flag to reinitialize systems
-		hasHibernated = 1;
+		//hasHibernated = 1;
 	}
 
 	return 0;

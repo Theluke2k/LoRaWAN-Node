@@ -36,10 +36,28 @@
  * *against* changing the clocks during the operation.
  */
 
-
+/*
 void init_system()
 {
-	adi_pwr_Init();
+	// Initiliaze system clock
+	InitClock();
+
+	// Initialize GPIO driver and pins
+	//InitGPIODriver();
+	gpio_init();
+
+	// Initialize ADC driver
+	adc_init(false); // TODO: calibration stuck. Check later.
+
+	// Initialize I2C driver
+    i2c_init();
+
+}
+*/
+void init_system()
+{
+
+    adi_pwr_Init();
 	adi_pwr_SetHPBuckLoadMode(ADI_PWR_HPBUCK_LD_MODE_LOW);
 
 	ADI_CLOCK_SOURCE_STATUS clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
@@ -49,10 +67,12 @@ void init_system()
 		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFXTAL, &clock_status);
 	};
 
+
 	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFXTAL);
 
 	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK,1);
 	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK,1);
+
 
 	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_LFXTAL, true);
 
@@ -65,32 +85,6 @@ void init_system()
 	adi_pwr_SetLFClockMux(ADI_CLOCK_MUX_LFCLK_LFXTAL);
 
 	adi_pwr_UpdateCoreClock();
-
-	// Custom init for tests
-//	adi_pwr_Init();
-//	adi_pwr_SetHPBuckLoadMode(ADI_PWR_HPBUCK_LD_MODE_LOW);
-//
-//	ADI_CLOCK_SOURCE_STATUS clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
-//	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_HFOSC, true);
-//	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
-//		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFOSC, &clock_status);
-//	}
-//
-//	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_LFXTAL, true);
-//
-//	clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
-//	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
-//		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_LFXTAL, &clock_status);
-//	};
-//
-////	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK,1);
-////	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK,1);
-//
-//	adi_pwr_SetLFClockMux(ADI_CLOCK_MUX_LFCLK_LFXTAL);
-//	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFOSC);
-//
-//	// Update Core Clock
-//	adi_pwr_UpdateCoreClock();
 
 /*
  * Following if we know the offset of the RTC oscillator, we can trim it if necessary
@@ -108,7 +102,6 @@ void init_system()
 //		return(eResult);
 //	}
 
-
     //uart_init();
 
     //xint_init();
@@ -121,15 +114,75 @@ void init_system()
 
     //rtc_Init();
 
-    /*
-     * Lucas (23/03/2024):
-     * Removed for merge
-     */
-
     //spi_init();
 	//lora_initialize();
 
 }
+
+/*
+ * Lucas (28-07-2024):
+ * Initializes power and the system clock. the external sources for both
+ * main and RTC clocks are selected (16MHz and 32.768kHz, respectively).
+ */
+void InitClock() {
+	adi_pwr_Init();
+	adi_pwr_SetHPBuckLoadMode(ADI_PWR_HPBUCK_LD_MODE_LOW);
+
+	ADI_CLOCK_SOURCE_STATUS clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
+	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_HFXTAL, true);
+	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
+		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_HFXTAL, &clock_status);
+	};
+
+	adi_pwr_SetRootClockMux(ADI_CLOCK_MUX_ROOT_HFXTAL);
+
+	adi_pwr_SetClockDivider(ADI_CLOCK_HCLK, 1);
+	adi_pwr_SetClockDivider(ADI_CLOCK_PCLK, 1);
+
+	adi_pwr_EnableClockSource(ADI_CLOCK_SOURCE_LFXTAL, true);
+
+	clock_status = ADI_CLOCK_SOURCE_ENABLED_NOT_STABLE;
+	while (clock_status != ADI_CLOCK_SOURCE_ENABLED_STABLE) {
+		adi_pwr_GetClockStatus(ADI_CLOCK_SOURCE_LFXTAL, &clock_status);
+	};
+
+	adi_pwr_SetLFClockMux(ADI_CLOCK_MUX_LFCLK_LFXTAL);
+
+	adi_pwr_UpdateCoreClock();
+
+	/*
+	 * Following if we know the offset of the RTC oscillator, we can trim it if necessary
+	 * If this is to be used the macro ADI_RTC_CALIBRATE has to be set
+	 */
+	// #define ADI_RTC_CALIBRATE
+	//	if(ADI_RTC_SUCCESS != (eResult = adi_rtc_SetTrim(hDevice0,ADI_RTC_TRIM_INTERVAL_14,ADI_RTC_TRIM_1,ADI_RTC_TRIM_SUB)))
+	//	{
+	//		DEBUG_RESULT("\n Failed to set the device %04d", eResult, ADI_RTC_SUCCESS);
+	//		return(eResult);
+	//	}
+	//	if(ADI_RTC_SUCCESS != (eResult = adi_rtc_EnableTrim(hDevice0, true)))
+	//	{
+	//		DEBUG_RESULT("\n Failed to enable the trim %04d", eResult, ADI_RTC_SUCCESS);
+	//		return(eResult);
+	//	}
+}
+
+/*
+ * Lucas (28-07-2024):
+ * Function to initialize everything that is needed for taking the measurements
+ */
+void InitMeasureMode() {
+	DigitalPinsEnable();
+}
+
+/*
+ * Lucas (28-07-2024):
+ * Function to deinitialize everything that is needed for taking the measurements
+ */
+void DeInitMeasureMode() {
+	DigitalPinsDisable();
+}
+
 
 /*
  * Lucas (27-07-2024):
@@ -177,8 +230,6 @@ void init_store()
 
 		adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN); //not really needed but it can be like this
 
-
-
 #if BOARD_NUM == 1
     select_comparator_reference(REF1_0_8_REF2_1_2);
 #elif BOARD_NUM == 2
@@ -196,15 +247,6 @@ void init_store()
     gpio_init();
     adc_init(false);
     i2c_init();
-
-    /*
-     * Lucas (23/03/2024):
-     * REMOVED FOR MERGE
-     */
-    //rtc_Init();
-    //spi_init();
-    //lora_initialize();
-
 }
 
 /**

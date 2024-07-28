@@ -72,6 +72,8 @@
 
 void analog_pin_init();
 void digital_pin_init();
+void DigitalPinsEnable();
+void DigitalPinsDisable();
 void i2c_pin_init();
 
 void gpio_init();

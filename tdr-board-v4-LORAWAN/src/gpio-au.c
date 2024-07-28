@@ -131,37 +131,36 @@ void digital_pin_init()
 	// UART1
     //*((volatile uint32_t *)REG_GPIO1_CFG) |= UART1_TX_PORTP2_MUX;
 	//*((volatile uint32_t *) REG_GPIO2_CFG) |= UART1_RX_PORTP3_MUX;
-	if (ADI_GPIO_SUCCESS
-			!= (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT2,
-					ADI_GPIO_PIN_0, true))) {
+
+	/*
+	 * Lucas (28-07-2024):
+	 * DEBUG PINS
+	 *//*
+	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT2, ADI_GPIO_PIN_0, true))) {
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
 	}
-	if (ADI_GPIO_SUCCESS
-			!= (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT1,
-					ADI_GPIO_PIN_15, true))) {
+	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT1, ADI_GPIO_PIN_15, true))) {
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
 	}
+*/
 
 
-    /*
+
+	/*
 	 * Lucas (23/03/2024):
 	 * Removed for merge
 	 */
-    // LORA/SPI
-//    *((volatile uint32_t *)REG_GPIO0_CFG) |= SPI0_CLK_PORTP0_MUX | SPI0_MOSI_PORTP0_MUX | SPI0_MISO_PORTP0_MUX | SPI0_CS_PORT0_MUX;
-//
-//    if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(LORA_RST_PORT, LORA_RST_PIN, true)))
-//	{
-//		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
-//	}
-//	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_InputEnable(LORA_DIO0_PORT, LORA_DIO0_PIN, true)))
-//	{
-//		DEBUG_MESSAGE("adi_gpio_InputEnable failed\n");
-//	}
+//	adi_gpio_SetHigh(LORA_RST_PORT, LORA_RST_PIN);
 
+}
+
+/*
+ * Lucas (28-07-2024):
+ * Function to initialize digital pins for measurement mode.
+ */
+void DigitalPinsEnable() {
 	//Initial states
 	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
-
 	adi_gpio_SetHigh(MICRO_TH_EN_PORT, MICRO_TH_EN_PIN);
 	adi_gpio_SetLow(MICRO_TH_S0_PORT, MICRO_TH_S0_PIN);
 	adi_gpio_SetLow(MICRO_TH_S1_PORT, MICRO_TH_S1_PIN);
@@ -172,14 +171,25 @@ void digital_pin_init()
 	adi_gpio_SetLow(MICRO_REF_S1_PORT, MICRO_REF_S1_PIN);
 	adi_gpio_SetLow(MICRO_REF_S0_PORT, MICRO_REF_S0_PORT);
 	adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN);
+}
 
-
-	/*
-	 * Lucas (23/03/2024):
-	 * Removed for merge
-	 */
-//	adi_gpio_SetHigh(LORA_RST_PORT, LORA_RST_PIN);
-
+/*
+ * Lucas (28-07-2024):
+ * Function to disable any digital pin used for measurements.
+ */
+void DigitalPinsDisable() {
+	// Disable everything
+	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
+	adi_gpio_SetLow(MICRO_TH_EN_PORT, MICRO_TH_EN_PIN);
+	adi_gpio_SetLow(MICRO_TH_S0_PORT, MICRO_TH_S0_PIN);
+	adi_gpio_SetLow(MICRO_TH_S1_PORT, MICRO_TH_S1_PIN);
+	adi_gpio_SetLow(MICRO_SENSOR_EN_PORT, MICRO_SENSOR_EN_PIN);
+	adi_gpio_SetLow(MICRO_RST_INT_PORT, MICRO_RST_INT_PIN);
+	adi_gpio_SetLow(MICRO_COMP_ON_PORT, MICRO_COMP_ON_PIN);
+	adi_gpio_SetLow(MICRO_STM_START_PORT, MICRO_STM_START_PIN);
+	adi_gpio_SetLow(MICRO_REF_S1_PORT, MICRO_REF_S1_PIN);
+	adi_gpio_SetLow(MICRO_REF_S0_PORT, MICRO_REF_S0_PORT);
+	adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN);
 }
 
 /**
@@ -202,8 +212,14 @@ void gpio_init()
 	ADI_GPIO_RESULT gpioStatus = ADI_GPIO_SUCCESS;
 	gpioStatus = adi_gpio_Init(gpioMemory, ADI_GPIO_MEMORY_SIZE);
 	DEBUG_RESULT("GPIO init failed", gpioStatus, ADI_GPIO_SUCCESS);
-    digital_pin_init();
+
+	digital_pin_init();
     analog_pin_init();
     i2c_pin_init();
 }
 
+void InitGPIODriver() {
+	ADI_GPIO_RESULT gpioStatus = ADI_GPIO_SUCCESS;
+	gpioStatus = adi_gpio_Init(gpioMemory, ADI_GPIO_MEMORY_SIZE);
+	DEBUG_RESULT("GPIO init failed", gpioStatus, ADI_GPIO_SUCCESS);
+}

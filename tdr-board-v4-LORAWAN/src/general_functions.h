@@ -11,6 +11,9 @@
 /* Add your custom header content here */
 
 void init_system();
+void InitClock();
+void InitMeasureMode();
+void DeInitMeasureMode();
 void deinit_system();
 void reinit_system();
 void init_store();
