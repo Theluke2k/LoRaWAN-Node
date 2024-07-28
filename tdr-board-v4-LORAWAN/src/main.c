@@ -264,8 +264,16 @@ int main(void) {
 		//InitMeasureMode();
 		//DelayMs(1000);
 		// Run measurements
-  		init_store();
+		xint_uart_disable();
+		init_store();
 		run_and_store_measurements(tdr_data, &index);
+		uart_init();
+		uint32_t delay_val = 1600; // 20ms
+		while (--delay_val) {
+		};
+		print_tdr_data_to_uart(tdr_data);
+		uart_deinit();
+
 
 		// Deinitialize measure mode
 		//DeInitMeasureMode();
