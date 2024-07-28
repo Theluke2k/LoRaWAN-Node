@@ -70,14 +70,16 @@ void digital_pin_init()
 {
 	ADI_GPIO_RESULT error_status = ADI_GPIO_SUCCESS;
 
-	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(MICRO_TH_EN_PORT, MICRO_TH_EN_PIN, true)))
+	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(MICRO_TH_EN_PORT, MICRO_TH_EN_PIN, false)))
 	{
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
 	}
+
 	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(MICRO_TH_S0_PORT, MICRO_TH_S0_PIN, true)))
 	{
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
 	}
+
 	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(MICRO_TH_S1_PORT, MICRO_TH_S1_PIN, true)))
 	{
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
@@ -86,6 +88,7 @@ void digital_pin_init()
 	{
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
 	}
+
 	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(MICRO_RST_INT_PORT, MICRO_RST_INT_PIN, true)))
 	{
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
@@ -203,3 +206,4 @@ void gpio_init()
     analog_pin_init();
     i2c_pin_init();
 }
+
