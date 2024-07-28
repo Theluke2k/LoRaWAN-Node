@@ -166,6 +166,8 @@ void init_store()
 
 		adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN); //not really needed but it can be like this
 
+
+
 #if BOARD_NUM == 1
     select_comparator_reference(REF1_0_8_REF2_1_2);
 #elif BOARD_NUM == 2
@@ -183,6 +185,15 @@ void init_store()
     gpio_init();
     adc_init(false);
     i2c_init();
+
+    /*
+     * Lucas (23/03/2024):
+     * REMOVED FOR MERGE
+     */
+    //rtc_Init();
+    //spi_init();
+    //lora_initialize();
+
 }
 
 /**
