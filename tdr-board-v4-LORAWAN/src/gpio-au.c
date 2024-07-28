@@ -136,13 +136,13 @@ void digital_pin_init()
 	 * Lucas (28-07-2024):
 	 * DEBUG PINS
 	 */
-	/*
+
 	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT2, ADI_GPIO_PIN_0, true))) {
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
 	}
 	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT1, ADI_GPIO_PIN_15, true))) {
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
-	}*/
+	}
 
 	//Initial states
 	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
@@ -160,43 +160,6 @@ void digital_pin_init()
 
 }
 
-/*
- * Lucas (28-07-2024):
- * Function to initialize digital pins for measurement mode.
- */
-void DigitalPinsEnable() {
-	//Initial states
-	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
-	adi_gpio_SetHigh(MICRO_TH_EN_PORT, MICRO_TH_EN_PIN);
-	adi_gpio_SetLow(MICRO_TH_S0_PORT, MICRO_TH_S0_PIN);
-	adi_gpio_SetLow(MICRO_TH_S1_PORT, MICRO_TH_S1_PIN);
-	adi_gpio_SetLow(MICRO_SENSOR_EN_PORT, MICRO_SENSOR_EN_PIN);
-	adi_gpio_SetLow(MICRO_RST_INT_PORT, MICRO_RST_INT_PIN);
-	adi_gpio_SetLow(MICRO_COMP_ON_PORT, MICRO_COMP_ON_PIN);
-	adi_gpio_SetLow(MICRO_STM_START_PORT, MICRO_STM_START_PIN);
-	adi_gpio_SetLow(MICRO_REF_S1_PORT, MICRO_REF_S1_PIN);
-	adi_gpio_SetLow(MICRO_REF_S0_PORT, MICRO_REF_S0_PORT);
-	adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN);
-}
-
-/*
- * Lucas (28-07-2024):
- * Function to disable any digital pin used for measurements.
- */
-void DigitalPinsDisable() {
-	// Disable everything
-	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
-	adi_gpio_SetLow(MICRO_TH_EN_PORT, MICRO_TH_EN_PIN);
-	adi_gpio_SetLow(MICRO_TH_S0_PORT, MICRO_TH_S0_PIN);
-	adi_gpio_SetLow(MICRO_TH_S1_PORT, MICRO_TH_S1_PIN);
-	adi_gpio_SetLow(MICRO_SENSOR_EN_PORT, MICRO_SENSOR_EN_PIN);
-	adi_gpio_SetLow(MICRO_RST_INT_PORT, MICRO_RST_INT_PIN);
-	adi_gpio_SetLow(MICRO_COMP_ON_PORT, MICRO_COMP_ON_PIN);
-	adi_gpio_SetLow(MICRO_STM_START_PORT, MICRO_STM_START_PIN);
-	adi_gpio_SetLow(MICRO_REF_S1_PORT, MICRO_REF_S1_PIN);
-	adi_gpio_SetLow(MICRO_REF_S0_PORT, MICRO_REF_S0_PORT);
-	adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN);
-}
 
 /**
  * @brief    I2C pin mux setup.
@@ -218,14 +181,8 @@ void gpio_init()
 	ADI_GPIO_RESULT gpioStatus = ADI_GPIO_SUCCESS;
 	gpioStatus = adi_gpio_Init(gpioMemory, ADI_GPIO_MEMORY_SIZE);
 	DEBUG_RESULT("GPIO init failed", gpioStatus, ADI_GPIO_SUCCESS);
-
 	digital_pin_init();
     analog_pin_init();
     i2c_pin_init();
 }
 
-void InitGPIODriver() {
-	ADI_GPIO_RESULT gpioStatus = ADI_GPIO_SUCCESS;
-	gpioStatus = adi_gpio_Init(gpioMemory, ADI_GPIO_MEMORY_SIZE);
-	DEBUG_RESULT("GPIO init failed", gpioStatus, ADI_GPIO_SUCCESS);
-}
