@@ -237,14 +237,14 @@ int main(void) {
 		 * AU runs their measurements. The data is stored in tdr_data.
 		 * The stack uses this struct as data source when transmitting data.
 		 */
-//		xint_uart_disable();
-//		init_store();
-//		run_and_store_measurements(tdr_data, &index);
-//		uart_init();
-//		uint32_t delay_val = 1600; // 20ms
-//		while(--delay_val){};
-//		print_tdr_data_to_uart(tdr_data);
-//		uart_deinit();
+		xint_uart_disable();
+		init_store();
+		run_and_store_measurements(tdr_data, &index);
+		uart_init();
+		uint32_t delay_val = 1600; // 20ms
+		while(--delay_val){};
+		print_tdr_data_to_uart(tdr_data);
+		uart_deinit();
 
 		// Specify the amount of desired uplinks before going to sleep.
 		desiredUplinks = 1;
