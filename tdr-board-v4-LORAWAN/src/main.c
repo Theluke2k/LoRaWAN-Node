@@ -261,16 +261,14 @@ int main(void) {
 		 * The stack uses this struct as data source when transmitting data.
 		 */
 		// Initialize measure mode
-		//InitMeasureMode();
-		//DelayMs(1000);
+		InitMeasureMode();
+
 		// Run measurements
 		init_store();
 		run_and_store_measurements(tdr_data, &index);
 
-
-
 		// Deinitialize measure mode
-		//DeInitMeasureMode();
+		DeInitMeasureMode();
 
 
 		// Specify the amount of desired uplinks before going to sleep.
@@ -379,7 +377,7 @@ int main(void) {
 				enter_hibernation();
 
 				// Reinitializez required systems after hibernate wakeup.
-				//SystemReinitializerFromHibernate();
+				SystemReinitializerFromHibernate();
 			}
 			CRITICAL_SECTION_END( );
 
