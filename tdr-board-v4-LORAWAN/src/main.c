@@ -79,7 +79,7 @@ uint8_t tester = 0; //
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_5 // DEBUG (default: DR0)
+#define LORAWAN_DEFAULT_DATARATE                    DR_0 // DEBUG (default: DR0)
 
 /*!
  * LoRaWAN confirmed messages
@@ -445,15 +445,62 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 		printf("ping\n");
 		return true;
 	}
-	else if(strncmp(receiveBuffer, "Sleep", 5) == 0) {
-			int time = 0;
-			if(sscanf(receiveBuffer, "Sleep %d", &time) == 1) {
-				// Execute handler for command
-				printf("deep sleep: %d\n", time);
-				sleepTime = time;
-				return true;
-			}
+	else if (strncmp(receiveBuffer, "Sleep", 5) == 0) {
+		int time = 0;
+		if (sscanf(receiveBuffer, "Sleep %d", &time) == 1) {
+			// Execute handler for command
+			printf("deep sleep: %d\n", time);
+			sleepTime = time;
+			return true;
 		}
+	}
+	else if (strncmp(receiveBuffer, "set_adr:", 8) == 0) {
+		int setADR = 0;
+		if (sscanf(receiveBuffer, "set_adr:%d", &setADR) == 1) {
+			// Execute handler for command
+
+			// Check validity
+			if (setADR == 1 || setADR == 0) {
+				if (LmHandlerParams.AdrEnable != setADR) {
+					// Update ADR parameter
+					LmHandlerParams.AdrEnable = setADR;
+
+					// Reinitialize LmHandler
+					if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams)
+							!= LORAMAC_HANDLER_SUCCESS) {
+						printf("LoRaMac wasn't properly initialized\n");
+						// Fatal error, endless loop.
+						while (1) {
+						}
+					}
+				}
+			}
+			return true;
+		}
+	}
+	else if (strncmp(receiveBuffer, "set_datarate:", 13) == 0) {
+		int set_datarate = 0;
+		if (sscanf(receiveBuffer, "set_datarate:%d", &set_datarate) == 1) {
+			// Execute handler for command
+
+			// Check validity
+			if (set_datarate >= 0 && set_datarate <= 5) {
+				// Update ADR parameter
+				LmHandlerParams.TxDatarate = set_datarate;
+
+				// Reinitialize LmHandler
+				if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams)
+						!= LORAMAC_HANDLER_SUCCESS) {
+					printf("LoRaMac wasn't properly initialized\n");
+					// Fatal error, endless loop.
+					while (1) {
+					}
+				}
+
+			}
+			return true;
+		}
+	}
 	else if(strncmp(receiveBuffer, "{\"config\":{\"adr\":\"", 18) == 0) {
 		bool setADR = 0;
 		if(sscanf(receiveBuffer, "{\"config\":{\"adr\":\"%d", &setADR) == 1) {
