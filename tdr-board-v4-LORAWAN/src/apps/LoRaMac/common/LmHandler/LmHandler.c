@@ -354,7 +354,7 @@ LmHandlerErrorStatus_t LmHandlerInit( LmHandlerCallbacks_t *handlerCallbacks,
 
 // DEBUG START
 extern uint8_t isJoiningFlag;
-//DEBUG END
+// DEBUG END
 bool LmHandlerIsBusy( void )
 {
 	// DEBUG START

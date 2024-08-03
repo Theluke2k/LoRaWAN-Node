@@ -125,8 +125,8 @@ void digital_pin_init()
 	}
 
 	// UART0
-	*((volatile uint32_t *)REG_GPIO0_CFG) |= UART0_TX_PORTP0_MUX;
-	*((volatile uint32_t *)REG_GPIO0_CFG) |= UART0_RX_PORTP0_MUX;
+	//*((volatile uint32_t *)REG_GPIO0_CFG) |= UART0_TX_PORTP0_MUX;
+	//*((volatile uint32_t *)REG_GPIO0_CFG) |= UART0_RX_PORTP0_MUX;
 
 	// UART1
     //*((volatile uint32_t *)REG_GPIO1_CFG) |= UART1_TX_PORTP2_MUX;

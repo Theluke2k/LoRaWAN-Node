@@ -72,14 +72,14 @@ uint8_t tester = 0; //
  *
  * \remark Please note that when ADR is enabled the end-device should be static
  */
-#define LORAWAN_ADR_STATE                           LORAMAC_HANDLER_ADR_ON
+#define LORAWAN_ADR_STATE                           LORAMAC_HANDLER_ADR_OFF
 
 /*!
  * Default datarate
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_0 // DEBUG (default: DR0)
+#define LORAWAN_DEFAULT_DATARATE                    DR_5 // DEBUG (default: DR0)
 
 /*!
  * LoRaWAN confirmed messages
@@ -96,7 +96,7 @@ uint8_t tester = 0; //
  *
  * \remark Please note that ETSI mandates duty cycled transmissions. Use only for test purposes
  */
-#define LORAWAN_DUTYCYCLE_ON                        true
+#define LORAWAN_DUTYCYCLE_ON                        false
 
 /*!
  * LoRaWAN application port
@@ -248,12 +248,12 @@ int main(void) {
 
 	while (1) {
 		// Reinitialize system that were closed during hibernation
-		/*
+
 		if(hasHibernated) {
 			reinit_system();
 			hasHibernated = 0;
 		}
-		*/
+
 
 		/*
 		 * Lucas (30-03-2024):
@@ -269,7 +269,6 @@ int main(void) {
 
 		// Deinitialize measure mode
 		DeInitMeasureMode();
-
 
 		// Specify the amount of desired uplinks before going to sleep.
 		desiredUplinks = 1;
@@ -399,7 +398,7 @@ int main(void) {
 		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset);
 
 		// De-initialize system we don't need while hibernating
-		//deinit_system();
+		deinit_system();
 
 		// Set Wakeup Alarm
 		TimerStart(&SleepTimer);
@@ -408,7 +407,7 @@ int main(void) {
 		enter_hibernation();
 
 		// Set flag to reinitialize systems
-		//hasHibernated = 1;
+		hasHibernated = 1;
 	}
 
 	return 0;

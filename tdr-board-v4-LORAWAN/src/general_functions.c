@@ -109,7 +109,14 @@ void InitClock() {
  * Function to initialize everything that is needed for taking the measurements
  */
 void InitMeasureMode() {
+	// Initialize digital pins
 	DigitalPinsEnable();
+
+	// Init ADC
+	adc_init(false);
+
+	// Init I2C
+	i2c_init();
 }
 
 /*
@@ -117,7 +124,14 @@ void InitMeasureMode() {
  * Function to deinitialize everything that is needed for taking the measurements
  */
 void DeInitMeasureMode() {
+	// Disable some digital pins
 	DigitalPinsDisable();
+
+	// Disable ADC
+	adc_deinit();
+
+	// Disable I2C
+	i2c_deinit();
 }
 
 
@@ -128,6 +142,10 @@ void DeInitMeasureMode() {
 void deinit_system() {
 	// Deinitialize GPIO driver
 	adi_gpio_UnInit();
+
+	// Close SPI Driver
+	SpiDeInit(NULL);
+
 }
 
 /*
@@ -135,6 +153,7 @@ void deinit_system() {
  * Re-initializes the systems that were deinitialized before hibernation
  */
 void reinit_system() {
+	// Init GPIO
 	gpio_init();
 }
 
@@ -147,13 +166,8 @@ void reinit_system() {
  */
 void init_store()
 {
+	/*
 		adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
-
-//		adi_gpio_SetLow(MICRO_IMP_S2_PORT, MICRO_IMP_S2_PIN);
-//		adi_gpio_SetLow(MICRO_IMP_S1_PORT, MICRO_IMP_S1_PIN);
-//		adi_gpio_SetLow(MICRO_IMP_S0_PORT, MICRO_IMP_S0_PIN); //Legacy.
-
-
 		adi_gpio_SetHigh(MICRO_TH_EN_PORT, MICRO_TH_EN_PIN);
 		adi_gpio_SetLow(MICRO_TH_S0_PORT, MICRO_TH_S0_PIN);
 		adi_gpio_SetLow(MICRO_TH_S1_PORT, MICRO_TH_S1_PIN);
@@ -161,12 +175,10 @@ void init_store()
 		adi_gpio_SetLow(MICRO_RST_INT_PORT, MICRO_RST_INT_PIN);
 		adi_gpio_SetLow(MICRO_COMP_ON_PORT, MICRO_COMP_ON_PIN);
 		adi_gpio_SetLow(MICRO_STM_START_PORT, MICRO_STM_START_PIN);
-
 		adi_gpio_SetLow(MICRO_REF_S1_PORT, MICRO_REF_S1_PIN);
 		adi_gpio_SetLow(MICRO_REF_S0_PORT, MICRO_REF_S0_PIN);
-
 		adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN); //not really needed but it can be like this
-
+*/
 
 
 #if BOARD_NUM == 1
@@ -181,11 +193,16 @@ void init_store()
     select_comparator_reference(REF1_0_8_REF2_1_2);
 #endif
 
-    uart_init();
-    xint_init();
+    /*
+     * What needs to be initialized here?
+     */
+    // DEBUG START
+    //uart_init();
+    //xint_init();
     gpio_init();
     adc_init(false);
     i2c_init();
+    // DEBUG END
 
     /*
      * Lucas (23/03/2024):

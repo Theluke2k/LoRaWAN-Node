@@ -31,6 +31,12 @@ void i2c_init()
 	adi_i2c_SetBitRate(i2cDevice, 400000);
 }
 
+
+void i2c_deinit()
+{
+	adi_i2c_Close(i2cDevice);
+}
+
 /*
  * @brief Writes a blank byte to the I2C device of a given address.
  *
