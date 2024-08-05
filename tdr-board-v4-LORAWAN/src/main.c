@@ -72,7 +72,7 @@ uint8_t tester = 0; //
  *
  * \remark Please note that when ADR is enabled the end-device should be static
  */
-#define LORAWAN_ADR_STATE                           LORAMAC_HANDLER_ADR_OFF
+#define LORAWAN_ADR_STATE                           LORAMAC_HANDLER_ADR_ON
 
 /*!
  * Default datarate
@@ -219,7 +219,7 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t sleepTime = 10000;
+uint32_t sleepTime = 300000;
 int32_t sleepTimeOffset = 0;
 
 // Logical Flags
@@ -395,16 +395,20 @@ int main(void) {
 		iHibernateExitFlag = 0;
 
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
-		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset);
+		TimerSetValue( &SleepTimer, sleepTime + 0);
 
 		// De-initialize system we don't need while hibernating
-		deinit_system();
+		//deinit_system();
 
 		// Set Wakeup Alarm
 		TimerStart(&SleepTimer);
 
+		adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG
+
 		// Enter Hibernate Mode
 		enter_hibernation();
+
+		adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG
 
 		// Set flag to reinitialize systems
 		hasHibernated = 1;
