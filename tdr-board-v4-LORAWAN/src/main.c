@@ -219,7 +219,7 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t sleepTime = 300000;
+uint32_t sleepTime = 30000;
 int32_t sleepTimeOffset = 0;
 
 // Logical Flags
@@ -230,14 +230,14 @@ uint8_t testModeInitialized = 0;
 
 // Function definitions
 int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
-
+/*
 // Test mode variables
 uint8_t testMode_SF = 12; // Spreading factor of test mode value between 12 and 7.
 uint8_t testMode_TxPower = 0; // Transmission power in testMode.
 uint32_t testMode_duration = 0; // Duration of test mode in milliseconds.
 uint32_t testMode_startTime = 0; // Time before testMode starts in milliseconds. For example, start in 60000 means start testMode in 1 minute.
 uint32_t testMode_sleepTime = 5000; // Sleep time between transmissions in milliseconds during testmode.
-
+*/
 /*
  * Lucas (22-10-23):
  * Main program.
@@ -263,13 +263,14 @@ int main(void) {
 		 * If test mode has been initialized over CLI, the processor should execute
 		 * specialized code in a certain amount of time.
 		 */
-		if(testModeInitialized == 1) {
+		/*
+		if(testModeInitialized) {
 			// Execute some code
 
 			// Continue loop from beginning.
 			continue;
 		}
-
+*/
 
 		/*
 		 * Lucas (30-03-2024):
@@ -411,7 +412,7 @@ int main(void) {
 		iHibernateExitFlag = 0;
 
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
-		TimerSetValue( &SleepTimer, sleepTime + 0);
+		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset);
 
 		// De-initialize system we don't need while hibernating
 		//deinit_system();
@@ -419,12 +420,12 @@ int main(void) {
 		// Set Wakeup Alarm
 		TimerStart(&SleepTimer);
 
-		adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG
+		//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG
 
 		// Enter Hibernate Mode
 		enter_hibernation();
 
-		adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG
+		//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG
 
 		// Set flag to reinitialize systems
 		hasHibernated = 1;
