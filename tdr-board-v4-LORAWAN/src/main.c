@@ -227,9 +227,6 @@ uint8_t enableSleepFlag = 0;
 uint8_t isJoiningFlag = 0;
 uint8_t hasHibernated = 0;
 
-
-
-
 // Function definitions
 int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
 

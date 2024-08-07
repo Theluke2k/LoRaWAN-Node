@@ -235,6 +235,7 @@ void RtcInit( void )
 	DEBUG_RESULT("Failed to enable the device", eResult, ADI_RTC_SUCCESS);
 
 
+
 /*
 	//Program to test timer.
 	RtcSetTimerContext( );
@@ -329,14 +330,25 @@ void RtcInit( void )
 /*
  * Lucas:
  * This function saves the current tick of the counter register so it can
- * be used as reference e.g. if we want to get the elapsed time of the timer.
- */
+ * be used as reference e.g. if we want to get the elapsed time of the timer. OLD
+ *//*
 uint32_t RtcSetTimerContext( void )
 {
 	ADI_RTC_RESULT eResult;
 	eResult = adi_rtc_GetCount(hDevRtc1, &RtcTimerContext);
 	DEBUG_RESULT("\n Failed to get RTC Count %04d",eResult,ADI_RTC_SUCCESS);
 	//printf("RtcSetTimerContext returned: %d\n", RtcTimerContext);
+	return ( uint32_t )RtcTimerContext;
+}*/
+
+/*
+ * Lucas:
+ * This function saves the current tick of the counter register so it can
+ * be used as reference e.g. if we want to get the elapsed time of the timer.
+ */
+uint32_t RtcSetTimerContext( void )
+{
+	RtcTimerContext = RtcGetTimerValue();
 	return ( uint32_t )RtcTimerContext;
 }
 
@@ -372,13 +384,13 @@ uint32_t RtcGetMinimumTimeout( void )
 uint32_t RtcMs2Tick( TimerTime_t milliseconds )
 {
 	//printf("RtcMs2Tick returned: %d\n", (int) ((milliseconds * RTC_COUNTER_FREQ) / 1000.0f));
-	return (uint32_t) ((milliseconds * RTC_COUNTER_FREQ) / 1000.0f);
+	return (uint32_t) (milliseconds * (RTC_COUNTER_FREQ / 1000.0f));
 }
 
 TimerTime_t RtcTick2Ms( uint32_t tick )
 {
 	//printf("RtcTick2Ms returned: %d\n", (int) ((tick * 1000.0f) / RTC_COUNTER_FREQ));
-	return (uint32_t) ((tick * 1000.0f) / RTC_COUNTER_FREQ);
+	return (uint32_t) (tick * (1000.0f / RTC_COUNTER_FREQ));
 }
 
 /*
@@ -389,8 +401,8 @@ TimerTime_t RtcTick2Ms( uint32_t tick )
  */
 void RtcDelayMs( uint32_t delay )
 {
-	uint64_t delayTicks = 0;
-	uint64_t refTicks = RtcGetTimerValue( );
+	uint32_t delayTicks = 0;
+	uint32_t refTicks = RtcGetTimerValue( );
 
 	delayTicks = RtcMs2Tick( delay );
 
@@ -440,17 +452,14 @@ void RtcStopAlarm( void )
 
 /*
  * Lucas:
- * Starts the timer for a time specified by timeout (in ticks).
+ * Starts the timer for a time specified by timeout (in ticks). OLD
  */
 void RtcStartAlarm( uint32_t timeout )
 {
 	//printf("RtcStartAlarm called with timout: %d\n", (int) timeout);
 	//printf("Real value of alarm is: %d\n", (int) (RtcTimerContext + timeout));
 	ADI_RTC_RESULT eResult;
-	/*
-	 * Lucas:
-	 * Don't know if we need this.
-	 */
+
 	RtcStopAlarm( );
 
 	eResult = adi_rtc_SetAlarm(hDevRtc1, RtcTimerContext + timeout);
@@ -466,7 +475,30 @@ void RtcStartAlarm( uint32_t timeout )
 
 /*
  * Lucas:
- * Gets the current ticks of the RTC counter.
+ * Starts the timer for a time specified by timeout (in ticks).
+ *//*
+void RtcStartAlarm( uint32_t timeout )
+{
+	//printf("RtcStartAlarm called with timout: %d\n", (int) timeout);
+	//printf("Real value of alarm is: %d\n", (int) (RtcTimerContext + timeout));
+	ADI_RTC_RESULT eResult;
+
+	RtcStopAlarm( );
+
+	eResult = adi_rtc_SetAlarmRegs(hDevRtc1, (uint16_t) ((RtcTimerContext + timeout) >> 15), 0, (uint16_t) ((RtcTimerContext + timeout) & 0x7FFF));
+	DEBUG_RESULT("\n Failed to set alarm",eResult,ADI_RTC_SUCCESS);
+
+	eResult = adi_rtc_EnableAlarm(hDevRtc1,true);
+	DEBUG_RESULT("Failed to enable alarm",eResult,ADI_RTC_SUCCESS);
+
+	eResult = adi_rtc_EnableInterrupts(hDevRtc1, ADI_RTC_ALARM_INT, true);
+	DEBUG_RESULT("Failed to enable interrupts",eResult,ADI_RTC_SUCCESS);
+
+}*/
+
+/*
+ * Lucas:
+ * Gets the current ticks of the RTC counter. OLD
  */
 uint32_t RtcGetTimerValue( void )
 {
@@ -478,6 +510,24 @@ uint32_t RtcGetTimerValue( void )
 
 	return count;
 }
+
+/*
+ * Lucas:
+ * Gets the current ticks of the RTC counter.
+ *//*
+uint32_t RtcGetTimerValue( void )
+{
+	ADI_RTC_RESULT eResult;
+	uint32_t pnCount = 0;
+	uint32_t pfCount = 0;
+
+	eResult = adi_rtc_GetCountRegs(hDevRtc1, &pnCount, &pfCount);
+	DEBUG_RESULT("\n Failed to get RTC Count %04d",eResult,ADI_RTC_SUCCESS);
+
+	uint64_t totalCount = (pnCount << 15) | (pfCount);
+
+	return (uint32_t) totalCount;
+}*/
 
 /*
  * Lucas:
