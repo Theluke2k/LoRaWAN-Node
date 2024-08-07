@@ -97,7 +97,7 @@ static uint32_t RtcTimerContext = 0;
  */
 static void rtc1Callback(void *pCBParam, uint32_t Event, void *EventArg)
 {
-	//adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
+	adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
 	TimerIrqHandler();
 }
 
@@ -515,4 +515,3 @@ TimerTime_t RtcTempCompensation( TimerTime_t period, float temperature )
 {
     return 0;
 }
-

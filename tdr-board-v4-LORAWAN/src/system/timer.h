@@ -37,8 +37,8 @@ extern "C"
  */
 typedef struct TimerEvent_s
 {
-    uint32_t Timestamp;                  //! Current timer value
-    uint32_t ReloadValue;                //! Timer delay value
+    uint64_t Timestamp;                  //! Current timer value
+    uint64_t ReloadValue;                //! Timer delay value
     bool IsStarted;                      //! Is the timer currently running
     bool IsNext2Expire;                  //! Is the next timer to expire
     void ( *Callback )( void* context ); //! Timer IRQ callback function
@@ -50,8 +50,8 @@ typedef struct TimerEvent_s
  * \brief Timer time variable definition
  */
 #ifndef TimerTime_t
-typedef uint32_t TimerTime_t;
-#define TIMERTIME_T_MAX                             ( ( uint32_t )~0 )
+typedef uint32_t TimerTime_t; // DEBUG (default: uint32_t)
+#define TIMERTIME_T_MAX                             ( ( uint32_t )~0 ) // DEBUG (default: uint32_t)
 #endif
 
 /*!
