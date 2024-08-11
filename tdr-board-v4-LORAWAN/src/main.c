@@ -72,7 +72,7 @@ uint8_t tester = 0; //
  *
  * \remark Please note that when ADR is enabled the end-device should be static
  */
-#define LORAWAN_ADR_STATE                           LORAMAC_HANDLER_ADR_OFF
+#define LORAWAN_ADR_STATE                           LORAMAC_HANDLER_ADR_ON
 
 /*!
  * Default datarate
@@ -219,7 +219,7 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t sleepTime = 10000;
+uint32_t sleepTime = 30000;
 int32_t sleepTimeOffset = 0;
 
 // Logical Flags
@@ -257,7 +257,6 @@ int main(void) {
 			reinit_system();
 			hasHibernated = 0;
 		}
-
 
 		/*
 		 * Lucas (30-03-2024):

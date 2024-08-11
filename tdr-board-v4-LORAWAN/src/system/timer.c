@@ -221,10 +221,10 @@ void TimerIrqHandler( void )
         cur->IsStarted = false;
 
         // DEBUG START
-		if (RTCcallbackCounter < RTCCallback_MAX) {
-			ExecutedCallbacks[RTCcallbackCounter++] = cur->Callback;
-		}
-		// DEBUG END
+        if(RTCcallbackCounter < RTCCallback_MAX) {
+        	ExecutedCallbacks[RTCcallbackCounter++] = cur->Callback;
+        }
+        // DEBUG END
 
         ExecuteCallBack( cur->Callback, cur->Context );
     }
@@ -340,8 +340,8 @@ void TimerReset( TimerEvent_t *obj )
 
 void TimerSetValue( TimerEvent_t *obj, uint32_t value )
 {
-    uint64_t minValue = 0;
-    uint64_t ticks = RtcMs2Tick( value );
+    uint32_t minValue = 0;
+    uint32_t ticks = RtcMs2Tick( value );
 
     TimerStop( obj );
 
