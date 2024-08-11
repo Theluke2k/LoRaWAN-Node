@@ -219,7 +219,7 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t sleepTime = 30000;
+uint32_t sleepTime = 3500;
 int32_t sleepTimeOffset = 0;
 
 // Logical Flags
@@ -398,7 +398,7 @@ int main(void) {
 		iHibernateExitFlag = 0;
 
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
-		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset);
+		TimerSetValue( &SleepTimer, sleepTime + 0); // DEBUG (default + sleepTimeOffset)
 
 		// De-initialize system we don't need while hibernating
 		deinit_system();
@@ -406,8 +406,12 @@ int main(void) {
 		// Set Wakeup Alarm
 		TimerStart(&SleepTimer);
 
+		adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+
 		// Enter Hibernate Mode
 		enter_hibernation();
+
+		adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 
 		// Set flag to reinitialize systems
 		hasHibernated = 1;
