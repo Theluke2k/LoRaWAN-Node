@@ -125,6 +125,7 @@ static LmHandlerAppData_t AppData = { .Buffer = AppDataBuffer, .BufferSize = 0,
  * Timer to handle the application data transmission duty cycle
  */
 static TimerEvent_t TxTimer;
+static TimerEvent_t SleepTimer;
 
 static void OnMacProcessNotify(void);
 static void OnNvmDataChange(LmHandlerNvmContextStates_t state, uint16_t size);
@@ -155,6 +156,7 @@ static void OnPingSlotPeriodicityChanged(uint8_t pingSlotPeriodicity);
  * Function executed on TxTimer event
  */
 static void OnTxTimerEvent(void* context);
+static void OnSleepTimerEvent(void* context);
 
 //Function pointers for loramac callbacks.
 static LmHandlerCallbacks_t LmHandlerCallbacks =
@@ -215,6 +217,25 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
+uint32_t sleepTime = 30000;
+int32_t sleepTimeOffset = 0;
+
+// Logical Flags
+uint8_t enableSleepFlag = 0;
+uint8_t isJoiningFlag = 0;
+uint8_t hasHibernated = 0;
+uint8_t testModeInitialized = 0;
+
+// Test mode variables
+uint8_t testMode_SF = 12; // Spreading factor of test mode value between 12 and 7.
+uint8_t testMode_TxPower = 0; // Transmission power in testMode.
+uint32_t testMode_duration = 0; // Duration of test mode in milliseconds.
+uint32_t testMode_startTime = 0; // Time before testMode starts in milliseconds. For example, start in 60000 means start testMode in 1 minute.
+uint32_t testMode_sleepTime = 5000; // Sleep time between transmissions in milliseconds during testmode.
+
+// Function definitions
+int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
+
 /*
  * Lucas (22-10-23):
  * Main program.
@@ -222,29 +243,25 @@ uint8_t initialized = 0;
 int main(void) {
  	uint16_t index = 0;
 	init_system();
-	//BoardInitMcu();
-	//Radio.Write(0x01, 0x01);
-	//Radio.Write(0x01, 0x00);
+
+	// Create timer to wake up processor during join accept.
+	TimerInit( &SleepTimer, OnSleepTimerEvent );
+
 	while (1) {
-//		DelayMsMcu(5000);
-//		iHibernateExitFlag = 0;
-//
-//		rtc_UpdateAlarm();
-//		xint_uart_enable();
-//		enter_hibernation();
+
 		/*
 		 * Lucas (30-03-2024):
 		 * AU runs their measurements. The data is stored in tdr_data.
 		 * The stack uses this struct as data source when transmitting data.
 		 */
-		xint_uart_disable();
-		init_store();
-		run_and_store_measurements(tdr_data, &index);
-		uart_init();
-		uint32_t delay_val = 1600; // 20ms
-		while(--delay_val){};
-		print_tdr_data_to_uart(tdr_data);
-		uart_deinit();
+		//xint_uart_disable();
+		//init_store();
+		//run_and_store_measurements(tdr_data, &index);
+		//uart_init();
+		//uint32_t delay_val = 1600; // 20ms
+		//while(--delay_val){};
+		//print_tdr_data_to_uart(tdr_data);
+		//uart_deinit();
 
 		// Specify the amount of desired uplinks before going to sleep.
 		desiredUplinks = 1;
