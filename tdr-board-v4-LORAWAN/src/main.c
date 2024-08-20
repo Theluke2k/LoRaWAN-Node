@@ -223,7 +223,7 @@ uint8_t enableSleepFlag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t sleepTime = 3500;
+uint32_t sleepTime = 60000;
 int32_t sleepTimeOffset = 0;
 
 bool sleepTest = false;
@@ -352,13 +352,13 @@ int main(void) {
 					//Radio.Sleep();
 
 					// Set sleep timer
-					TimerSetValue(&SleepTimer, 2000);
+					//TimerSetValue(&SleepTimer, 2000);
 
 					// Start sleep timer
-					TimerStart(&SleepTimer);
+					//TimerStart(&SleepTimer);
 
 					// Start sleeping
-					enter_hibernation();
+					//enter_hibernation();
 				}
 
 
