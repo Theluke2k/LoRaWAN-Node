@@ -96,7 +96,7 @@ uint8_t tester = 0; //
  *
  * \remark Please note that ETSI mandates duty cycled transmissions. Use only for test purposes
  */
-#define LORAWAN_DUTYCYCLE_ON                        false
+#define LORAWAN_DUTYCYCLE_ON                        true
 
 /*!
  * LoRaWAN application port
@@ -219,7 +219,7 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t sleepTime = 3500;
+uint32_t sleepTime = 10000;
 int32_t sleepTimeOffset = 0;
 
 // Logical Flags
@@ -406,12 +406,12 @@ int main(void) {
 		// Set Wakeup Alarm
 		TimerStart(&SleepTimer);
 
-		adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+		//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 
 		// Enter Hibernate Mode
 		enter_hibernation();
 
-		adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+		//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 
 		// Set flag to reinitialize systems
 		hasHibernated = 1;
