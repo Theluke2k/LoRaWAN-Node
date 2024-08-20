@@ -25,6 +25,8 @@
 #include "rtc-board.h"
 #include "timer.h"
 
+#include <adi_gpio.h> // DEBUG
+
 /*!
  * Safely execute call back
  */
@@ -243,6 +245,7 @@ void TimerIrqHandler( void )
     {
         TimerSetTimeout( TimerListHead );
     }
+    //adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
 }
 
 void TimerStop( TimerEvent_t *obj )

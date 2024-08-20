@@ -59,7 +59,7 @@ uint8_t tester = 0; //
 /*!
  * Defines the application data transmission duty cycle. 10s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                           	1000 // Currently Unused
+#define APP_TX_DUTYCYCLE                           	1000000 // Currently Unused
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -219,7 +219,7 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t sleepTime = 10000;
+uint32_t sleepTime = 3500;
 int32_t sleepTimeOffset = 0;
 
 // Logical Flags
@@ -243,20 +243,65 @@ uint32_t testMode_sleepTime = 5000; // Sleep time between transmissions in milli
  * Main program.
  */
 int main(void) {
- 	uint16_t index = 0;
+	uint32_t reset_status = *((volatile uint32_t*)0x4004C040);
+
+	uint16_t index = 0;
 
  	// Initializes the system clock and needed drivers.
  	init_system();
 
+ 	if(reset_status & (1 << 2)) {
+ 		adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
+ 	}
+ 	else {
+ 		adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
+ 	}
+
+ 	if(reset_status & (1 << 3)) {
+ 		adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+ 	}
+ 	else {
+ 		adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+ 	}
+
+ 	DelayMsMcu(5000);
+ 	adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
+ 	adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+
+ 	// Clear reset bits
+ 	*((volatile uint32_t*)0x4004C040) = 0x0F;
+/*
+ 	adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
+
+ 	DelayMsMcu(500);
+
+ 	adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
+ 	*/
+
 	// Create timer to wake up processor during join accept.
 	TimerInit( &SleepTimer, OnSleepTimerEvent );
 
+	// Set interrup priorities. SPI must have highest prioriy!
+	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
+	NVIC_SetPriority(SPI0_EVT_IRQn, 1);
+	NVIC_SetPriority(RTC1_EVT_IRQn, 2);
+	NVIC_SetPriority(RTC0_EVT_IRQn, 2);
+
 	while (1) {
 		// Reinitialize system that were closed during hibernation
+		/*
 		if(hasHibernated) {
 			reinit_system();
 			hasHibernated = 0;
+		}*/
+
+		if((sleepTime == 40000) && hasHibernated) {
+			//adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
+			//hasHibernated = 0;
 		}
+
+		hasHibernated = 0;
+
 
 		/*
 		 * Lucas (30-03-2024):
@@ -282,12 +327,6 @@ int main(void) {
 		 */
 		// Initlialize board (sets up pins as LoRaMac wants it)
 		BoardInitMcu();
-
-		// Set interrup priorities. SPI must have highest prioriy!
-		NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
-		NVIC_SetPriority(SPI0_EVT_IRQn, 1);
-		NVIC_SetPriority(RTC1_EVT_IRQn, 2);
-		NVIC_SetPriority(RTC0_EVT_IRQn, 2);
 
 		// Initialize transmission perhiodicity variable
 		TxPeriodicity = APP_TX_DUTYCYCLE
@@ -317,6 +356,7 @@ int main(void) {
 
 			// Mark the program as initiated.
 			initialized = 1;
+			//adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
 		}
 
 		// Reset number of uplinks for this power cycle.
@@ -412,7 +452,9 @@ int main(void) {
 		enter_hibernation();
 
 		//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
-
+		//adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
+		//DelayMsMcu(500);
+		//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
 		// Set flag to reinitialize systems
 		hasHibernated = 1;
 	}

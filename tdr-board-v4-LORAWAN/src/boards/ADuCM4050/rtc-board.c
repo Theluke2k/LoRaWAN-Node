@@ -91,14 +91,21 @@ static void           rtc1Callback (void *pCBParam, uint32_t Event, void *EventA
  */
 static uint32_t RtcTimerContext = 0;
 
+// DEBUG start
+extern uint32_t sleepTime;
+extern uint8_t hasHibernated;
+// DEBUG end
+
+
 /*
  * Lucas:
  * Callback function for the alarm that is set.
  */
 static void rtc1Callback(void *pCBParam, uint32_t Event, void *EventArg)
 {
-	//adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
+	//adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
 	TimerIrqHandler();
+	//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
 }
 
 /*
@@ -372,7 +379,7 @@ uint32_t RtcGetMinimumTimeout( void )
 uint32_t RtcMs2Tick( TimerTime_t milliseconds )
 {
 	//printf("RtcMs2Tick returned: %d\n", (int) ((milliseconds * RTC_COUNTER_FREQ) / 1000.0f));
-	return (uint32_t) (milliseconds * (RTC_COUNTER_FREQ / 1000.0f));
+	return (uint32_t) ((milliseconds * RTC_COUNTER_FREQ) / 1000.0f);
 }
 
 TimerTime_t RtcTick2Ms( uint32_t tick )

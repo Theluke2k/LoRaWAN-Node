@@ -175,6 +175,7 @@
 								<option id="arm.linker.option.ldprocessing.ldfile.487611621" name="Custom linker script (-T)" superClass="arm.linker.option.ldprocessing.ldfile" useByScannerDiscovery="false" value="${workspace_loc:/${ProjName}}/RTE/Device/ADuCM4050/ADuCM4050.ld" valueType="string"/>
 								<option id="arm.toolchain.gcc.c.linker.option.specs.1164496002" name="Semihosting support" superClass="arm.toolchain.gcc.c.linker.option.specs" useByScannerDiscovery="false" value="arm.toolchain.gcc.c.linker.option.specs.nosys" valueType="enumerated"/>
 								<option id="arm.c.linker.mathslib.907377905" name="Link against system math library (-lm)" superClass="arm.c.linker.mathslib" useByScannerDiscovery="false" value="false" valueType="boolean"/>
+								<option id="arm.linker.option.gensymbolmap.1695002739" name="Generate symbol map (-Wl,-Map)" superClass="arm.linker.option.gensymbolmap" value="true" valueType="boolean"/>
 								<inputType id="arm.linker.input.1440673899" superClass="arm.linker.input">
 									<additionalInput kind="additionaldependency" paths="$(USER_OBJS)"/>
 								</inputType>
