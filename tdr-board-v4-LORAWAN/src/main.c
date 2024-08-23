@@ -128,6 +128,7 @@ static LmHandlerAppData_t AppData = { .Buffer = AppDataBuffer, .BufferSize = 0,
  */
 static TimerEvent_t TxTimer;
 static TimerEvent_t SleepTimer;
+static TimerEvent_t RawLoRaStartInTimer;
 
 static void OnMacProcessNotify(void);
 static void OnNvmDataChange(LmHandlerNvmContextStates_t state, uint16_t size);
@@ -159,6 +160,7 @@ static void OnPingSlotPeriodicityChanged(uint8_t pingSlotPeriodicity);
  */
 static void OnTxTimerEvent(void* context);
 static void OnSleepTimerEvent(void* context);
+static void OnRawLoRaStartInEvent(void* context);
 
 //Function pointers for loramac callbacks.
 static LmHandlerCallbacks_t LmHandlerCallbacks =
@@ -227,59 +229,31 @@ uint8_t enableSleepFlag = 0;
 uint8_t isJoiningFlag = 0;
 uint8_t hasHibernated = 0;
 uint8_t testModeInitialized = 0;
+uint8_t rawLoRaEnabled = 0;
 
 // Function definitions
 int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
-/*
+
 // Test mode variables
 uint8_t testMode_SF = 12; // Spreading factor of test mode value between 12 and 7.
 uint8_t testMode_TxPower = 0; // Transmission power in testMode.
 uint32_t testMode_duration = 0; // Duration of test mode in milliseconds.
-uint32_t testMode_startTime = 0; // Time before testMode starts in milliseconds. For example, start in 60000 means start testMode in 1 minute.
 uint32_t testMode_sleepTime = 5000; // Sleep time between transmissions in milliseconds during testmode.
-*/
+uint32_t rawlora_start_in = 0; // Time before RawLoRa starts in milliseconds. For example, start in 60000 means start rawlora in 1 minute.
+
 /*
  * Lucas (22-10-23):
  * Main program.
  */
 int main(void) {
-	uint32_t reset_status = *((volatile uint32_t*)0x4004C040);
-
 	uint16_t index = 0;
 
  	// Initializes the system clock and needed drivers.
  	init_system();
 
- 	if(reset_status & (1 << 2)) {
- 		adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
- 	}
- 	else {
- 		adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
- 	}
-
- 	if(reset_status & (1 << 3)) {
- 		adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
- 	}
- 	else {
- 		adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
- 	}
-
- 	DelayMsMcu(5000);
- 	adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15);
- 	adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
-
- 	// Clear reset bits
- 	*((volatile uint32_t*)0x4004C040) = 0x0F;
-/*
- 	adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
-
- 	DelayMsMcu(500);
-
- 	adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
- 	*/
-
-	// Create timer to wake up processor during join accept.
-	TimerInit( &SleepTimer, OnSleepTimerEvent );
+ 	// Create timer to wake up processor during join accept.
+ 	TimerInit( &SleepTimer, OnSleepTimerEvent );
+ 	TimerInit( &RawLoRaStartInTimer, OnRawLoRaStartInEvent );
 
 	// Set interrup priorities. SPI must have highest prioriy!
 	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
@@ -295,12 +269,14 @@ int main(void) {
 			hasHibernated = 0;
 		}*/
 
-		if((sleepTime == 40000) && hasHibernated) {
-			//adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
-			//hasHibernated = 0;
+		/*
+		 * Lucas (23-08-2024):
+		 * If the flag is set, the board executes the raw lora session
+		 * until the flag is disabled unset.
+		 */
+		while(rawLoRaEnabled) {
+			RawLoRaSession();
 		}
-
-		hasHibernated = 0;
 
 
 		/*
@@ -425,6 +401,10 @@ int main(void) {
 
 		} while (1);
 
+		if(rawLoRaEnabled) {
+			continue;
+		}
+
 		// Generate a random uint32_t using Radio.Random(). Map value to min -3000 and max 3000
 		sleepTimeOffset = getSleepTimeOffset(Radio.Random(), -3000, 3000);
 
@@ -438,7 +418,7 @@ int main(void) {
 		iHibernateExitFlag = 0;
 
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
-		TimerSetValue( &SleepTimer, sleepTime + 0); // DEBUG (default + sleepTimeOffset)
+		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset); // DEBUG (default + sleepTimeOffset)
 
 		// De-initialize system we don't need while hibernating
 		deinit_system();
@@ -446,15 +426,9 @@ int main(void) {
 		// Set Wakeup Alarm
 		TimerStart(&SleepTimer);
 
-		//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
-
 		// Enter Hibernate Mode
 		enter_hibernation();
 
-		//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
-		//adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
-		//DelayMsMcu(500);
-		//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
 		// Set flag to reinitialize systems
 		hasHibernated = 1;
 	}
@@ -471,6 +445,13 @@ int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX) {
 	float norm = (float)random_value / (float)UINT32_MAX;
 	int32_t offset = (int32_t)((norm * (MAX - MIN)) + MIN);
 	return offset;
+}
+
+/*
+ * Lucas (23-08-2024)
+ */
+void RawLoRaSession() {
+
 }
 
 /*
@@ -567,7 +548,25 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 			return true;
 		}
 	}
+	/*
+	 * New RawLora Commands.
+	 */
+	else if (strncmp(receiveBuffer, "rawlora_start_in:", 17) == 0) {
+		uint32_t startTime = 0;
+		if (sscanf(receiveBuffer, "rawlora_start_in:%d", &startTime) == 1) {
+			// Execute handler for command
 
+			// Check validity
+			if(startTime < 131072000) {
+				rawlora_start_in = startTime; // set flag
+
+				// Set and start timer to start LoRa in amount of timer
+				TimerSetValue( &RawLoRaStartInTimer, rawlora_start_in);
+				TimerStart(&RawLoRaStartInTimer);
+			}
+			return true;
+		}
+	}
 	else {
 		printf("unknown command\n");
 	}
@@ -820,6 +819,11 @@ static void OnSleepTimerEvent( void* context )
 {
 	iHibernateExitFlag = 1;
 	//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
+}
+
+static void OnRawLoRaStartInEvent( void* context )
+{
+	rawLoRaEnabled = 1;
 }
 
 

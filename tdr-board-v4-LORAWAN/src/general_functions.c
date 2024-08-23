@@ -47,10 +47,10 @@ void init_system()
 	gpio_init();
 
 	// Initialize ADC driver
-	adc_init(false); // TODO: calibration stuck. Check later.
+	adc_init(false); // TODO: calibration stuck. Check later. // DEBUG
 
 	// Initialize I2C driver
-    i2c_init();
+    i2c_init(); // DEBUG
 
 }
 
