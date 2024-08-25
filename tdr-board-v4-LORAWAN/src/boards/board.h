@@ -30,6 +30,22 @@ extern "C"
 
 #include <stdint.h>
 #include "utilities.h"
+#include "sx1276Regs-LoRa.h"
+#include "sx1276Regs-Fsk.h"
+
+/*
+ * Lucas (25-08-2024):
+ * Struct to contain data about the RawLoRa session.
+ */
+typedef struct RawLoRa_Config
+{
+	uint32_t		StartIn;
+	uint32_t		Duration;
+	uint32_t		TxPeriodicity;
+    uint8_t        	SpreadingFactor;
+    uint32_t		Frequency;
+}RawLoRa_Config;
+
 /*!
  * Possible power sources
  */
@@ -129,6 +145,10 @@ uint8_t GetBoardPowerSource( void );
  * \retval value  Version
  */
 Version_t BoardGetVersion( void );
+
+void RawLoRaSend(RawLoRa_Config *config, uint8_t *data, uint8_t packet_length);
+uint8_t RawLoRa_RadioConfig(RawLoRa_Config *config);
+uint8_t RawLoRa_RadioSend(uint8_t *data, uint8_t packet_length);
 
 #ifdef __cplusplus
 }

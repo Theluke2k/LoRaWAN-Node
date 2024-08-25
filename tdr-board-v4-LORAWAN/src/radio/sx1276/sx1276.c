@@ -1319,10 +1319,10 @@ uint8_t rx[1000];
 /*
  * Lucas:
  * The function is used to write a buffer of bytes to the sx1276 radio.
- * Here'swhat it does:
+ * Here's what it does:
  * 1. Set NSS to 0 to initiate a the transmission
  * 2. Transmit the address of the register that we want to write to (the value received
- *    is the previous value of the specified register (thus a dummy that we dont save).
+ *    is the previous value of the specified register (thus a dummy that we dont save)).
  *    The MSB is set to 1 to indicate a write operation and then 7 bits specify the address.
  * 3. Initiate a loop that sends the bytes to transmit one by one.
  * 4. Set NSS to high to indicate the end of the transmission.

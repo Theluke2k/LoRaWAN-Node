@@ -10,7 +10,7 @@
 #include "sx1276_registers.h"
 #include "gpio-au.h"
 #include "shared.h"
-
+#include "general_functions.h"
 
 uint16_t _packetIndex;
 
@@ -73,7 +73,7 @@ uint8_t lora_initialize() {
 
     /* Set the module in LoRa and standby mode */
     spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
-    spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
+    //spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
 
     return 0;
 }
@@ -216,3 +216,6 @@ int8_t lora_waitACK(char* ackMsg, uint16_t timeOutDelay) {
     if (!strcmp(rxBuffer, ackMsg)) return 0;
     else return 1;
 }
+
+
+

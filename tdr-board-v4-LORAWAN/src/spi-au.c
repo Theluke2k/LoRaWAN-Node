@@ -76,6 +76,17 @@ ADI_SPI_RESULT spi_init()
 	return ADI_SPI_SUCCESS;
 }
 
+ADI_SPI_RESULT spi_deinit()
+{
+	ADI_SPI_RESULT eResult;
+
+	/* Close the SPI device  */
+	eResult = adi_spi_Close(spiDevice);
+	DEBUG_RESULT("Failed to uninit SPI driver", eResult, ADI_SPI_SUCCESS);
+
+	return eResult;
+}
+
 /**
  * @brief    SPI write single byte.
  *

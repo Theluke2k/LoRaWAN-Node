@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "general_functions.h"
-
 #include "tdr.h"
 #include "rtc.h"
 #include "sensors.h"
@@ -420,3 +418,5 @@ uint32_t getClkFreq(const ADI_CLOCK_ID eClockId) {
     adi_pwr_GetClockFrequency(eClockId, &clockFreq);
     return clockFreq;
 }
+
+

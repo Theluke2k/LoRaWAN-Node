@@ -40,6 +40,7 @@
 #include <drivers/general/adi_drivers_general.h>
 #include "LoRaMac.h"
 #include "gpio-board.h"
+//#include "sx1276.h"
 
 /*!
  * Unique Devices IDs register set ( STM32L0xxx )
@@ -418,4 +419,110 @@ void BoardLowPowerHandler( void )
 
     __enable_irq( );
     */
+}
+
+/*
+ * Lucas (25-08-2024):
+ * Functions added for Rawlora session.
+ */
+void RawLoRaSend(RawLoRa_Config *config, uint8_t *data, uint8_t packet_length) {
+	//Configure the radio with the correct settings
+	RawLoRa_RadioConfig(config);
+
+	// Send the data packet
+	RawLoRa_RadioSend(data, packet_length);
+}
+
+/*
+ * Lucas (25-08-2024):
+ * Functions added for RawLoRa session functionality
+ */
+uint8_t RawLoRa_RadioConfig(RawLoRa_Config *config) {
+	uint8_t SX1276_ID = 0x12;
+
+	SX1276Reset();
+
+	// Check LoRa module version
+	uint8_t loRaVersion = Radio.Read(REG_VERSION);
+	if (loRaVersion != SX1276_ID)
+		return 1;
+
+	// Put module into sleep
+	Radio.Write(REG_LR_OPMODE, RFLR_OPMODE_LONGRANGEMODE_ON | RFLR_OPMODE_SLEEP);
+	/*
+	// Set the frequency to 868 MHz
+	Radio.Write(REG_LR_FRFMSB, 0xD9);
+	Radio.Write(REG_LR_FRFMID, 0x00);
+	Radio.Write(REG_LR_FRFLSB, 0x00);
+	*/
+
+	SX1276SetChannel(config->Frequency);
+
+	// Set base addresses
+	Radio.Write(REG_LR_FIFOTXBASEADDR, 0x00);
+	Radio.Write(REG_LR_FIFORXBASEADDR, 0x00);
+
+	// Set LNA boost
+	uint8_t lnaReg = Radio.Read(REG_LR_LNA);
+	Radio.Write(REG_LNA, lnaReg | 0x03);
+
+	// Set the output power at +20 dBm
+	Radio.Write(REG_LR_PADAC, 0x87);
+	uint8_t paConfig = Radio.Read(REG_LR_PACONFIG);
+	Radio.Write(REG_LR_PACONFIG, paConfig | RFLR_PACONFIG_PASELECT_PABOOST);
+
+	/* Set OCP */
+	uint8_t ocpTrim = (140 + 30) / 10; /* Here 140 is the current limit in mA */
+	Radio.Write(REG_LR_OCP, 0x20 | (0x1F & ocpTrim));
+
+	// Set spreading factor
+	uint8_t RegModemConfig2 = Radio.Read(REG_LR_MODEMCONFIG2);
+	RegModemConfig2 &= RFLR_MODEMCONFIG2_SF_MASK;
+	Radio.Write(REG_LR_MODEMCONFIG2, RegModemConfig2 | (config->SpreadingFactor << 4)); // Shifts the bits to fit in the upper 4 bits of the 8 bit register in the radio.
+
+	/* Set the module in LoRa and standby mode */
+	Radio.Write(REG_LR_OPMODE, RFLR_OPMODE_LONGRANGEMODE_ON | RFLR_OPMODE_STANDBY);
+	//spi_write_byte(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
+
+	return 0;
+}
+
+uint8_t RawLoRa_RadioSend(uint8_t *data, uint8_t packet_length) {
+	uint8_t currentLength;
+
+	/* Set the module in LoRa and standby mode */
+	Radio.Write(REG_LR_OPMODE, RFLR_OPMODE_LONGRANGEMODE_ON | RFLR_OPMODE_STANDBY);
+
+	/* Reset FIFO address and payload length */
+	Radio.Write(REG_LR_FIFOADDRPTR, 0x00);
+	Radio.Write(REG_LR_PAYLOADLENGTH, 0x00);
+
+	/* Check packet length */
+	if(packet_length > 255) {
+		return 1;
+	}
+
+	/* Update length */
+	Radio.Write(REG_LR_PAYLOADLENGTH, packet_length);
+
+	SX1276WriteBuffer(0, data, packet_length);
+
+	/* Put module in TX mode */
+	Radio.Write(REG_LR_OPMODE, RFLR_OPMODE_LONGRANGEMODE_ON | RFLR_OPMODE_TRANSMITTER);
+
+	/* Wait for TX done */
+	uint8_t txDone = 0;
+
+	while (txDone & RFLR_IRQFLAGS_TXDONE_MASK) {
+		txDone = Radio.Read(REG_LR_IRQFLAGS);
+	}
+
+	/* Clear IRQ's */
+	Radio.Write(REG_LR_IRQFLAGS, RFLR_IRQFLAGS_TXDONE_MASK);
+
+	/* Set the module in sleep mode */
+	Radio.Write(REG_LR_OPMODE, RFLR_OPMODE_LONGRANGEMODE_ON | RFLR_OPMODE_SLEEP);
+	/* WARNING !!!
+	 * If you put the LoRa module in sleep mode, you need to call the initialize function before use it again */
+	return 0;
 }

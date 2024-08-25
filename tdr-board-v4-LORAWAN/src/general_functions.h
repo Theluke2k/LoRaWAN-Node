@@ -27,4 +27,6 @@ void send_data_package(struct tdr_data integrator_vals_memory[], uint32_t num_ms
 void delay(uint32_t time);
 uint32_t getClkFreq(const ADI_CLOCK_ID eClockId);
 
+
+
 #endif /* __TDR_BOARD_V4_H__ */

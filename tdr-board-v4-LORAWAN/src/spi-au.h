@@ -21,6 +21,7 @@
 
 
 ADI_SPI_RESULT spi_init();
+ADI_SPI_RESULT spi_deinit();
 ADI_SPI_RESULT spi_write_byte(uint8_t address, uint8_t data);
 ADI_SPI_RESULT spi_write(uint8_t tx_bytes, uint8_t rx_bytes, uint8_t address, uint8_t* data);
 ADI_SPI_RESULT spi_read_byte(uint8_t address, uint8_t* ret);
