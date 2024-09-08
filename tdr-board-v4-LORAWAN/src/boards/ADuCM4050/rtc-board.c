@@ -96,16 +96,21 @@ extern uint32_t sleepTime;
 extern uint8_t hasHibernated;
 // DEBUG end
 
-
 /*
  * Lucas:
  * Callback function for the alarm that is set.
  */
 static void rtc1Callback(void *pCBParam, uint32_t Event, void *EventArg)
 {
-	//adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
+	/*
+	if (hasHibernated) {
+		adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG BLUE
+		DelayMsMcu(500);
+		adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG BLUE
+	}
+	*/
 	TimerIrqHandler();
-	//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
+
 }
 
 /*

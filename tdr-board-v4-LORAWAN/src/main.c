@@ -1,3 +1,4 @@
+
 /*
  * main.c
  *
@@ -167,6 +168,11 @@ static void OnRawLoRaStartInEvent(void* context);
 static void OnRawLoRaDurationEvent(void* context);
 static void OnRawLoRaPeriodicityEvent(void* context);
 
+/*!
+ * Custom Functions
+ */
+static uint8_t CLIHandler2(LmHandlerAppData_t* appData);
+
 //Function pointers for loramac callbacks.
 static LmHandlerCallbacks_t LmHandlerCallbacks =
 {
@@ -226,7 +232,7 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t sleepTime = 3500;
+uint32_t sleepTime = 5000;
 int32_t sleepTimeOffset = 0;
 
 // Logical Flags
@@ -243,7 +249,7 @@ int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
 static RawLoRa_Config RawLoRaConfig =
 {
 		.StartIn = 1000,
-		.Duration = 30000,
+		.Duration = 10000,
 		.TxPeriodicity = 5000,
 		.SpreadingFactor = 12,
 		.Frequency = 868000000,
@@ -258,6 +264,37 @@ int main(void) {
 
  	// Initializes the system clock and needed drivers.
  	init_system();
+
+ 	/*
+ 	char command_string[] = "UpPe=1;Pi=1;SeAd=1;SeDa=5;RaLoDu=5000;RaLoPe=4000;RaLoFr=868000000;RaLoSF=12;RaLoStIn=5000";
+
+ 	while(1) {
+ 		CLIHandler2(command_string);
+ 	}
+	*/
+
+ 	// DEBUG START
+ 	volatile uint32_t *reg = (uint32_t *)0x4004C038;
+ 	uint32_t reg_value = *reg;
+
+ 	if(reg_value & (1 << 29)) {
+ 		adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
+ 	}
+ 	else {
+ 		adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
+ 	}
+ 	if(reg_value & (1 << 30)) {
+ 		adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+ 	}
+ 	else {
+ 		adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+ 	}
+ 	// DEBUG END
+ 	DelayMsMcu(5000);
+
+ 	// Reset DEBUG pins
+	adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+ 	adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
 
  	// Create timers
  	TimerInit( &SleepTimer, OnSleepTimerEvent );
@@ -439,10 +476,38 @@ int main(void) {
 		iHibernateExitFlag = 0;
 
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
-		TimerSetValue( &SleepTimer, sleepTime + sleepTimeOffset); // DEBUG (default + sleepTimeOffset)
+		TimerSetValue( &SleepTimer, sleepTime + 0); // DEBUG (default + sleepTimeOffset)
 
 		// De-initialize system we don't need while hibernating
 		deinit_system();
+		// Set flag to reinitialize systems
+		hasHibernated = 1; // DEBUG
+
+
+		/*
+		// DEBUG START
+		volatile uint32_t *reg = (uint32_t *) 0x4004C038;
+		uint32_t reg_value = *reg;
+
+		if (reg_value & (1 << 29)) {
+			adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
+		} else {
+			adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
+		}
+		if (reg_value & (1 << 30)) {
+			adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+		} else {
+			adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+		}
+
+		DelayMsMcu(5000);
+
+		// Reset DEBUG pins
+		adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+		adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
+		// DEBUG END
+
+		*/
 
 		// Set Wakeup Alarm
 		TimerStart(&SleepTimer);
@@ -451,7 +516,7 @@ int main(void) {
 		enter_hibernation();
 
 		// Set flag to reinitialize systems
-		hasHibernated = 1;
+		hasHibernated = 0; // DEBUG default = 1;
 	}
 
 	return 0;
@@ -487,6 +552,9 @@ void RawLoRaSession() {
 	iHibernateExitFlag = 0;
 	enter_hibernation();
 	iHibernateExitFlag = 0;
+
+	// Reinitializez required systems after hibernate wakeup.
+	SystemReinitializerFromHibernate();
 }
 
 /*
@@ -599,7 +667,7 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 				TimerSetValue( &RawLoRaStartInTimer, RawLoRaConfig.StartIn);
 				TimerStart(&RawLoRaStartInTimer);
 
-				adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+				//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
 			}
 			return true;
 		}
@@ -659,6 +727,159 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 	return false;
 }
 
+static uint8_t CLIHandler2(LmHandlerAppData_t* appData) { // BEFORE: char *command_string
+	// Define expected CLI functions:
+	if (appData->Buffer == NULL || appData->BufferSize == 0) {
+		return false;
+	}
+
+	// Save appdata buffer in new buffer that can be modified
+	char command_string[appData->BufferSize]; // Add extra space for null terminator
+	memcpy(command_string, appData->Buffer, appData->BufferSize); // Copy original array
+
+
+	// Number of commands received.
+	uint8_t num_of_commands = 0;
+
+	// Split the command string into individual commands separated by ;
+	char *command = strtok(command_string, ";");
+
+	// Loop through all of the commands in the command string
+	while (command != NULL) {
+		/* PROCESS COMMAND */
+		// Ping
+		if (strncmp(command, "Pi=", 3) == 0) {
+			// Execute handler for command
+			printf("ping\n");
+			num_of_commands++;
+		}
+		// LoRaWAN uplink periodicity
+		else if (strncmp(command, "UpPe=", 5) == 0) {
+			int time = 0;
+			if (sscanf(command, "UpPe=%d", &time) == 1) {
+				// Execute handler for command
+				printf("deep sleep: %d\n", time);
+				sleepTime = time;
+				num_of_commands++;
+			}
+		}
+		else if (strncmp(command, "SeAd=", 5) == 0) {
+			int setADR = 0;
+			if (sscanf(command, "SeAd=%d", &setADR) == 1) {
+				// Execute handler for command
+
+				// Check validity
+				if (setADR == 1 || setADR == 0) {
+					if (LmHandlerParams.AdrEnable != setADR) {
+						// Update ADR parameter
+						LmHandlerParams.AdrEnable = setADR;
+
+						// Reinitialize LmHandler
+						if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
+							printf("LoRaMac wasn't properly initialized\n");
+							// Fatal error, endless loop.
+							while (1) {
+							}
+						}
+					}
+				}
+				num_of_commands++;
+			}
+		}
+		else if (strncmp(command, "SeDa=", 5) == 0) {
+			int set_datarate = 0;
+			if (sscanf(command, "SeDa=%d", &set_datarate) == 1) {
+				// Execute handler for command
+
+				// Check validity
+				if (set_datarate >= 0 && set_datarate <= 5) {
+					// Update ADR parameter
+					LmHandlerParams.TxDatarate = set_datarate;
+
+					// Reinitialize LmHandler
+					if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams)!= LORAMAC_HANDLER_SUCCESS) {
+						printf("LoRaMac wasn't properly initialized\n");
+						// Fatal error, endless loop.
+						while (1) {
+						}
+					}
+
+				}
+				num_of_commands++;
+			}
+		}
+		/*
+		 * New RawLora Commands.
+		 */
+		else if (strncmp(command, "RaLoStIn=", 9) == 0) {
+			uint32_t startTime = 0;
+			if (sscanf(command, "RaLoStIn=%d", &startTime) == 1) {
+				// Execute handler for command
+
+				// Check validity
+				if (startTime < 131072000) {
+					RawLoRaConfig.StartIn = startTime; // set flag
+
+					// Set and start timer to start LoRa in amount of timer
+					TimerSetValue(&RawLoRaStartInTimer, RawLoRaConfig.StartIn);
+					TimerStart(&RawLoRaStartInTimer);
+
+					//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+				}
+				num_of_commands++;
+			}
+		} else if (strncmp(command, "RaLoDu=", 7) == 0) {
+			uint32_t duration = 0;
+			if (sscanf(command, "RaLoDu=%d", &duration) == 1) {
+				// Execute handler for command
+
+				// Check validity
+				if (duration < 131072000) {
+					RawLoRaConfig.Duration = duration; // set flag
+				}
+				num_of_commands++;
+			}
+		} else if (strncmp(command, "RaLoSF=", 7) == 0) {
+			uint32_t SF = 0;
+			if (sscanf(command, "RaLoSF=%d", &SF)	== 1) {
+				// Execute handler for command
+
+				// Check validity
+				if (SF < 13 && SF > 6) {
+					RawLoRaConfig.SpreadingFactor = SF;
+				}
+				num_of_commands++;
+			}
+		} else if (strncmp(command, "RaLoPe=", 7) == 0) {
+			uint32_t period = 0;
+			if (sscanf(command, "RaLoPe=%d", &period) == 1) {
+				// Execute handler for command
+
+				// Check validity
+				if (period < 131072000) {
+					RawLoRaConfig.TxPeriodicity = period; // set flag
+				}
+				num_of_commands++;
+			}
+		} else if (strncmp(command, "RaLoFr=:", 7) == 0) {
+			uint32_t freq = 0;
+			if (sscanf(command, "RaLoFr=%d", &freq) == 1) {
+				// Execute handler for command
+
+				// Check validity TODO: update this check!
+				if (freq >= 0) {
+					RawLoRaConfig.Frequency = freq; // set flag
+				}
+				num_of_commands++;
+			}
+		}
+
+		// Move to the next command in the command string
+		command = strtok(NULL, ";");
+	}
+	return num_of_commands;
+}
+
 static void OnMacProcessNotify( void )
 {
     IsMacProcessPending = 1;
@@ -711,7 +932,7 @@ static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
     case 1: // The application LED can be controlled on port 1 or 2
     case LORAWAN_APP_PORT:
         {
-        	CLIHandler(appData);
+        	CLIHandler2(appData);
         	//AppLedStateOn = appData->Buffer[0] & 0x01;
             //GpioWrite( &Led4, ( ( AppLedStateOn & 0x01 ) != 0 ) ? 1 : 0 );
         }
@@ -903,6 +1124,8 @@ static void OnTxTimerEvent( void* context )
 static void OnSleepTimerEvent( void* context )
 {
 	iHibernateExitFlag = 1;
+
+
 	//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 }
 
@@ -911,7 +1134,7 @@ static void OnRawLoRaStartInEvent( void* context )
 	// Get the processor out of sleep if it is sleeping
 	iHibernateExitFlag = 1;
 
-	adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+	//adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
 
 
 	// Stop Sleeptimer
@@ -921,7 +1144,7 @@ static void OnRawLoRaStartInEvent( void* context )
 	TimerSetValue( &RawLoRaDurationTimer, RawLoRaConfig.Duration );
 	TimerStart( &RawLoRaDurationTimer );
 
-	adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
+	//adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
 
 	// Set enable flag for RawLoRa session.
 	rawLoRaEnabled = 1;
@@ -936,8 +1159,8 @@ static void OnRawLoRaDurationEvent( void* context )
 	SystemReinitializerFromHibernate();
 
 	// DEBUG pins
-	adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
-	adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+	//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
+	//adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
 
 	// Stop timers
 	TimerStop( &RawLoRaPeriodicityTimer );
@@ -950,7 +1173,7 @@ static void OnRawLoRaPeriodicityEvent( void* context )
 {
 	iHibernateExitFlag = 1;
 	TimerStart( &RawLoRaPeriodicityTimer );
-	adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+	//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
 }
 
 
