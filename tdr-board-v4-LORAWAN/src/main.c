@@ -133,6 +133,7 @@ static TimerEvent_t SleepTimer;
 static TimerEvent_t RawLoRaStartInTimer;
 static TimerEvent_t RawLoRaDurationTimer;
 static TimerEvent_t RawLoRaPeriodicityTimer;
+static TimerEvent_t UplinkPeriodicityTimer;
 
 static void OnMacProcessNotify(void);
 static void OnNvmDataChange(LmHandlerNvmContextStates_t state, uint16_t size);
@@ -167,6 +168,7 @@ static void OnSleepTimerEvent(void* context);
 static void OnRawLoRaStartInEvent(void* context);
 static void OnRawLoRaDurationEvent(void* context);
 static void OnRawLoRaPeriodicityEvent(void* context);
+static void OnUplinkPeriodicityEvent(void* context);
 
 /*!
  * Custom Functions
@@ -232,8 +234,12 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t sleepTime = 5000;
+uint32_t uplinkPeriodicity = 10000;
+int32_t sleepTime = 0;
+uint32_t maxInitializationTime = 1000; // Maximum time it takes between wakeup and next uplink.
 int32_t sleepTimeOffset = 0;
+uint32_t lastUplinkTime = 0;
+uint32_t uplinkTimeDiff = 0;
 
 // Logical Flags
 uint8_t enableSleepFlag = 0;
@@ -265,14 +271,6 @@ int main(void) {
  	// Initializes the system clock and needed drivers.
  	init_system();
 
- 	/*
- 	char command_string[] = "UpPe=1;Pi=1;SeAd=1;SeDa=5;RaLoDu=5000;RaLoPe=4000;RaLoFr=868000000;RaLoSF=12;RaLoStIn=5000";
-
- 	while(1) {
- 		CLIHandler2(command_string);
- 	}
-	*/
-
  	// DEBUG START
  	volatile uint32_t *reg = (uint32_t *)0x4004C038;
  	uint32_t reg_value = *reg;
@@ -301,12 +299,14 @@ int main(void) {
  	TimerInit( &RawLoRaStartInTimer, OnRawLoRaStartInEvent );
  	TimerInit( &RawLoRaDurationTimer, OnRawLoRaDurationEvent );
  	TimerInit( &RawLoRaPeriodicityTimer, OnRawLoRaPeriodicityEvent );
+ 	TimerInit( &UplinkPeriodicityTimer, OnUplinkPeriodicityEvent );
 
 	// Set interrup priorities. SPI must have highest prioriy!
 	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
 	NVIC_SetPriority(SPI0_EVT_IRQn, 1);
 	NVIC_SetPriority(RTC1_EVT_IRQn, 2);
 	NVIC_SetPriority(RTC0_EVT_IRQn, 2);
+
 
 	while (1) {
 		// Reinitialize system that were closed during hibernation
@@ -396,6 +396,8 @@ int main(void) {
 		// Reset number of uplinks for this power cycle.
 		uplinksSent = 0;
 
+
+		// MAIN STATE MACHINE IN ACTIVE MODE
 		do  {
 			// Processes the LoRaMac events
 			LmHandlerProcess();
@@ -444,13 +446,14 @@ int main(void) {
 				// Clear flags
 				enableSleepFlag = 0;
 				isJoiningFlag = 0;
-				iHibernateExitFlag = 0;
 
 				// Start sleep timer
 				TimerStart(&SleepTimer);
 
 				// Enter hibernation mode
+				iHibernateExitFlag = 0;
 				enter_hibernation();
+				iHibernateExitFlag = 0;
 
 				// Reinitializez required systems after hibernate wakeup.
 				SystemReinitializerFromHibernate();
@@ -464,7 +467,7 @@ int main(void) {
 		}
 
 		// Generate a random uint32_t using Radio.Random(). Map value to min -3000 and max 3000
-		sleepTimeOffset = getSleepTimeOffset(Radio.Random(), 500-sleepTime, 5000); // NOT TESTED (default: -3000, 3000)
+		sleepTimeOffset = getSleepTimeOffset(Radio.Random(), 500-uplinkPeriodicity, 5000); // NOT TESTED (default: -3000, 3000)
 
 		// Deinitialize Loramac
 		LmHandlerDeInit();
@@ -472,51 +475,30 @@ int main(void) {
 		// Set radio to sleep
 		Radio.Write(0x01, 0x00);
 
-		// Reset Sleep Flag
-		iHibernateExitFlag = 0;
-
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
-		TimerSetValue( &SleepTimer, sleepTime + 0); // DEBUG (default + sleepTimeOffset)
+		//TimerSetValue( &SleepTimer, sleepTime + 0); // DEBUG (default + sleepTimeOffset)
+
+		// Set Wakeup Alarm
+		//TimerStart(&SleepTimer);
 
 		// De-initialize system we don't need while hibernating
 		deinit_system();
-		// Set flag to reinitialize systems
-		hasHibernated = 1; // DEBUG
 
+		// Compute sleepTime
+		sleepTime = uplinkPeriodicity - (TimerGetCurrentTime() - lastUplinkTime) - maxInitializationTime;
 
-		/*
-		// DEBUG START
-		volatile uint32_t *reg = (uint32_t *) 0x4004C038;
-		uint32_t reg_value = *reg;
+		// Start timer and enter hibernation is sleepTime is larger than 300 ms.
+		if(sleepTime > 300) {
+			TimerSetValue( &UplinkPeriodicityTimer, sleepTime);
+			TimerStart( &UplinkPeriodicityTimer );
 
-		if (reg_value & (1 << 29)) {
-			adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
-		} else {
-			adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
-		}
-		if (reg_value & (1 << 30)) {
-			adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
-		} else {
-			adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+			iHibernateExitFlag = 0;
+			enter_hibernation();
+			iHibernateExitFlag = 0;
 		}
 
-		DelayMsMcu(5000);
-
-		// Reset DEBUG pins
-		adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
-		adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
-		// DEBUG END
-
-		*/
-
-		// Set Wakeup Alarm
-		TimerStart(&SleepTimer);
-
-		// Enter Hibernate Mode
-		enter_hibernation();
-
 		// Set flag to reinitialize systems
-		hasHibernated = 0; // DEBUG default = 1;
+		hasHibernated = 1; // DEBUG default = 1;
 	}
 
 	return 0;
@@ -583,7 +565,7 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 		if (sscanf(receiveBuffer, "Sleep %d", &time) == 1) {
 			// Execute handler for command
 			printf("deep sleep: %d\n", time);
-			sleepTime = time;
+			uplinkPeriodicity = time;
 			return true;
 		}
 	}
@@ -758,8 +740,11 @@ static uint8_t CLIHandler2(LmHandlerAppData_t* appData) { // BEFORE: char *comma
 			int time = 0;
 			if (sscanf(command, "UpPe=%d", &time) == 1) {
 				// Execute handler for command
-				printf("deep sleep: %d\n", time);
-				sleepTime = time;
+				// Check validity
+				if(time >= maxInitializationTime) {
+					uplinkPeriodicity = time;
+				}
+
 				num_of_commands++;
 			}
 		}
@@ -1033,10 +1018,21 @@ static void PrepareTxFrame( void )
     // The size of the buffer should always be equal to the maximum size
     AppData.BufferSize = packet_length;
 
+    uint32_t currentTime = TimerGetCurrentTime();
+    while(currentTime - lastUplinkTime < uplinkPeriodicity) {
+    	currentTime = TimerGetCurrentTime();
+    }
+
+    adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
     LmHandlerErrorStatus_t t = LmHandlerSend( &AppData, LmHandlerParams.IsTxConfirmed );
 
     if(t == LORAMAC_HANDLER_SUCCESS) {
     	uplinksSent++;
+    	lastUplinkTime = currentTime;
+    	//lastUplinkTime += uplinkPeriodicity;
+    }
+    else {
+    	TimerStop( &UplinkPeriodicityTimer );
     }
 }
 
@@ -1129,6 +1125,13 @@ static void OnSleepTimerEvent( void* context )
 	//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 }
 
+static void OnUplinkPeriodicityEvent( void* context )
+{
+	iHibernateExitFlag = 1;
+	//TimerSetValue( &UplinkPeriodicityTimer, sleepTime-1000);
+	//TimerStart(&UplinkPeriodicityTimer);
+}
+
 static void OnRawLoRaStartInEvent( void* context )
 {
 	// Get the processor out of sleep if it is sleeping
@@ -1137,8 +1140,9 @@ static void OnRawLoRaStartInEvent( void* context )
 	//adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
 
 
-	// Stop Sleeptimer
+	// Stop Sleeptimers
 	TimerStop( &SleepTimer );
+	TimerStop( &UplinkPeriodicityTimer );
 
 	// Start timer for duration of session.
 	TimerSetValue( &RawLoRaDurationTimer, RawLoRaConfig.Duration );
