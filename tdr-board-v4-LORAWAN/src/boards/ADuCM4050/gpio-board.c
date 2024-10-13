@@ -47,6 +47,10 @@ ADI_GPIO_PORT port1 = ADI_GPIO_PORT1;
 ADI_GPIO_PORT port2 = ADI_GPIO_PORT2;
 ADI_GPIO_PORT port3 = ADI_GPIO_PORT3;
 
+// Variables to store the values for the interrupts
+ADI_GPIO_DATA int_pins[4] = {0, 0, 0, 0};
+
+
 /*
  * Lucas (12-11-23):
  * To know which callbacks to use when different pins trigger an interrupt,
@@ -302,10 +306,17 @@ void GpioMcuSetInterrupt( Gpio_t *obj, IrqModes irqMode, IrqPriorities irqPriori
 	//Sets pins, use pinsToEnable when testing the real program
 	//adi_gpio_SetGroupInterruptPins(*(ADI_GPIO_PORT*) obj->port, SYS_GPIO_INTA_IRQn, (ADI_GPIO_DATA) (obj->pinIndex));
 
-	/* Below: functions for handling the callbacks. Taken from Semtech */
-	adi_gpio_SetGroupInterruptPolarity(ADI_GPIO_PORT1, ADI_GPIO_PIN_5 | ADI_GPIO_PIN_4 |ADI_GPIO_PIN_3 | ADI_GPIO_PIN_2);
-	adi_gpio_SetGroupInterruptPins(ADI_GPIO_PORT1, ADI_GPIO_INTA_IRQ, ADI_GPIO_PIN_5 | ADI_GPIO_PIN_4 |ADI_GPIO_PIN_3 | ADI_GPIO_PIN_2);
+	//Some new code
+	int_pins[*(ADI_GPIO_PORT*)obj->port] |= obj->pinIndex;
+
+	adi_gpio_SetGroupInterruptPolarity(*(ADI_GPIO_PORT*)obj->port, int_pins[*(ADI_GPIO_PORT*)obj->port]);
+	adi_gpio_SetGroupInterruptPins(*(ADI_GPIO_PORT*)obj->port, ADI_GPIO_INTA_IRQ, int_pins[*(ADI_GPIO_PORT*)obj->port]);
 	adi_gpio_RegisterCallback(SYS_GPIO_INTA_IRQn, AllPinsCallback, (void*) SYS_GPIO_INTA_IRQn);
+
+	/* Below: functions for handling the callbacks. Taken from Semtech */
+	//adi_gpio_SetGroupInterruptPolarity(ADI_GPIO_PORT1, ADI_GPIO_PIN_5 | ADI_GPIO_PIN_4 |ADI_GPIO_PIN_3 | ADI_GPIO_PIN_2);
+	//adi_gpio_SetGroupInterruptPins(ADI_GPIO_PORT1, ADI_GPIO_INTA_IRQ, ADI_GPIO_PIN_5 | ADI_GPIO_PIN_4 |ADI_GPIO_PIN_3 | ADI_GPIO_PIN_2);
+	//adi_gpio_RegisterCallback(SYS_GPIO_INTA_IRQn, AllPinsCallback, (void*) SYS_GPIO_INTA_IRQn);
 }
 
 void GpioMcuRemoveInterrupt( Gpio_t *obj )

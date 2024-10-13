@@ -44,11 +44,13 @@ void init_system()
 	//InitGPIODriver();
 	gpio_init();
 
+	// DEBUG START i will not run these until our board can fully suport the new TDR chip
 	// Initialize ADC driver
-	adc_init(false); // TODO: calibration stuck. Check later. // DEBUG
+	//adc_init(false); // TODO: calibration stuck. Check later. // DEBUG
 
 	// Initialize I2C driver
-    i2c_init(); // DEBUG
+    //i2c_init(); // DEBUG
+	// DEBUG END
 
 }
 

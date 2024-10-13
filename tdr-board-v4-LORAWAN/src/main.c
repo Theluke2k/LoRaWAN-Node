@@ -234,7 +234,7 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t uplinkPeriodicity = 10000;
+uint32_t uplinkPeriodicity = 5000;
 int32_t sleepTime = 0;
 uint32_t maxInitializationTime = 1000; // Maximum time it takes between wakeup and next uplink.
 int32_t sleepTimeOffset = 0;
@@ -263,6 +263,8 @@ static RawLoRa_Config RawLoRaConfig =
 
 /*
  * Lucas (22-10-23):
+ *
+ *
  * Main program.
  */
 int main(void) {
@@ -270,7 +272,7 @@ int main(void) {
 
  	// Initializes the system clock and needed drivers.
  	init_system();
-
+ 	/*
  	// DEBUG START
  	volatile uint32_t *reg = (uint32_t *)0x4004C038;
  	uint32_t reg_value = *reg;
@@ -289,11 +291,11 @@ int main(void) {
  	}
  	// DEBUG END
  	DelayMsMcu(5000);
-
+	*/
  	// Reset DEBUG pins
-	adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
- 	adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
-
+	//adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
+ 	//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
+ 	DelayMsMcu(2000);
  	// Create timers
  	TimerInit( &SleepTimer, OnSleepTimerEvent );
  	TimerInit( &RawLoRaStartInTimer, OnRawLoRaStartInEvent );
@@ -310,11 +312,12 @@ int main(void) {
 
 	while (1) {
 		// Reinitialize system that were closed during hibernation
-		/*
+
 		if(hasHibernated) {
 			reinit_system();
+			adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_0);
 			hasHibernated = 0;
-		}*/
+		}
 
 		/*
 		 * Lucas (23-08-2024):
@@ -343,14 +346,14 @@ int main(void) {
 		 * The stack uses this struct as data source when transmitting data.
 		 */
 		// Initialize measure mode
-		InitMeasureMode();
+		//InitMeasureMode();
 
 		// Run measurements
-		init_store();
-		run_and_store_measurements(tdr_data, &index);
+		//init_store();
+		//run_and_store_measurements(tdr_data, &index);
 
 		// Deinitialize measure mode
-		DeInitMeasureMode();
+		//DeInitMeasureMode();
 
 		// Specify the amount of desired uplinks before going to sleep.
 		desiredUplinks = 1;
@@ -475,6 +478,7 @@ int main(void) {
 		// Set radio to sleep
 		Radio.Write(0x01, 0x00);
 
+		adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_0);
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
 		//TimerSetValue( &SleepTimer, sleepTime + 0); // DEBUG (default + sleepTimeOffset)
 
@@ -990,20 +994,19 @@ static void PrepareTxFrame( void )
     }
 
     // DEBUG start (fill some test data to send)
-    /*
     tdr_data[0].int1_integer = 1;
-	tdr_data[0].int1_decimal = 2;
+	//tdr_data[0].int1_decimal = 2;
 	tdr_data[0].int2_integer = 3;
-	tdr_data[0].int2_decimal = 4;
+	//tdr_data[0].int2_decimal = 4;
 	tdr_data[0].th1_temp = 5;
 	tdr_data[0].th2_temp = 6;
 	tdr_data[0].th3_temp = 7;
 	tdr_data[0].th4_temp = 8;
 	tdr_data[0].honey_rh_integer = 9;
-	tdr_data[0].honey_rh_decimal = 10;
+	//tdr_data[0].honey_rh_decimal = 10;
 	tdr_data[0].honey_temp_integer = 11;
-	tdr_data[0].honey_temp_decimal = 12;
-	*/
+	//tdr_data[0].honey_temp_decimal = 12;
+
     // DEBUG end
 
 

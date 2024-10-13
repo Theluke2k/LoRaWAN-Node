@@ -64,11 +64,17 @@
 #define UART_WAKEUP_PORT					ADI_GPIO_PORT0
 #define UART_WAKEUP_PIN						ADI_GPIO_PIN_13
 
-#define LORA_RST_PORT						ADI_GPIO_PORT2
-#define LORA_RST_PIN						ADI_GPIO_PIN_1
+#define LORA_RST_PORT						ADI_GPIO_PORT1 //old P2_01
+#define LORA_RST_PIN						ADI_GPIO_PIN_6
 
-#define LORA_DIO0_PORT						ADI_GPIO_PORT1
-#define LORA_DIO0_PIN						ADI_GPIO_PIN_5
+#define LORA_DIO0_PORT						ADI_GPIO_PORT1 //old P1_05
+#define LORA_DIO0_PIN						ADI_GPIO_PIN_7
+
+#define LORA_DIO1_PORT						ADI_GPIO_PORT1 //old P1_04
+#define LORA_DIO1_PIN						ADI_GPIO_PIN_8
+
+#define LORA_PWR_PORT						ADI_GPIO_PORT1 //new
+#define LORA_PWR_PIN						ADI_GPIO_PIN_0
 
 void analog_pin_init();
 void digital_pin_init();

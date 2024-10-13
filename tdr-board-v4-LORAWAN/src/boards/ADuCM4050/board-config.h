@@ -81,7 +81,7 @@ typedef struct {
 
 //Hmm, it seems that only the first value of the comma-separated expression is read
 
-#define RADIO_RESET                                	P2_1
+#define RADIO_RESET                                	P1_6 //old P2_1
 #define TCXO_PWR_PIN                                //GPIO( GPIO_PORTA, 9 ) there is not a dedicated pin, might be UART?
 #define RF_SWITCH_PIN                               //GPIO( GPIO_PORTA, 13 ) There is not a dedicated RF switch pin, I believe
 
@@ -90,14 +90,17 @@ typedef struct {
 #define RADIO_SCLK                                  P0_0
 #define RADIO_NSS 								    P0_3
 
-#define RADIO_DIO_0                                 P1_5
-#define RADIO_DIO_1                                 P1_4
-#define RADIO_DIO_2                                 P1_3
-#define RADIO_DIO_3                                 P1_2
+#define RADIO_DIO_0                                 P1_7 //old P1_5
+#define RADIO_DIO_1                                 P1_8 //old P1_4
+#define RADIO_DIO_2                                 P1_11 //old P1_3
+#define RADIO_DIO_3                                 P1_12 //old P1_2
+#define RADIO_DIO_4                                 P1_13 //new
+#define RADIO_DIO_5                                 P1_14 //new
+
 
 //#define LED_1                                       (ADI_GPIO_PORT2, ADI_GPIO_PIN_2) //The yellow LED (why?
-#define UART_TX                                     P0__10
-#define UART_RX                                     P0_11
+#define UART_TX                                     P0__10 // not used
+#define UART_RX                                     P0_11  // not used
 #define I2C_SDA                                     //GPIO( GPIO_PORTA, 16 ) I2C serial data, don't think it's dedicated
 #define I2C_SCL                                     //GPIO( GPIO_PORTA, 17 ) I2C serial clock - can be handled by specific functions
 
