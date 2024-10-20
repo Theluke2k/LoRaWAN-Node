@@ -63,6 +63,15 @@ uint16_t NvmDataMgmtStore( void )
     LoRaMacMibGetRequestConfirm( &mibReq );
     LoRaMacNvmData_t* nvm = mibReq.Param.Contexts;
 
+//    // DEBUG start
+//	uint16_t g = sizeof(nvm->Crypto);
+//	g = sizeof(nvm->MacGroup1);
+//	g = sizeof(nvm->MacGroup2);
+//	g = sizeof(nvm->SecureElement);
+//	g = sizeof(nvm->RegionGroup1);
+//	g = sizeof(nvm->RegionGroup2);
+//	g = sizeof(nvm->ClassB);
+
     // Input checks
     if( NvmNotifyFlags == LORAMAC_NVM_NOTIFY_FLAG_NONE )
     {

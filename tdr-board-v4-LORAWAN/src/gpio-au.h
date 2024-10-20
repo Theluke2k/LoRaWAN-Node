@@ -76,6 +76,15 @@
 #define LORA_PWR_PORT						ADI_GPIO_PORT1 //new
 #define LORA_PWR_PIN						ADI_GPIO_PIN_0
 
+#define EEPROM_WP_PORT						ADI_GPIO_PORT0 //new
+#define EEPROM_WP_PIN						ADI_GPIO_PIN_8
+
+#define EEPROM_HOLD_PORT					ADI_GPIO_PORT0 //new
+#define EEPROM_HOLD_PIN						ADI_GPIO_PIN_12
+
+#define EEPROM_CS_PORT						ADI_GPIO_PORT1 //new
+#define EEPROM_CS_PIN						ADI_GPIO_PIN_10
+
 void analog_pin_init();
 void digital_pin_init();
 void DigitalPinsEnable();

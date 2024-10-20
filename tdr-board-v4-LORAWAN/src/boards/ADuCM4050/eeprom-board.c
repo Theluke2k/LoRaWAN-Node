@@ -22,7 +22,7 @@
  */
 #include "utilities.h"
 #include "eeprom-board.h"
-
+#include <adi_gpio.h>
 
 /*
  * Lucas (30-03-2024)
@@ -38,6 +38,8 @@ uint16_t s = 0;
 
 LmnStatus_t EepromMcuWriteBuffer( uint16_t addr, uint8_t *buffer, uint16_t size )
 {
+	adi_gpio_Toggle(ADI_GPIO_PORT0, ADI_GPIO_PIN_14);
+	DelayMsMcu(4);
 	s += size;
     if(addr + size <= EMULATED_EEPROM_SIZE) {
     	memcpy1(&emulatedEepromStorage[addr], buffer, size);

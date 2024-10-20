@@ -234,7 +234,7 @@ volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
 uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
-uint32_t uplinkPeriodicity = 5000;
+uint32_t uplinkPeriodicity = 10000;
 int32_t sleepTime = 0;
 uint32_t maxInitializationTime = 1000; // Maximum time it takes between wakeup and next uplink.
 int32_t sleepTimeOffset = 0;
@@ -315,7 +315,8 @@ int main(void) {
 
 		if(hasHibernated) {
 			reinit_system();
-			adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_0);
+			//adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_6);
+			//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_0);
 			hasHibernated = 0;
 		}
 
@@ -477,8 +478,8 @@ int main(void) {
 
 		// Set radio to sleep
 		Radio.Write(0x01, 0x00);
-
-		adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_0);
+		//adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_0);
+		//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_6);
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
 		//TimerSetValue( &SleepTimer, sleepTime + 0); // DEBUG (default + sleepTimeOffset)
 
