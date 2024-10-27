@@ -300,8 +300,38 @@ int main(void) {
 	*/
 
  	// EEPROM TEST START
- 	BoardInitMcu();
+ 	while(1) {
+ 		BoardInitMcu();
+ 		EepromReset();
 
+ 		uint8_t bufferSize = 10;
+ 		uint16_t address = 0;
+
+ 		uint8_t writeBuffer[bufferSize];
+ 		uint8_t readBuffer[bufferSize];
+
+ 		// Fill buffer with data
+ 		for(int i = 0; i < bufferSize; i++) {
+ 			writeBuffer[i] = i;
+ 		}
+ 		uint8_t status_reg[1] = {0};
+ 		uint8_t identification_reg[3] = {0};
+
+ 		// Read identification register
+ 		EepromMcuReadIdentification(identification_reg, 3);
+
+ 		// Read status register
+ 		EepromMcuReadStatus(status_reg, 1);
+
+ 		// Read data from the EEPROM
+ 		EepromMcuReadBuffer(address, readBuffer, bufferSize);
+
+ 		// Write the data to the EEPROM
+ 		EepromMcuWriteBuffer(address, writeBuffer, bufferSize);
+
+ 		// Read data from the EEPROM
+ 		EepromMcuReadBuffer(address, readBuffer, bufferSize);
+ 	}
  	// EEPROM TEST END
 
 
@@ -324,8 +354,6 @@ int main(void) {
 
 		if(hasHibernated) {
 			reinit_system();
-			//adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_6);
-			//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_0);
 			hasHibernated = 0;
 		}
 
@@ -487,13 +515,10 @@ int main(void) {
 
 		// Set radio to sleep
 		Radio.Write(0x01, 0x00);
-		//adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_0);
-		//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_6);
+
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
 		//TimerSetValue( &SleepTimer, sleepTime + 0); // DEBUG (default + sleepTimeOffset)
 
-		// Set Wakeup Alarm
-		//TimerStart(&SleepTimer);
 
 		// De-initialize system we don't need while hibernating
 		deinit_system();
@@ -662,8 +687,6 @@ bool CLIHandler(LmHandlerAppData_t* appData) {
 				// Set and start timer to start LoRa in amount of timer
 				TimerSetValue( &RawLoRaStartInTimer, RawLoRaConfig.StartIn);
 				TimerStart(&RawLoRaStartInTimer);
-
-				//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
 			}
 			return true;
 		}
@@ -822,8 +845,6 @@ static uint8_t CLIHandler2(LmHandlerAppData_t* appData) { // BEFORE: char *comma
 					// Set and start timer to start LoRa in amount of timer
 					TimerSetValue(&RawLoRaStartInTimer, RawLoRaConfig.StartIn);
 					TimerStart(&RawLoRaStartInTimer);
-
-					//adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
 				}
 				num_of_commands++;
 			}
@@ -1160,8 +1181,6 @@ static void OnRawLoRaStartInEvent( void* context )
 	// Start timer for duration of session.
 	TimerSetValue( &RawLoRaDurationTimer, RawLoRaConfig.Duration );
 	TimerStart( &RawLoRaDurationTimer );
-
-	//adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
 
 	// Set enable flag for RawLoRa session.
 	rawLoRaEnabled = 1;

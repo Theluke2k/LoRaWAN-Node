@@ -102,13 +102,6 @@ extern uint8_t hasHibernated;
  */
 static void rtc1Callback(void *pCBParam, uint32_t Event, void *EventArg)
 {
-	/*
-	if (hasHibernated) {
-		adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG BLUE
-		DelayMsMcu(500);
-		adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG BLUE
-	}
-	*/
 	TimerIrqHandler();
 
 }

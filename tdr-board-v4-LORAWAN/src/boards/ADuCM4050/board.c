@@ -35,12 +35,14 @@
 #include "gps.h"
 #include "rtc-board.h"
 #include "sx1276-board.h"
+#include "eeprom-board.h"
 #include "board.h"
 #include <sys/platform.h>
 #include <drivers/general/adi_drivers_general.h>
 #include "LoRaMac.h"
 #include "gpio-board.h"
 //#include "sx1276.h"
+//
 
 /*!
  * Unique Devices IDs register set ( STM32L0xxx )
@@ -151,7 +153,9 @@ void BoardInitMcu( void )
 		 */
 	}
 	SpiInit( &SX1276.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
+	SpiInit( &eeprom.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
 	SX1276IoInit( );
+	EepromIoInit( );
 	/*
 	 * Lucas (10-11-23):
 	 * The examples have the following code. I dont think that the

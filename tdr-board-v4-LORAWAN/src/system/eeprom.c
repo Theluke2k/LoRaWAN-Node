@@ -5,8 +5,9 @@
  *      Author: lselm
  */
 
+#include "eeprom.h"
 
 /*!
  * EEPROM hardware and global parameters
  */
-SX1276_t SX1276;
+//EEPROM_t eeprom;
