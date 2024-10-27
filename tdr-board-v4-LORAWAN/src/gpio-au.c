@@ -35,7 +35,8 @@
 #define SPI0_CLK_PORTP0_MUX   	((uint16_t) ((uint16_t) 1<<0))
 #define SPI0_MOSI_PORTP0_MUX  	((uint16_t) ((uint16_t) 1<<2))
 #define SPI0_MISO_PORTP0_MUX  	((uint16_t) ((uint16_t) 1<<4))
-#define SPI0_CS_PORT0_MUX		((uint16_t) ((uint16_t) 1<<6))
+#define SPI0_CS0_PORT0_MUX		((uint16_t) ((uint16_t) 1<<6))
+#define SPI0_CS1_PORT1_MUX		((uint16_t) ((uint16_t) 1<<10))
 
 // UART0
 #define UART0_TX_PORTP0_MUX  ((uint32_t) ((uint32_t) 0x1 << 20))
@@ -106,6 +107,35 @@ void digital_pin_init()
 	}
 
 	/*
+	 * Lucas (27/10/24):
+	 * During testing of the program, these pins should be initialized.
+	 * This is because LoRaWAN actually does it normally, but if we use the
+	 * program without LoRaWAN, then we have to do it ourselves.
+	 */
+	// DEBUG START
+	// LORA/SPI and EEPROM CS
+	*((volatile uint32_t *)REG_GPIO0_CFG) |= SPI0_CLK_PORTP0_MUX | SPI0_MOSI_PORTP0_MUX | SPI0_MISO_PORTP0_MUX;
+	//*((volatile uint32_t *)REG_GPIO1_CFG) |= SPI0_CS1_PORT1_MUX;
+
+
+
+	// LORA DIO0
+	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_InputEnable(LORA_DIO0_PORT, LORA_DIO0_PIN, true)))
+	{
+		DEBUG_MESSAGE("adi_gpio_InputEnable failed\n");
+	}
+	// LORA RST
+	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(LORA_RST_PORT, LORA_RST_PIN, true)))
+	{
+		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
+	}
+
+	// DEBUG END
+
+
+
+
+	/*
 	 * Lucas (28-07-2024):
 	 * DEBUG PINS
 	 */
@@ -126,10 +156,10 @@ void digital_pin_init()
 	}
 
 	// INITIAL PINS STATES
-	adi_gpio_SetLow(EEPROM_WP_PORT, EEPROM_WP_PIN);					// Enable write protection. Remember to disable when writing to EEPROM
-	adi_gpio_SetHigh(EEPROM_HOLD_PORT, EEPROM_HOLD_PORT);			// Disable Hold. If enabled, the communication with the EEPROM is paused.
-	adi_gpio_SetHigh(EEPROM_CS_PORT, EEPROM_CS_PORT);				// De-select the chip. Remember to select before communication.
-	adi_gpio_SetLow(LORA_PWR_PORT, LORA_PWR_PIN);					// Allow power to the radio
+	adi_gpio_SetLow(EEPROM_WP_PORT, EEPROM_WP_PIN);					// Enable write protection (low). Remember to disable when writing to EEPROM
+	adi_gpio_SetHigh(EEPROM_HOLD_PORT, EEPROM_HOLD_PORT);			// Disable Hold (high). If enabled (low), the communication with the EEPROM is paused.
+	adi_gpio_SetHigh(EEPROM_CS_PORT, EEPROM_CS_PORT);				// De-select the chip (high). Remember to select (low) before communication.
+	adi_gpio_SetLow(LORA_PWR_PORT, LORA_PWR_PIN);					// Allow power to the radio (low)
 }
 
 /*

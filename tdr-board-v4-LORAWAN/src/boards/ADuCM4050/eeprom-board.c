@@ -36,6 +36,10 @@ static uint8_t emulatedEepromStorage[EMULATED_EEPROM_SIZE] = {0};
 
 uint16_t s = 0;
 
+void EepromIoInit() {
+
+}
+
 LmnStatus_t EepromMcuWriteBuffer( uint16_t addr, uint8_t *buffer, uint16_t size )
 {
 	adi_gpio_Toggle(ADI_GPIO_PORT0, ADI_GPIO_PIN_14);

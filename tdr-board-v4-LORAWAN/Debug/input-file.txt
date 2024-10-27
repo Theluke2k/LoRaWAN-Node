@@ -35,6 +35,7 @@
 "src/boards/ADuCM4050/sx1276-board.o"
 "src/boards/ADuCM4050/uart-board.o"
 "src/boards/mcu/utilities.o"
+"src/eeprom.o"
 "src/flash.o"
 "src/general_functions.o"
 "src/gpio-au.o"

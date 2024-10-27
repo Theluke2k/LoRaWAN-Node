@@ -30,6 +30,16 @@ extern "C"
 
 #include <stdint.h>
 #include "utilities.h"
+#include "gpio.h"
+#include "spi.h"
+/*
+ * Lucas (27/10/24):
+ *Add EPROM functionality
+ */
+/*!
+ * \brief Initializes the radio I/Os pins interface
+ */
+void EepromIoInit( void );
 
 /*!
  * Writes the given buffer to the EEPROM at the specified address.

@@ -272,6 +272,12 @@ int main(void) {
 
  	// Initializes the system clock and needed drivers.
  	init_system();
+
+	// Set interrup priorities. SPI must have highest prioriy!
+	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
+	NVIC_SetPriority(SPI0_EVT_IRQn, 1);
+	NVIC_SetPriority(RTC1_EVT_IRQn, 2);
+	NVIC_SetPriority(RTC0_EVT_IRQn, 2);
  	/*
  	// DEBUG START
  	volatile uint32_t *reg = (uint32_t *)0x4004C038;
@@ -292,10 +298,17 @@ int main(void) {
  	// DEBUG END
  	DelayMsMcu(5000);
 	*/
+
+ 	// EEPROM TEST START
+ 	BoardInitMcu();
+
+ 	// EEPROM TEST END
+
+
  	// Reset DEBUG pins
 	//adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
  	//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
- 	DelayMsMcu(2000);
+ 	DelayMsMcu(20000);
  	// Create timers
  	TimerInit( &SleepTimer, OnSleepTimerEvent );
  	TimerInit( &RawLoRaStartInTimer, OnRawLoRaStartInEvent );
@@ -303,11 +316,7 @@ int main(void) {
  	TimerInit( &RawLoRaPeriodicityTimer, OnRawLoRaPeriodicityEvent );
  	TimerInit( &UplinkPeriodicityTimer, OnUplinkPeriodicityEvent );
 
-	// Set interrup priorities. SPI must have highest prioriy!
-	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
-	NVIC_SetPriority(SPI0_EVT_IRQn, 1);
-	NVIC_SetPriority(RTC1_EVT_IRQn, 2);
-	NVIC_SetPriority(RTC0_EVT_IRQn, 2);
+
 
 
 	while (1) {

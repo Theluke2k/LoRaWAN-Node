@@ -21,6 +21,7 @@
 #include "i2c-au.h"
 #include "sx1276.h"
 #include "shared.h"
+#include "eeprom.h"
 
 #include "tdr-board-v4_config.h"
 
