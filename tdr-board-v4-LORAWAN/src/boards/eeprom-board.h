@@ -61,6 +61,8 @@ extern "C"
 #define EEPROM_RSTEN							0x66
 #define EEPROM_RESET							0x99
 
+
+#define EMULATED_EEPROM_SIZE			1536
 /*
  * Lucas (27/10/24):
  *Add EPROM functionality
@@ -93,10 +95,28 @@ LmnStatus_t EepromReadStatus( uint8_t *buffer, uint16_t size );
 /*!
  * \brief Read Identification register of EEPROM
  */
-LmnStatus_t EepromMcuReadIdentification( uint8_t *buffer, uint16_t size );
+LmnStatus_t EepromReadIdentification( uint8_t *buffer, uint16_t size );
 
 /*!
- * Writes the given buffer to the EEPROM at the specified address.
+ * brief Writes bytes across pages of EEPROM.
+ *
+ * \param[IN] addr EEPROM address to write to
+ * \param[IN] buffer Pointer to the buffer to be written.
+ * \param[IN] size Size of the buffer to be written.
+ * \retval status [LMN_STATUS_OK, LMN_STATUS_ERROR]
+ */
+LmnStatus_t EepromWriteBufferDirect( uint16_t addr, uint8_t *buffer, uint16_t size );
+
+LmnStatus_t EepromWriteAcrossPage( uint16_t addr, uint8_t *buffer, uint16_t size );
+
+LmnStatus_t EepromReadBufferDirect( uint16_t addr, uint8_t *buffer, uint16_t size );
+
+LmnStatus_t EepromDownloadMirror( uint16_t addr, uint16_t size );
+
+LmnStatus_t EepromUploadMirror( uint16_t addr, uint16_t size );
+
+/*!
+ * Writes the given buffer to the EEPROM at the specified address. Has to be within one page.
  *
  * \param[IN] addr EEPROM address to write to
  * \param[IN] buffer Pointer to the buffer to be written.

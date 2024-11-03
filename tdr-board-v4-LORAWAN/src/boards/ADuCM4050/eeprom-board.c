@@ -37,17 +37,16 @@ EEPROM_t eeprom;
  * For this to work, it is assumed that the device is never turned off. In
  * the worst case if it turns off, it will just have to rejoin the network again.
  */
-#define EMULATED_EEPROM_SIZE			65536
 
 static uint8_t emulatedEepromStorage[EMULATED_EEPROM_SIZE] = {0};
 
 uint16_t s = 0;
 
-uint8_t eepDelay = 5;
+uint8_t eepDelay = 0;
 
 void EepromIoInit() {
 	GpioInit( &eeprom.Spi.Nss, EEPROM_NSS, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
-	GpioInit( &eeprom.WP, EEPROM_WP, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_UP, 1 );
+	GpioInit( &eeprom.WP, EEPROM_WP, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_UP, 0 );
 	GpioInit( &eeprom.HOLD, EEPROM_HOLD, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_UP, 1 );
 }
 
@@ -57,7 +56,7 @@ void EepromReset() {
 
 	// Disable Write Protect
 	GpioWrite( &eeprom.WP, 1 );
-	DelayMsMcu(eepDelay);
+	//DelayMsMcu(eepDelay);
 
 	// Send a Reset Enable instruction
 	GpioWrite( &eeprom.Spi.Nss, 0 );
@@ -73,43 +72,39 @@ void EepromReset() {
 
 	// Enable Write Protect
 	GpioWrite( &eeprom.WP, 0 );
-	DelayMsMcu(eepDelay);
+	//DelayMsMcu(eepDelay);
 }
-// OLD
-//LmnStatus_t EepromMcuWriteBuffer( uint16_t addr, uint8_t *buffer, uint16_t size )
-//{
-//	DelayMsMcu(4);
-//	s += size;
-//    if(addr + size <= EMULATED_EEPROM_SIZE) {
-//    	memcpy1(&emulatedEepromStorage[addr], buffer, size);
-//    	return LMN_STATUS_OK;
-//    }
-//    else {
-//    	printf('damn\n');
-//    }
-//
-//
-//    return LMN_STATUS_ERROR;
-//}
 
-// OLD
-//LmnStatus_t EepromMcuReadBuffer( uint16_t addr, uint8_t *buffer, uint16_t size )
-//{
-//	if (addr + size <= EMULATED_EEPROM_SIZE) {
-//		memcpy1(buffer, &emulatedEepromStorage[addr], size);
-//		return LMN_STATUS_OK;
-//	}
-//	return LMN_STATUS_ERROR;
-//}
-
-// NEW
 LmnStatus_t EepromMcuWriteBuffer( uint16_t addr, uint8_t *buffer, uint16_t size )
+{
+	//DelayMsMcu(4);
+	s += size;
+    if(addr + size <= EMULATED_EEPROM_SIZE) {
+    	memcpy1(&emulatedEepromStorage[addr], buffer, size);
+    	return LMN_STATUS_OK;
+    }
+
+    return LMN_STATUS_ERROR;
+}
+
+
+LmnStatus_t EepromMcuReadBuffer( uint16_t addr, uint8_t *buffer, uint16_t size )
+{
+	if (addr + size <= EMULATED_EEPROM_SIZE) {
+		memcpy1(buffer, &emulatedEepromStorage[addr], size);
+		return LMN_STATUS_OK;
+	}
+	return LMN_STATUS_ERROR;
+}
+
+
+LmnStatus_t EepromWriteBufferDirect( uint16_t addr, uint8_t *buffer, uint16_t size )
 {
 	// Variable to store byte received from EEPROM
 	uint8_t rx = 0;
 
 	// Disable Write Protect
-	//GpioWrite( &eeprom.WP, 1 );
+	GpioWrite( &eeprom.WP, 1 );
 
 	// Send a Write Enable instruction
 	GpioWrite( &eeprom.Spi.Nss, 0 );
@@ -149,14 +144,45 @@ LmnStatus_t EepromMcuWriteBuffer( uint16_t addr, uint8_t *buffer, uint16_t size 
 	}while(rx & 0x01); // Check WIP bit
 
 	// Enable Write Protect
-	//GpioWrite( &eeprom.WP, 0 );
+	GpioWrite( &eeprom.WP, 0 );
 
 
     return LMN_STATUS_OK;
 }
 
-// NEW
-LmnStatus_t EepromMcuReadBuffer( uint16_t addr, uint8_t *buffer, uint16_t size )
+LmnStatus_t EepromWriteAcrossPage( uint16_t addr, uint8_t *buffer, uint16_t size )
+{
+	// Variable to keep track of how many bytes are written
+	uint16_t dataWritten = 0, pageOffset = 0, bytesToWrite = 0;
+
+	while(size > 0) {
+		// Check how many bytes into the current page we are
+		pageOffset = addr % 512;
+
+		// Check if we have to split the write up or if all bytes can be fit into one page
+		if(pageOffset + size > 512) {
+			bytesToWrite = 512 - pageOffset;
+		}
+		else {
+			bytesToWrite = size;
+		}
+
+		// Write the bytes that can fit on the page
+		if(EepromWriteBufferDirect(addr, buffer, bytesToWrite) == LMN_STATUS_OK) {
+			dataWritten += bytesToWrite;
+		}
+
+		// Update variables
+		addr += bytesToWrite;
+		buffer += bytesToWrite;
+		size -= bytesToWrite;
+
+	}
+
+    return LMN_STATUS_OK;
+}
+
+LmnStatus_t EepromReadBufferDirect( uint16_t addr, uint8_t *buffer, uint16_t size )
 {
 	// Variable to store byte received from EEPROM
 	uint8_t rx = 0;
@@ -185,7 +211,7 @@ LmnStatus_t EepromMcuReadBuffer( uint16_t addr, uint8_t *buffer, uint16_t size )
 }
 
 
-LmnStatus_t EepromMcuReadStatus( uint8_t *buffer, uint16_t size )
+LmnStatus_t EepromReadStatus( uint8_t *buffer, uint16_t size )
 {
 	// Variable to store byte received from EEPROM
 	uint8_t rx = 0;
@@ -208,7 +234,7 @@ LmnStatus_t EepromMcuReadStatus( uint8_t *buffer, uint16_t size )
 	return LMN_STATUS_OK;
 }
 
-LmnStatus_t EepromMcuReadIdentification( uint8_t *buffer, uint16_t size )
+LmnStatus_t EepromReadIdentification( uint8_t *buffer, uint16_t size )
 {
 	// Variable to store byte received from EEPROM
 	uint8_t rx = 0;
@@ -234,6 +260,20 @@ LmnStatus_t EepromMcuReadIdentification( uint8_t *buffer, uint16_t size )
 	//DelayMsMcu(eepDelay);
 
 	return LMN_STATUS_OK;
+}
+
+LmnStatus_t EepromDownloadMirror( uint16_t addr, uint16_t size )
+{
+	EepromReadBufferDirect(addr, emulatedEepromStorage, EMULATED_EEPROM_SIZE);
+
+	return LMN_STATUS_OK;
+}
+
+LmnStatus_t EepromUploadMirror( uint16_t addr, uint16_t size )
+{
+	EepromWriteAcrossPage(addr, emulatedEepromStorage, EMULATED_EEPROM_SIZE);
+
+    return LMN_STATUS_OK;
 }
 
 void EepromMcuSetDeviceAddr( uint8_t addr )

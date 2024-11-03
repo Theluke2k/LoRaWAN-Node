@@ -29,6 +29,9 @@
 
 void DelayMsMcu( uint32_t ms )
 {
+	if(ms == 0) {
+		return;
+	}
 	uint32_t clockFreq;
 	adi_pwr_GetClockFrequency(ADI_CLOCK_HCLK, &clockFreq);
 	uint32_t delay_val = clockFreq / 15000;

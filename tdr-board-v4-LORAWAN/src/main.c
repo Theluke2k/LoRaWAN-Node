@@ -36,6 +36,7 @@
 #include <adi_gpio.h>
 #include "spi.h"
 #include "sx1276-board.h"
+#include "eeprom-board.h"
 
 // DEBUG
 uint8_t tester = 0; //
@@ -236,7 +237,7 @@ uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
 uint32_t uplinkPeriodicity = 10000;
 int32_t sleepTime = 0;
-uint32_t maxInitializationTime = 1000; // Maximum time it takes between wakeup and next uplink.
+uint32_t maxInitializationTime = 1200; // Maximum time it takes between wakeup and next uplink.
 int32_t sleepTimeOffset = 0;
 uint32_t lastUplinkTime = 0;
 uint32_t uplinkTimeDiff = 0;
@@ -298,21 +299,21 @@ int main(void) {
  	// DEBUG END
  	DelayMsMcu(5000);
 	*/
-
+/*
  	// EEPROM TEST START
+	#define bufferSize 1100
  	while(1) {
  		BoardInitMcu();
  		EepromReset();
 
- 		uint8_t bufferSize = 10;
  		uint16_t address = 0;
 
- 		uint8_t writeBuffer[bufferSize];
- 		uint8_t readBuffer[bufferSize];
+ 		uint8_t writeBuffer[bufferSize] = {0};
+		uint8_t readBuffer[bufferSize] = {0};
 
  		// Fill buffer with data
  		for(int i = 0; i < bufferSize; i++) {
- 			writeBuffer[i] = i;
+ 			writeBuffer[i] = rand() % 256;
  		}
  		uint8_t status_reg[1] = {0};
  		uint8_t identification_reg[3] = {0};
@@ -333,12 +334,12 @@ int main(void) {
  		EepromMcuReadBuffer(address, readBuffer, bufferSize);
  	}
  	// EEPROM TEST END
-
+*/
 
  	// Reset DEBUG pins
 	//adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
  	//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
- 	DelayMsMcu(20000);
+ 	//DelayMsMcu(20000);
  	// Create timers
  	TimerInit( &SleepTimer, OnSleepTimerEvent );
  	TimerInit( &RawLoRaStartInTimer, OnRawLoRaStartInEvent );
@@ -402,6 +403,11 @@ int main(void) {
 		 */
 		// Initlialize board (sets up pins as LoRaMac wants it)
 		BoardInitMcu();
+
+		// Download mirror from EEPROM
+		uint32_t ST = RtcGetTimerValue();
+		EepromDownloadMirror(0, EMULATED_EEPROM_SIZE);
+		uint32_t ET = RtcTick2Ms(RtcGetTimerValue() - ST);
 
 		// Initialize transmission perhiodicity variable
 		TxPeriodicity = APP_TX_DUTYCYCLE
@@ -519,6 +525,10 @@ int main(void) {
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
 		//TimerSetValue( &SleepTimer, sleepTime + 0); // DEBUG (default + sleepTimeOffset)
 
+		// Upload the EEPROM mirror
+		ST = RtcGetTimerValue();
+		EepromUploadMirror(0, EMULATED_EEPROM_SIZE);
+		ET = RtcTick2Ms(RtcGetTimerValue() - ST);
 
 		// De-initialize system we don't need while hibernating
 		deinit_system();

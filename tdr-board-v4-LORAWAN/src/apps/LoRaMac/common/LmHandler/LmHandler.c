@@ -267,8 +267,11 @@ LmHandlerErrorStatus_t LmHandlerInit( LmHandlerCallbacks_t *handlerCallbacks,
         return LORAMAC_HANDLER_ERROR;
     }
 
+    uint32_t ST = RtcGetTimerValue();
     // Restore data if required
     nbNvmData = NvmDataMgmtRestore( );
+    uint32_t ET = RtcTick2Ms(RtcGetTimerValue() - ST);
+
 
     // Try to restore from NVM and query the mac if possible.
     if( ( LmHandlerCallbacks->OnNvmDataChange != NULL ) && ( nbNvmData > 0 ) )
