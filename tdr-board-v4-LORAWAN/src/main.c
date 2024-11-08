@@ -37,6 +37,7 @@
 #include "spi.h"
 #include "sx1276-board.h"
 #include "eeprom-board.h"
+#include "gpio-au.h"
 
 // DEBUG
 uint8_t tester = 0; //
@@ -274,11 +275,59 @@ int main(void) {
  	// Initializes the system clock and needed drivers.
  	init_system();
 
+ 	// Turn on the radio and eeprom
+ 	adi_gpio_SetLow(LORA_PWR_PORT, LORA_PWR_PIN);
+
 	// Set interrup priorities. SPI must have highest prioriy!
 	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
 	NVIC_SetPriority(SPI0_EVT_IRQn, 1);
 	NVIC_SetPriority(RTC1_EVT_IRQn, 2);
 	NVIC_SetPriority(RTC0_EVT_IRQn, 2);
+
+	// Turn on
+	BoardInitMcu();
+
+	DelayMsMcu(10);
+
+	// Initialize sleep timer
+	TimerInit( &SleepTimer, OnSleepTimerEvent );
+
+	// Put radio in sleep
+	Radio.Write(0x01, 0x01);
+	DelayMsMcu(1);
+	Radio.Write(0x01, 0x00);
+
+	// Power off radio
+	adi_gpio_SetHigh(LORA_PWR_PORT, LORA_PWR_PIN);
+
+	// Set NSS pins low
+	GpioWrite( &SX1276.Spi.Nss, 0 );
+	GpioWrite( &eeprom.Spi.Nss, 0 );
+
+	// Set radio reset low
+	GpioWrite( &SX1276.Reset, 0 );
+
+	// Set WP and HOLD low
+	GpioWrite( &eeprom.WP, 0 );
+	GpioWrite( &eeprom.HOLD, 0 );
+
+
+
+	while(1){
+		// Little delay
+		DelayMsMcu(1000);
+
+		// Set timer
+		TimerSetValue(&SleepTimer, 20000);
+		TimerStart(&SleepTimer);
+
+		// Enter hibernation mode
+		iHibernateExitFlag = 0;
+		enter_hibernation();
+		iHibernateExitFlag = 0;
+
+	}
+
  	/*
  	// DEBUG START
  	volatile uint32_t *reg = (uint32_t *)0x4004C038;

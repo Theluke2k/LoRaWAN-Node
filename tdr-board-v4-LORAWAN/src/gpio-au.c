@@ -75,14 +75,12 @@ void digital_pin_init()
 	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(LORA_PWR_PORT, LORA_PWR_PIN, true))) {
 		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
 	}
-	// Allow power to the radio (low)
-	adi_gpio_SetLow(LORA_PWR_PORT, LORA_PWR_PIN);
 
 
 	// DEBUG PIN
-	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT0, ADI_GPIO_PIN_14, true))) {
-		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
-	}
+//	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT0, ADI_GPIO_PIN_14, true))) {
+//		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
+//	}
 
 
 
