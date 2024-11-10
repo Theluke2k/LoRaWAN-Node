@@ -347,14 +347,7 @@ int main(void) {
  	TimerInit( &RawLoRaPeriodicityTimer, OnRawLoRaPeriodicityEvent );
  	TimerInit( &UplinkPeriodicityTimer, OnUplinkPeriodicityEvent );
 
-
-
-
 	while (1) {
-		// Reinitialize system that were closed during hibernation
-
-
-
 		/*
 		 * Lucas (23-08-2024):
 		 * If the flag is set, the board executes the raw lora session
@@ -434,7 +427,6 @@ int main(void) {
 
 			// Mark the program as initiated.
 			initialized = 1;
-			//adi_gpio_Toggle(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG
 		}
 
 		// Reset number of uplinks for this power cycle.
@@ -517,7 +509,7 @@ int main(void) {
 		LmHandlerDeInit();
 
 		// Set radio to sleep
-		Radio.Write(0x01, 0x00);
+		//Radio.Write(0x01, 0x00);
 
 		// Calculate time offset of +- 3000 ms to avoid packet collisions
 		//TimerSetValue( &SleepTimer, sleepTime + 0); // DEBUG (default + sleepTimeOffset)
@@ -529,7 +521,6 @@ int main(void) {
 
 		// De-initialize system we don't need while hibernating
 		SystemPrepareHibernate();
-		DelayMsMcu(5);
 
 		// Compute sleepTime
 		sleepTime = uplinkPeriodicity - (TimerGetCurrentTime() - lastUplinkTime) - maxInitializationTime;
@@ -581,6 +572,10 @@ void RawLoRaSession() {
 
 	// Send data
 	RawLoRaSend(&RawLoRaConfig, AppData.Buffer, AppData.BufferSize);
+	//DelayMsMcu(100);
+
+	//SystemPrepareHibernate();
+	//DelayMsMcu(100);
 
 	// Go to sleep
 	iHibernateExitFlag = 0;
@@ -589,6 +584,7 @@ void RawLoRaSession() {
 
 	// Reinitializez required systems after hibernate wakeup.
 	SystemReinitializerFromHibernate();
+	//DelayMsMcu(100);
 }
 
 /*

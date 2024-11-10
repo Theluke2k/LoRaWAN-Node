@@ -119,6 +119,7 @@ void SystemReinitializerFromHibernate( void )
 
 	// Allow power to the radio and eeprom
 	GpioWrite( &radio_eeprom_PWR, 0);
+	DelayMsMcu(5);
 }
 
 /*!
@@ -127,7 +128,7 @@ void SystemReinitializerFromHibernate( void )
 void SystemPrepareHibernate( void )
 {
 	// Remove interrupts from radio
-	SX1276IoIrqDeInit();
+	//SX1276IoIrqDeInit();
 
 	// Turn off radio and eeprom
 	GpioWrite( &radio_eeprom_PWR, 1);
