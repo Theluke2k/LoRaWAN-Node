@@ -311,8 +311,6 @@ int main(void) {
 	GpioWrite( &eeprom.WP, 0 );
 	GpioWrite( &eeprom.HOLD, 0 );
 
-
-
 	while(1){
 		// Little delay
 		DelayMsMcu(1000);
