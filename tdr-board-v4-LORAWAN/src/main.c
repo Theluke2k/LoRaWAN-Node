@@ -353,10 +353,7 @@ int main(void) {
 	while (1) {
 		// Reinitialize system that were closed during hibernation
 
-		if(hasHibernated) {
-			reinit_system();
-			hasHibernated = 0;
-		}
+
 
 		/*
 		 * Lucas (23-08-2024):
@@ -531,7 +528,8 @@ int main(void) {
 		ET = RtcTick2Ms(RtcGetTimerValue() - ST);
 
 		// De-initialize system we don't need while hibernating
-		deinit_system();
+		SystemPrepareHibernate();
+		DelayMsMcu(5);
 
 		// Compute sleepTime
 		sleepTime = uplinkPeriodicity - (TimerGetCurrentTime() - lastUplinkTime) - maxInitializationTime;
@@ -544,10 +542,15 @@ int main(void) {
 			iHibernateExitFlag = 0;
 			enter_hibernation();
 			iHibernateExitFlag = 0;
+
+			// Set flag to reinitialize systems
+			hasHibernated = 1; // DEBUG default = 1;
 		}
 
-		// Set flag to reinitialize systems
-		hasHibernated = 1; // DEBUG default = 1;
+		if(hasHibernated) {
+			SystemReinitializerFromHibernate();
+			hasHibernated = 0;
+		}
 	}
 
 	return 0;

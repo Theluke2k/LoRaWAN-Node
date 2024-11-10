@@ -25,7 +25,6 @@
 #include "board-config.h"
 #include "utilities.h"
 #include "delay.h"
-#include "gpio.h"
 #include "adc.h"
 #include "spi.h"
 #include "i2c.h"
@@ -41,6 +40,7 @@
 #include <drivers/general/adi_drivers_general.h>
 #include "LoRaMac.h"
 #include "gpio-board.h"
+#include "board-config.h"
 //#include "sx1276.h"
 //
 
@@ -109,11 +109,33 @@ void BoardInitPeriph( void )
  */
 void SystemReinitializerFromHibernate( void )
 {
-	// Reinitialize SPI pins
+	// Reinitialize SPI pins (not sure if both calls are necessary)
 	SpiInit( &SX1276.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
+	SpiInit( &eeprom.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
 
+	// Initialize all pins to radio and eeprom
+	SX1276IoInit( );
+	EepromIoInit( );
+
+	// Allow power to the radio and eeprom
+	GpioWrite( &radio_eeprom_PWR, 0);
 }
-// DEBUG END
+
+/*!
+ * \brief Manages everything that needs to be done before entering hibernate.
+*/
+void SystemPrepareHibernate( void )
+{
+	// Remove interrupts from radio
+	SX1276IoIrqDeInit();
+
+	// Turn off radio and eeprom
+	GpioWrite( &radio_eeprom_PWR, 1);
+
+	// Turn off all output pins connected to the radio and eeprom
+	SX1276IoDeInit();
+	EepromIoDeInit();
+}
 
 /*!
  * \brief Initializes the mcu.
@@ -152,8 +174,14 @@ void BoardInitMcu( void )
 		 * System clock reconfig here? The examples have it. Don't know if we need it.
 		 */
 	}
+	// Initialize and allow power to the radio and eeprom
+	GpioInit( &radio_eeprom_PWR, RADIO_EEPROM_PWR, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+
+	// Initialize SPI for radio and eeprom
 	SpiInit( &SX1276.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
 	SpiInit( &eeprom.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
+
+	// Initialize pins for radio and eeprom
 	SX1276IoInit( );
 	EepromIoInit( );
 	/*

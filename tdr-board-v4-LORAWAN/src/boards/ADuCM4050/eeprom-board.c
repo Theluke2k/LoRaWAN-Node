@@ -46,8 +46,14 @@ uint8_t eepDelay = 0;
 
 void EepromIoInit() {
 	GpioInit( &eeprom.Spi.Nss, EEPROM_NSS, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
-	GpioInit( &eeprom.WP, EEPROM_WP, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_UP, 0 );
-	GpioInit( &eeprom.HOLD, EEPROM_HOLD, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_UP, 1 );
+	GpioInit( &eeprom.WP, EEPROM_WP, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+	GpioInit( &eeprom.HOLD, EEPROM_HOLD, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
+}
+
+void EepromIoDeInit() {
+	GpioWrite( &eeprom.Spi.Nss, 0 );
+	GpioWrite( &eeprom.WP, 0 );
+	GpioWrite( &eeprom.HOLD, 0 );
 }
 
 void EepromReset() {

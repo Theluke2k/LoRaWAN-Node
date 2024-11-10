@@ -77,6 +77,11 @@ typedef struct {
     ADI_GPIO_DATA Pins;
 } PinMap;
 
+// General Pins
+
+// Radio and EEPROM power
+Gpio_t radio_eeprom_PWR;
+
 //PinMap NSSPin = {ADI_GPIO_PORT2, ADI_GPIO_PIN_8};
 
 //Hmm, it seems that only the first value of the comma-separated expression is read
@@ -101,6 +106,8 @@ typedef struct {
 #define EEPROM_WP									P0_8
 #define EEPROM_HOLD									P0_12
 
+// PWR to radio and eeprom
+#define RADIO_EEPROM_PWR 								    P1_0
 
 //#define LED_1                                       (ADI_GPIO_PORT2, ADI_GPIO_PIN_2) //The yellow LED (why?
 #define UART_TX                                     P0__10 // not used

@@ -142,10 +142,10 @@ void DeInitMeasureMode() {
  */
 void deinit_system() {
 	// Deinitialize GPIO driver
-	adi_gpio_UnInit();
+	//adi_gpio_UnInit();
 
 	// Close SPI Driver
-	SpiDeInit(NULL);
+	//SpiDeInit(NULL);
 
 }
 
@@ -155,7 +155,9 @@ void deinit_system() {
  */
 void reinit_system() {
 	// Init GPIO
-	gpio_init();
+	//gpio_init();
+
+
 }
 
 /**

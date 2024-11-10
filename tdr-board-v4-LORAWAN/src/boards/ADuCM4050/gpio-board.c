@@ -321,10 +321,16 @@ void GpioMcuSetInterrupt( Gpio_t *obj, IrqModes irqMode, IrqPriorities irqPriori
 
 void GpioMcuRemoveInterrupt( Gpio_t *obj )
 {
-	/*
-	 * Lucas (12-11-23):
-	 * This function is not used anywhere in loramac.
-	*/
+	// Clear IRQ handler for the pin
+	obj->IrqHandler = NULL;
+	array[obj->pin] = NULL;
+
+	// Remove pin from interrupt mask
+	int_pins[*(ADI_GPIO_PORT*)obj->port] &= ~(obj->pinIndex);
+
+	// Update the group interrupt
+	adi_gpio_SetGroupInterruptPins(*(ADI_GPIO_PORT*)obj->port, ADI_GPIO_INTA_IRQ, int_pins[*(ADI_GPIO_PORT*)obj->port]);
+
 }
 
 /*

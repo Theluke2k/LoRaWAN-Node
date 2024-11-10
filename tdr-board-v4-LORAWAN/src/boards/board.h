@@ -32,6 +32,7 @@ extern "C"
 #include "utilities.h"
 #include "sx1276Regs-LoRa.h"
 #include "sx1276Regs-Fsk.h"
+#include "gpio.h"
 
 /*
  * Lucas (25-08-2024):
@@ -59,6 +60,11 @@ enum BoardPowerSources
  * \brief Lucas: Initializes the required systems on the board after hibernate wakeup.
  */
 void SystemReinitializerFromHibernate( void );
+
+/*!
+ * \brief Lucas: Manages everything that needs to be done before entering hibernate.
+*/
+void SystemPrepareHibernate( void );
 
 /*!
  * \brief Initializes the mcu.

@@ -83,6 +83,11 @@ typedef struct EEPROM_t
 void EepromIoInit( void );
 
 /*!
+ * \brief De-initializes the EEPROM I/Os pins interface
+ */
+void EepromIoDeInit();
+
+/*!
  * \brief Resets the EEPROM I/Os pins interface
  */
 void EepromReset( void );
