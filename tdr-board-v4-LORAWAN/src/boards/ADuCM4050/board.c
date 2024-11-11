@@ -128,7 +128,7 @@ void SystemReinitializerFromHibernate( void )
 void SystemPrepareHibernate( void )
 {
 	// Remove interrupts from radio
-	//SX1276IoIrqDeInit();
+	SX1276IoIrqDeInit();
 
 	// Turn off radio and eeprom
 	GpioWrite( &radio_eeprom_PWR, 1);
@@ -546,12 +546,14 @@ uint8_t RawLoRa_RadioSend(uint8_t *data, uint8_t packet_length) {
 	/* Wait for TX done */
 	uint8_t txDone = 0;
 
-	while (txDone & RFLR_IRQFLAGS_TXDONE_MASK) {
+	while(!(txDone & RFLR_IRQFLAGS_TXDONE_MASK)) {
 		txDone = Radio.Read(REG_LR_IRQFLAGS);
 	}
 
 	/* Clear IRQ's */
 	Radio.Write(REG_LR_IRQFLAGS, RFLR_IRQFLAGS_TXDONE_MASK);
+
+	txDone = Radio.Read(REG_LR_IRQFLAGS);
 
 	/* Set the module in sleep mode */
 	Radio.Write(REG_LR_OPMODE, RFLR_OPMODE_LONGRANGEMODE_ON | RFLR_OPMODE_SLEEP);

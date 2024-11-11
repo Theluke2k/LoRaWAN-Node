@@ -572,10 +572,10 @@ void RawLoRaSession() {
 
 	// Send data
 	RawLoRaSend(&RawLoRaConfig, AppData.Buffer, AppData.BufferSize);
-	//DelayMsMcu(100);
+	//DelayMsMcu(2000);
 
-	//SystemPrepareHibernate();
-	//DelayMsMcu(100);
+	SystemPrepareHibernate();
+	//DelayMsMcu(1000);
 
 	// Go to sleep
 	iHibernateExitFlag = 0;
@@ -584,7 +584,7 @@ void RawLoRaSession() {
 
 	// Reinitializez required systems after hibernate wakeup.
 	SystemReinitializerFromHibernate();
-	//DelayMsMcu(100);
+	//DelayMsMcu(1000);
 }
 
 /*
