@@ -237,10 +237,13 @@ uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
 uint32_t uplinkPeriodicity = 10000;
 int32_t sleepTime = 0;
-uint32_t maxInitializationTime = 1200; // Maximum time it takes between wakeup and next uplink.
+const uint32_t maxInitializationTime = 1200; // Maximum time it takes between wakeup and next uplink.
+const uint32_t maxInitializationTimeRawLoRa = 300;
 int32_t sleepTimeOffset = 0;
 uint32_t lastUplinkTime = 0;
+uint32_t lastRawTX = 0;
 uint32_t uplinkTimeDiff = 0;
+const int32_t minSleepMs = 300;
 
 // Logical Flags
 uint8_t enableSleepFlag = 0;
@@ -264,8 +267,6 @@ static RawLoRa_Config RawLoRaConfig =
 
 /*
  * Lucas (22-10-23):
- *
- *
  * Main program.
  */
 int main(void) {
@@ -348,21 +349,13 @@ int main(void) {
  	TimerInit( &UplinkPeriodicityTimer, OnUplinkPeriodicityEvent );
 
 	while (1) {
+		BoardInitMcu();
 		/*
 		 * Lucas (23-08-2024):
 		 * If the flag is set, the board executes the raw lora session
 		 * until the flag is disabled unset.
 		 */
 		if (rawLoRaEnabled) {
-			BoardInitMcu();
-
-			// Reset radio
-			SX1276Reset();
-
-			// Set timers for session duration and TX periodicity.
-			TimerSetValue(&RawLoRaPeriodicityTimer,	RawLoRaConfig.TxPeriodicity);
-			TimerStart(&RawLoRaPeriodicityTimer);
-
 			// Start LoRa session
 			while (rawLoRaEnabled) {
 				RawLoRaSession();
@@ -392,7 +385,7 @@ int main(void) {
 		 * Run the LoRaMac stack.
 		 */
 		// Initlialize board (sets up pins as LoRaMac wants it)
-		BoardInitMcu();
+
 
 		// Download mirror from EEPROM
 		uint32_t ST = RtcGetTimerValue();
@@ -423,7 +416,7 @@ int main(void) {
 			LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
 
 			// The join process can be made here but it does not need to run. The state machine handles it.
-			LmHandlerJoin(); // DEBUG: should be deleted when eeprom is implemented
+			LmHandlerJoin(); // DELETE THIS IF WE WANT TO NOT HAVING THE BOARD JOIN ON EACH STARTUP.
 
 			// Mark the program as initiated.
 			initialized = 1;
@@ -440,6 +433,7 @@ int main(void) {
 
 			// Try to send uplink
 			if (uplinksSent < desiredUplinks) {
+				LmHandlerErrorStatus_t deviceTimeReq =  LmHandlerDeviceTimeReq();
 				PrepareTxFrame();
 			}
 
@@ -483,6 +477,9 @@ int main(void) {
 				enableSleepFlag = 0;
 				isJoiningFlag = 0;
 
+				// Prepare for hibernation
+				//SystemPrepareHibernate();
+
 				// Start sleep timer
 				TimerStart(&SleepTimer);
 
@@ -498,6 +495,7 @@ int main(void) {
 
 		} while (1);
 
+		// If Raw LoRa is ready to be enabled, dont go to sleep. Just start the loop over
 		if(rawLoRaEnabled) {
 			continue;
 		}
@@ -519,31 +517,27 @@ int main(void) {
 		EepromUploadMirror(0, EMULATED_EEPROM_SIZE);
 		ET = RtcTick2Ms(RtcGetTimerValue() - ST);
 
-		// De-initialize system we don't need while hibernating
-		SystemPrepareHibernate();
-
 		// Compute sleepTime
 		sleepTime = uplinkPeriodicity - (TimerGetCurrentTime() - lastUplinkTime) - maxInitializationTime;
 
 		// Start timer and enter hibernation is sleepTime is larger than 300 ms.
-		if(sleepTime > 300) {
+		if(sleepTime > minSleepMs) {
+			// De-initialize system we don't need while hibernating
+			SystemPrepareHibernate();
+
+			// Set timers
 			TimerSetValue( &UplinkPeriodicityTimer, sleepTime);
 			TimerStart( &UplinkPeriodicityTimer );
 
+			// Enter hibernation
 			iHibernateExitFlag = 0;
 			enter_hibernation();
 			iHibernateExitFlag = 0;
 
-			// Set flag to reinitialize systems
-			hasHibernated = 1; // DEBUG default = 1;
-		}
-
-		if(hasHibernated) {
+			// Re-initialize system after hibernate
 			SystemReinitializerFromHibernate();
-			hasHibernated = 0;
 		}
 	}
-
 	return 0;
 }
 
@@ -564,196 +558,48 @@ int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX) {
  */
 void RawLoRaSession() {
 	// Get data to send?
+	//??????????????????
 
 	// For dummy data, send the same as in LoRaWAN
 	uint8_t packet_length = sizeof(tdr_data);
 	memcpy1(AppData.Buffer, tdr_data, packet_length);
 	AppData.BufferSize = packet_length;
 
-	// Send data
-	RawLoRaSend(&RawLoRaConfig, AppData.Buffer, AppData.BufferSize);
-	//DelayMsMcu(2000);
+	// Configure the radio
+	RawLoRa_RadioConfig( &RawLoRaConfig );
 
-	SystemPrepareHibernate();
-	//DelayMsMcu(1000);
+	// Wait until it is time to send
+	uint32_t currentTime = TimerGetCurrentTime();
+	while(currentTime - lastRawTX < RawLoRaConfig.TxPeriodicity) {
+		currentTime = TimerGetCurrentTime();
+	}
 
-	// Go to sleep
-	iHibernateExitFlag = 0;
-	enter_hibernation();
-	iHibernateExitFlag = 0;
+	// Send the data packet
+	RawLoRa_RadioSend(AppData.Buffer, AppData.BufferSize);
+	lastRawTX = currentTime;
 
-	// Reinitializez required systems after hibernate wakeup.
-	SystemReinitializerFromHibernate();
-	//DelayMsMcu(1000);
+	// Compute sleep time
+	sleepTime = RawLoRaConfig.TxPeriodicity - (TimerGetCurrentTime() - lastRawTX) - maxInitializationTimeRawLoRa;
+
+	// Start timer and enter hibernation is sleepTime is larger than 300 ms.
+	if(sleepTime > minSleepMs) {
+		// Prepeare board to hibernate
+		SystemPrepareHibernate();
+
+		// Set timers for session duration and TX periodicity.
+		TimerSetValue(&RawLoRaPeriodicityTimer,	sleepTime);
+		TimerStart(&RawLoRaPeriodicityTimer);
+
+		// Hibernate
+		iHibernateExitFlag = 0;
+		enter_hibernation();
+		iHibernateExitFlag = 0;
+
+		// Reinitializez required systems after hibernate wakeup.
+		SystemReinitializerFromHibernate();
+	}
 }
 
-/*
- * Lucas:
- * Function to handle the CLI interface functions.
- */
-bool CLIHandler(LmHandlerAppData_t* appData) {
-	// Define expected CLI functions:
-	if(appData->Buffer == NULL || appData->BufferSize == 0) {
-		return false;
-	}
-
-	// Create new buffer to add null terminator
-	char receiveBuffer[appData->BufferSize + 1]; // Add extra space for null terminator
-	memcpy(receiveBuffer, appData->Buffer, appData->BufferSize); // Copy original array
-	receiveBuffer[appData->BufferSize] = '\0'; // Add null terminator
-
-	// Check the different commands
-	if(strcmp(receiveBuffer, "123") == 0) {
-		// Execute handler for command
-		printf("ping\n");
-		return true;
-	}
-	else if (strncmp(receiveBuffer, "Sleep", 5) == 0) {
-		int time = 0;
-		if (sscanf(receiveBuffer, "Sleep %d", &time) == 1) {
-			// Execute handler for command
-			printf("deep sleep: %d\n", time);
-			uplinkPeriodicity = time;
-			return true;
-		}
-	}
-	else if (strncmp(receiveBuffer, "set_adr:", 8) == 0) {
-		int setADR = 0;
-		if (sscanf(receiveBuffer, "set_adr:%d", &setADR) == 1) {
-			// Execute handler for command
-
-			// Check validity
-			if (setADR == 1 || setADR == 0) {
-				if (LmHandlerParams.AdrEnable != setADR) {
-					// Update ADR parameter
-					LmHandlerParams.AdrEnable = setADR;
-
-					// Reinitialize LmHandler
-					if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams)
-							!= LORAMAC_HANDLER_SUCCESS) {
-						printf("LoRaMac wasn't properly initialized\n");
-						// Fatal error, endless loop.
-						while (1) {
-						}
-					}
-				}
-			}
-			return true;
-		}
-	}
-	else if (strncmp(receiveBuffer, "set_datarate:", 13) == 0) {
-		int set_datarate = 0;
-		if (sscanf(receiveBuffer, "set_datarate:%d", &set_datarate) == 1) {
-			// Execute handler for command
-
-			// Check validity
-			if (set_datarate >= 0 && set_datarate <= 5) {
-				// Update ADR parameter
-				LmHandlerParams.TxDatarate = set_datarate;
-
-				// Reinitialize LmHandler
-				if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams)
-						!= LORAMAC_HANDLER_SUCCESS) {
-					printf("LoRaMac wasn't properly initialized\n");
-					// Fatal error, endless loop.
-					while (1) {
-					}
-				}
-
-			}
-			return true;
-		}
-	}
-	else if(strncmp(receiveBuffer, "{\"config\":{\"adr\":\"", 18) == 0) {
-		bool setADR = 0;
-		if(sscanf(receiveBuffer, "{\"config\":{\"adr\":\"%d", &setADR) == 1) {
-			if(LmHandlerParams.AdrEnable != setADR) {
-				// Execute handler for command
-				LmHandlerParams.AdrEnable = setADR;
-
-				if (LmHandlerInit(&LmHandlerCallbacks, &LmHandlerParams) != LORAMAC_HANDLER_SUCCESS) {
-					printf("LoRaMac wasn't properly initialized\n");
-					// Fatal error, endless loop.
-					while (1) {}
-				}
-			}
-			printf("setadr: %d\n", setADR);
-			return true;
-		}
-	}
-	/*
-	 * New RawLora Commands.
-	 */
-	else if (strncmp(receiveBuffer, "rawlora_start_in:", 17) == 0) {
-		uint32_t startTime = 0;
-		if (sscanf(receiveBuffer, "rawlora_start_in:%d", &startTime) == 1) {
-			// Execute handler for command
-
-			// Check validity
-			if(startTime < 131072000) {
-				RawLoRaConfig.StartIn = startTime; // set flag
-
-				// Set and start timer to start LoRa in amount of timer
-				TimerSetValue( &RawLoRaStartInTimer, RawLoRaConfig.StartIn);
-				TimerStart(&RawLoRaStartInTimer);
-			}
-			return true;
-		}
-	}
-	else if (strncmp(receiveBuffer, "rawlora_duration:", 17) == 0) {
-		uint32_t duration = 0;
-		if (sscanf(receiveBuffer, "rawlora_duration:%d", &duration) == 1) {
-			// Execute handler for command
-
-			// Check validity
-			if (duration < 131072000) {
-				RawLoRaConfig.Duration = duration; // set flag
-			}
-			return true;
-		}
-	}
-	else if (strncmp(receiveBuffer, "rawlora_spreading_factor:", 25) == 0) {
-		uint32_t SF = 0;
-		if (sscanf(receiveBuffer, "rawlora_spreading_factor:%d", &SF) == 1) {
-			// Execute handler for command
-
-			// Check validity
-			if (SF < 13 && SF > 6) {
-				RawLoRaConfig.SpreadingFactor = SF;
-			}
-			return true;
-		}
-	}
-	else if (strncmp(receiveBuffer, "rawlora_periodicity:", 20) == 0) {
-		uint32_t period = 0;
-		if (sscanf(receiveBuffer, "rawlora_periodicity:%d", &period) == 1) {
-			// Execute handler for command
-
-			// Check validity
-			if (period < 131072000) {
-				RawLoRaConfig.TxPeriodicity = period; // set flag
-			}
-			return true;
-		}
-	}
-	else if (strncmp(receiveBuffer, "rawlora_frequency:", 18) == 0) {
-		uint32_t freq = 0;
-		if (sscanf(receiveBuffer, "rawlora_frequency:%d", &freq) == 1) {
-			// Execute handler for command
-
-			// Check validity TODO: update this check!
-			if (freq >= 0) {
-				RawLoRaConfig.Frequency = freq; // set flag
-			}
-			return true;
-		}
-	}
-	else {
-		printf("unknown command\n");
-	}
-
-	return false;
-}
 
 static uint8_t CLIHandler2(LmHandlerAppData_t* appData) { // BEFORE: char *command_string
 	// Define expected CLI functions:
@@ -962,8 +808,6 @@ static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
     case LORAWAN_APP_PORT:
         {
         	CLIHandler2(appData);
-        	//AppLedStateOn = appData->Buffer[0] & 0x01;
-            //GpioWrite( &Led4, ( ( AppLedStateOn & 0x01 ) != 0 ) ? 1 : 0 );
         }
         break;
     default:
@@ -1066,13 +910,11 @@ static void PrepareTxFrame( void )
     	currentTime = TimerGetCurrentTime();
     }
 
-    adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
     LmHandlerErrorStatus_t t = LmHandlerSend( &AppData, LmHandlerParams.IsTxConfirmed );
 
     if(t == LORAMAC_HANDLER_SUCCESS) {
     	uplinksSent++;
     	lastUplinkTime = currentTime;
-    	//lastUplinkTime += uplinkPeriodicity;
     }
     else {
     	TimerStop( &UplinkPeriodicityTimer );
@@ -1144,12 +986,6 @@ uint32_t x = 0;
  */
 static void OnTxTimerEvent( void* context )
 {
-	// DEBUG start
-	if( LmHandlerJoinStatus( ) == LORAMAC_HANDLER_SET ) {
-		tester = 1;
-		x++;
-	}
-	PAJ("OnTxTimerEvent\n");
 	// DEBUG end
 	TimerStop(&TxTimer);
 
@@ -1163,25 +999,17 @@ static void OnTxTimerEvent( void* context )
 static void OnSleepTimerEvent( void* context )
 {
 	iHibernateExitFlag = 1;
-
-
-	//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0);
 }
 
 static void OnUplinkPeriodicityEvent( void* context )
 {
 	iHibernateExitFlag = 1;
-	//TimerSetValue( &UplinkPeriodicityTimer, sleepTime-1000);
-	//TimerStart(&UplinkPeriodicityTimer);
 }
 
 static void OnRawLoRaStartInEvent( void* context )
 {
 	// Get the processor out of sleep if it is sleeping
 	iHibernateExitFlag = 1;
-
-	//adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
-
 
 	// Stop Sleeptimers
 	TimerStop( &SleepTimer );
@@ -1200,13 +1028,6 @@ static void OnRawLoRaDurationEvent( void* context )
 	// Wake up from sleep. Periodicity timer wont do it.
 	iHibernateExitFlag = 1;
 
-	// Set up SPI for LoRaWAN
-	SystemReinitializerFromHibernate();
-
-	// DEBUG pins
-	//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
-	//adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
-
 	// Stop timers
 	TimerStop( &RawLoRaPeriodicityTimer );
 
@@ -1217,8 +1038,6 @@ static void OnRawLoRaDurationEvent( void* context )
 static void OnRawLoRaPeriodicityEvent( void* context )
 {
 	iHibernateExitFlag = 1;
-	TimerStart( &RawLoRaPeriodicityTimer );
-	//adi_gpio_Toggle(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
 }
 
 

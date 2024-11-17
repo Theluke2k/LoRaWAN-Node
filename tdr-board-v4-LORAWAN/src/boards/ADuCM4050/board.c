@@ -119,7 +119,6 @@ void SystemReinitializerFromHibernate( void )
 
 	// Allow power to the radio and eeprom
 	GpioWrite( &radio_eeprom_PWR, 0);
-	DelayMsMcu(5);
 }
 
 /*!

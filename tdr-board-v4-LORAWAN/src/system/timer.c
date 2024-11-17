@@ -388,8 +388,6 @@ static void TimerSetTimeout( TimerEvent_t *obj )
     {
         obj->Timestamp = RtcGetTimerElapsedTime( ) + minTicks;
     }
-    //printf("Calling RtcSetAlarm!\n");
-    //printf("Current Count: %d\n", RtcGetTimerValue());
     RtcSetAlarm( obj->Timestamp );
 }
 

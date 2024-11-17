@@ -90,6 +90,8 @@ static void           rtc1Callback (void *pCBParam, uint32_t Event, void *EventA
  * Variable used to track the last time an alarm was set.
  */
 static uint32_t RtcTimerContext = 0;
+static uint32_t backupSeconds = 0;
+static uint16_t backupMs = 0;
 
 // DEBUG start
 extern uint32_t sleepTime;
@@ -239,96 +241,6 @@ void RtcInit( void )
 	eResult = adi_rtc_Enable(hDevRtc1, true);
 	DEBUG_RESULT("Failed to enable the device", eResult, ADI_RTC_SUCCESS);
 
-
-/*
-	//Program to test timer.
-	RtcSetTimerContext( );
-	RtcSetAlarm( 327680/2 );
-	while(iFlag == 0) {
-
-	}
-	printf("Timer executed interrupt!\n");
-*/
-	/*
-	 * Lucas:
-	 * PROGRAM TO TEST COUNTER
-	 */
-	/*
-	eResult = adi_rtc_EnableAlarm(hDevRtc1, false);
-	DEBUG_RESULT("adi_RTC_EnableAlarm failed",eResult,ADI_RTC_SUCCESS);
-
-	eResult = adi_rtc_EnableInterrupts(hDevRtc1, ADI_RTC_ALARM_INT, false);
-	DEBUG_RESULT("adi_RTC_EnableInterrupts failed",eResult,ADI_RTC_SUCCESS);
-
-	if (ADI_RTC_SUCCESS != (eResult = adi_rtc_GetCount(hDevRtc1, &count)))
-	{
-		DEBUG_RESULT("\n Failed to get RTC Count %04d", eResult, ADI_RTC_SUCCESS);
-	}
-	printf("Count: %d\n", count);
-
-	uint32_t rtcCounts[20];
-	uint32_t loopTimes[20];
-	uint32_t oldCount = count;
-	uint32_t loopTime = 0;
-	for(int i = 0; i < 10; i++) {
-		while(count == oldCount) {
-			if (ADI_RTC_SUCCESS != (eResult = adi_rtc_GetCount(hDevRtc1, &count)))
-			{
-				DEBUG_RESULT("\n Failed to get RTC Count %04d", eResult, ADI_RTC_SUCCESS);
-			}
-			loopTime++;
-		}
-		rtcCounts[i] = count;
-		loopTimes[i] = loopTime;
-		loopTime = 0;
-		oldCount = count;
-	}
-
-	for (int i = 0; i < 10; i++) {
-		printf("Count: %d\n", rtcCounts[i]);
-		printf("LoopTime: %d\n", loopTimes[i]);
-	}*/
-
-	/*
-	 * Lucas:
-	 * PROGRAM TO TEST ALARM
-	 */
-
-	/*
-	uint32_t counter;
-
-	if(ADI_RTC_SUCCESS != (eResult = adi_rtc_GetCount(hDevRtc1,&counter)))
-	{
-	    DEBUG_RESULT("\n Failed to get RTC Count %04d",eResult,ADI_RTC_SUCCESS);
-	}
-	if(ADI_RTC_SUCCESS != (eResult = adi_rtc_SetAlarm(hDevRtc1, counter + 163840)))
-	{
-	    DEBUG_RESULT("\n Failed to set RTC Alarm %04d",eResult,ADI_RTC_SUCCESS);
-	}
-
-
-
-	iHibernateExitFlag = 0;
-	if (ADI_RTC_SUCCESS != (eResult = adi_rtc_GetCount(hDevRtc1, &count)))
-	{
-		DEBUG_RESULT("\n Failed to get RTC Count %04d", eResult, ADI_RTC_SUCCESS);
-	}
-	printf("Count: %d\n", count);
-	if (adi_pwr_EnterLowPowerMode(ADI_PWR_MODE_HIBERNATE, &iHibernateExitFlag, 0))
-	{
-	    DEBUG_MESSAGE("System Entering to Low Power Mode failed");
-	}
-	printf("Timer Callback Called!\n");
-	if (ADI_RTC_SUCCESS != (eResult = adi_rtc_GetCount(hDevRtc1, &count)))
-	{
-		DEBUG_RESULT("\n Failed to get RTC Count %04d", eResult, ADI_RTC_SUCCESS);
-	}
-	printf("Count: %d\n", count);
-
-	while(testerInt != 1) {
-		printf("%d\n", testerInt);
-	}
-	*/
 }
 
 /*
@@ -498,17 +410,31 @@ uint32_t RtcGetTimerElapsedTime( void )
 
 uint32_t RtcGetCalendarTime( uint16_t *milliseconds )
 {
-	return 0;
+	// Get the current RTC count
+	uint32_t rtcTicks = RtcGetTimerValue();
+
+	// Convert ticks to seconds and milliseconds
+	uint32_t seconds = RtcTick2Ms(rtcTicks) / 1000;
+	uint16_t ms = RtcTick2Ms(rtcTicks) % 1000;
+
+	if(milliseconds != NULL) {
+		*milliseconds = ms;
+	}
+
+	return seconds;
+
 }
 
 void RtcBkupWrite( uint32_t data0, uint32_t data1 )
 {
-
+	backupSeconds = data0;
+	backupMs = data1;
 }
 
 void RtcBkupRead( uint32_t* data0, uint32_t* data1 )
 {
-
+	*data0 = backupSeconds;
+	*data1 = backupMs;
 }
 
 void RtcProcess( void )
