@@ -237,7 +237,7 @@ uint8_t uplinksSent = 0;
 uint8_t initialized = 0;
 uint32_t uplinkPeriodicity = 10000;
 int32_t sleepTime = 0;
-const uint32_t maxInitializationTime = 1200; // Maximum time it takes between wakeup and next uplink.
+const uint32_t maxInitializationTime = 1500; // Maximum time it takes between wakeup and next uplink.
 const uint32_t maxInitializationTimeRawLoRa = 300;
 int32_t sleepTimeOffset = 0;
 uint32_t lastUplinkTime = 0;
@@ -731,7 +731,7 @@ static uint8_t CLIHandler2(LmHandlerAppData_t* appData) { // BEFORE: char *comma
 				// Execute handler for command
 
 				// Check validity
-				if (period < 131072000) {
+				if (period < 131072000 && period >= 1000) {
 					RawLoRaConfig.TxPeriodicity = period; // set flag
 				}
 				num_of_commands++;
