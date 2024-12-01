@@ -25,6 +25,7 @@
 "src/apps/LoRaMac/common/LmHandlerMsgDisplay.o"
 "src/apps/LoRaMac/common/NvmDataMgmt.o"
 "src/apps/LoRaMac/common/cli.o"
+"src/boards/ADuCM4050/adc-board.o"
 "src/boards/ADuCM4050/board.o"
 "src/boards/ADuCM4050/delay-board.o"
 "src/boards/ADuCM4050/eeprom-board.o"

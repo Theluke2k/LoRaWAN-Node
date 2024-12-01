@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
 #include "firmwareVersion.h"
 #include "apps/LoRaMac/common/githubVersion.h"
 #include "utilities.h"
@@ -175,6 +176,9 @@ static void OnUplinkPeriodicityEvent(void* context);
  * Custom Functions
  */
 static uint8_t CLIHandler2(LmHandlerAppData_t* appData);
+double SCVoltageAfterTX(double V_cap_i, double C, double t_tx, double V_sup, double i_tx);
+bool IsVoltageSufficient(double V_cap_i, double t_tx);
+
 
 //Function pointers for loramac callbacks.
 static LmHandlerCallbacks_t LmHandlerCallbacks =
@@ -245,6 +249,16 @@ uint32_t lastRawTX = 0;
 uint32_t uplinkTimeDiff = 0;
 const int32_t minSleepMs = 300;
 
+// For supercat calculations (SC = Super Capacitor)
+const double C_SC = 1.0;			// Supercap capacitance
+const double V_radio = 3.3;		// Radio supply voltage
+const double V_SC_min = 3.5;	// Minimum supercap voltage for operation
+const double i_tx = 0.12;		// Current draw during radio transmission
+double t_tx = 3.0;				// Radio transmission time
+double V_SC = 0.0;				// Voltage over the supercapacitor
+double V_SC_e = 0.0;				// Voltage over the supercapacitor after hypothetical transmission
+
+
 // Logical Flags
 uint8_t enableSleepFlag = 0;
 uint8_t isJoiningFlag = 0;
@@ -280,68 +294,8 @@ int main(void) {
 	NVIC_SetPriority(SPI0_EVT_IRQn, 1);
 	NVIC_SetPriority(RTC1_EVT_IRQn, 2);
 	NVIC_SetPriority(RTC0_EVT_IRQn, 2);
- 	/*
- 	// DEBUG START
- 	volatile uint32_t *reg = (uint32_t *)0x4004C038;
- 	uint32_t reg_value = *reg;
 
- 	if(reg_value & (1 << 29)) {
- 		adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
- 	}
- 	else {
- 		adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
- 	}
- 	if(reg_value & (1 << 30)) {
- 		adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
- 	}
- 	else {
- 		adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
- 	}
- 	// DEBUG END
- 	DelayMsMcu(5000);
-	*/
-/*
- 	// EEPROM TEST START
-	#define bufferSize 1100
- 	while(1) {
- 		BoardInitMcu();
- 		EepromReset();
-
- 		uint16_t address = 0;
-
- 		uint8_t writeBuffer[bufferSize] = {0};
-		uint8_t readBuffer[bufferSize] = {0};
-
- 		// Fill buffer with data
- 		for(int i = 0; i < bufferSize; i++) {
- 			writeBuffer[i] = rand() % 256;
- 		}
- 		uint8_t status_reg[1] = {0};
- 		uint8_t identification_reg[3] = {0};
-
- 		// Read identification register
- 		EepromMcuReadIdentification(identification_reg, 3);
-
- 		// Read status register
- 		EepromMcuReadStatus(status_reg, 1);
-
- 		// Read data from the EEPROM
- 		EepromMcuReadBuffer(address, readBuffer, bufferSize);
-
- 		// Write the data to the EEPROM
- 		EepromMcuWriteBuffer(address, writeBuffer, bufferSize);
-
- 		// Read data from the EEPROM
- 		EepromMcuReadBuffer(address, readBuffer, bufferSize);
- 	}
- 	// EEPROM TEST END
-*/
-
- 	// Reset DEBUG pins
-	//adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
- 	//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
- 	//DelayMsMcu(20000);
- 	// Create timers
+ 	// Initialize timers
  	TimerInit( &SleepTimer, OnSleepTimerEvent );
  	TimerInit( &RawLoRaStartInTimer, OnRawLoRaStartInEvent );
  	TimerInit( &RawLoRaDurationTimer, OnRawLoRaDurationEvent );
@@ -349,7 +303,23 @@ int main(void) {
  	TimerInit( &UplinkPeriodicityTimer, OnUplinkPeriodicityEvent );
 
 	while (1) {
+		// Initialize board drivers and pins
 		BoardInitMcu();
+
+		// Get some stuff before doing anything
+		V_SC = getSupercapVoltage();	// Get current votlage over supercap
+		t_tx = getTransmissionTime();	// Get the transmission time
+
+		// Compute voltage over SC after transmitting
+		V_SC_e = SCVoltageAfterTX(V_SC, C_SC, t_tx, V_radio, i_tx);
+
+		// Check if we have sufficient power to proceed
+		if(V_SC_e <= V_SC_min) {
+			// Go to sleep for maybe 1 minute and then wake up to see if we have enough power.
+			// Otherwise use the
+
+		}
+
 		/*
 		 * Lucas (23-08-2024):
 		 * If the flag is set, the board executes the raw lora session
@@ -539,6 +509,23 @@ int main(void) {
 		}
 	}
 	return 0;
+}
+
+double SCVoltageAfterTX(double V_cap_i, double C, double t_tx, double V_sup, double i_tx) {
+	return sqrt(V_cap_i*V_cap_i - (2*i_tx*V_sup*t_tx) / C);
+}
+
+bool IsVoltageSufficient(double V_cap_i, double t_tx) {
+	// Compute voltage after transmission
+	double V_cap_e = SCVoltageAfterTX(V_cap_i, C_SC, t_tx, V_radio,i_tx);
+
+	// Check if the end voltage is over the required operating voltage
+	if( V_cap_e >= V_SC_min ) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 /*

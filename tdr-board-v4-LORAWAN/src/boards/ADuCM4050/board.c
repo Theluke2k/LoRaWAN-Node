@@ -184,6 +184,17 @@ void BoardInitMcu( void )
 	// Initialize pins for radio and eeprom
 	SX1276IoInit( );
 	EepromIoInit( );
+
+	// Initialize the ADC driver
+	AdcMcuInitDriver(false);
+
+	// Initialize the pin to sense the voltage on the supercap
+	AdcMcuInit(&superCapVoltagePin, SUPERCAP_VOLTAGE_PIN);
+
+	// Read on the ADC
+	AdcMcuReadChannelCustom( &superCapVoltagePin, ADI_ADC_CHANNEL_3, 10);
+
+
 	/*
 	 * Lucas (10-11-23):
 	 * The examples have the following code. I dont think that the
@@ -560,3 +571,21 @@ uint8_t RawLoRa_RadioSend(uint8_t *data, uint8_t packet_length) {
 	 * If you put the LoRa module in sleep mode, you need to call the initialize function before use it again */
 	return 0;
 }
+
+double getSupercapVoltage() {
+	double V_SC = 5.3;
+
+	// Configure ADC and do measurements
+
+
+	return V_SC;		// Temporary dummy
+
+}
+
+double getTransmissionTime() {
+	double t_tx = 3.0;
+	// Maybe do some calculations based on current datarate
+
+	return t_tx; // Temporary dummy
+}
+

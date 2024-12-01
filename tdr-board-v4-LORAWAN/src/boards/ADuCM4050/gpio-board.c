@@ -228,6 +228,8 @@ void GpioMcuInit( Gpio_t *obj, PinNames pin, PinModes mode, PinConfigs config, P
 	}
 
 
+
+
 	/*
 	 * Lucas:
 	 * The example for B-L072Z creates some other functions for other PinModes

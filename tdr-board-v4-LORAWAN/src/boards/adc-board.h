@@ -28,8 +28,22 @@ extern "C"
 {
 #endif
 
+#include <adi_adc.h>
 #include "adc.h"
 
+/**
+ * Number of samples to be taken in the single trigger for any measurement. Allows for simple digital filtering.
+ */
+#define ADC_NUM_SAMPLES             (10u)
+
+/**
+ * ADC ID number.
+ */
+#define ADC_DEV_NUM                	(0u)
+
+
+void AdcMcuInitDriver( bool calibration );
+uint16_t AdcMcuReadChannelCustom( Adc_t *obj, uint32_t channel, uint8_t acquisition_time);
 /*!
  * \brief Initializes the ADC object and MCU peripheral
  *

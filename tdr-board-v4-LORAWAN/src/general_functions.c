@@ -47,7 +47,7 @@ void init_system()
 
 	// DEBUG START i will not run these until our board can fully suport the new TDR chip
 	// Initialize ADC driver
-	//adc_init(false); // TODO: calibration stuck. Check later. // DEBUG
+	adc_init(false); // TODO: calibration stuck. Check later. // DEBUG
 
 	// Initialize I2C driver
     //i2c_init(); // DEBUG

@@ -78,6 +78,7 @@ typedef struct {
 } PinMap;
 
 // General Pins
+Adc_t superCapVoltagePin;
 
 // Radio and EEPROM power
 Gpio_t radio_eeprom_PWR;
@@ -108,6 +109,9 @@ Gpio_t radio_eeprom_PWR;
 
 // PWR to radio and eeprom
 #define RADIO_EEPROM_PWR 								    P1_0
+
+// Supercap Voltage Sensing pin
+#define SUPERCAP_VOLTAGE_PIN						P2_6
 
 //#define LED_1                                       (ADI_GPIO_PORT2, ADI_GPIO_PIN_2) //The yellow LED (why?
 #define UART_TX                                     P0__10 // not used

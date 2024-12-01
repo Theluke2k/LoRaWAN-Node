@@ -33,6 +33,7 @@ extern "C"
 #include "sx1276Regs-LoRa.h"
 #include "sx1276Regs-Fsk.h"
 #include "gpio.h"
+#include "adc-board.h"
 
 /*
  * Lucas (25-08-2024):
@@ -55,6 +56,9 @@ enum BoardPowerSources
     USB_POWER = 0,
     BATTERY_POWER,
 };
+
+double getSupercapVoltage();
+double getTransmissionTime();
 
 /*!
  * \brief Lucas: Initializes the required systems on the board after hibernate wakeup.
