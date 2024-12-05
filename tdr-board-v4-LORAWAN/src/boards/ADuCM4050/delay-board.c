@@ -27,9 +27,6 @@
 #include "delay-board.h"
 #include <adi_pwr.h>
 
-#define SYS_CLOCK_FREQ							20000000
-
-
 
 void DelayMsMcu( uint32_t ms )
 {
@@ -38,7 +35,7 @@ void DelayMsMcu( uint32_t ms )
 	}
 	uint32_t clockFreq;
 	adi_pwr_GetClockFrequency(ADI_CLOCK_HCLK, &clockFreq);
-	uint32_t delay_val = SYS_CLOCK_FREQ / 15000;
+	uint32_t delay_val = clockFreq / 15000;
 	delay_val *= ms;
 	while(--delay_val) {}
 }

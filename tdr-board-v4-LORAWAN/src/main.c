@@ -175,6 +175,8 @@ static void OnUplinkPeriodicityEvent(void* context);
  * Custom Functions
  */
 static uint8_t CLIHandler2(LmHandlerAppData_t* appData);
+float SCVoltageAfterTX(float V_cap_i, float C, float t_tx, float V_sup, float i_tx);
+bool IsVoltageSufficient(float V_cap_i, float t_tx);
 
 //Function pointers for loramac callbacks.
 static LmHandlerCallbacks_t LmHandlerCallbacks =
@@ -244,6 +246,15 @@ uint32_t lastUplinkTime = 0;
 uint32_t lastRawTX = 0;
 uint32_t uplinkTimeDiff = 0;
 const int32_t minSleepMs = 300;
+
+// For supercap calculations (SC = Super Capacitor)
+const float C_SC = 1.0;			// Supercap capacitance
+const float V_radio = 3.3;		// Radio supply voltage
+const float V_SC_min = 3.5;	// Minimum supercap voltage for operation
+const float i_tx = 0.12;		// Current draw during radio transmission
+float t_tx = 3.0;				// Radio transmission time
+float V_SC = 0.0;				// Voltage over the supercapacitor
+float V_SC_e = 0.0;				// Voltage over the supercapacitor after hypothetical transmission
 
 // Logical Flags
 uint8_t enableSleepFlag = 0;
@@ -479,6 +490,23 @@ int main(void) {
 		}
 	}
 	return 0;
+}
+
+float SCVoltageAfterTX(float V_cap_i, float C, float t_tx, float V_sup, float i_tx) {
+	return sqrt(V_cap_i*V_cap_i - (2*i_tx*V_sup*t_tx) / C);
+}
+
+bool IsVoltageSufficient(float V_cap_i, float t_tx) {
+	// Compute voltage after transmission
+	float V_cap_e = SCVoltageAfterTX(V_cap_i, C_SC, t_tx, V_radio,i_tx);
+
+	// Check if the end voltage is over the required operating voltage
+	if( V_cap_e >= V_SC_min ) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 /*
