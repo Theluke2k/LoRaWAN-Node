@@ -877,7 +877,6 @@ static void PrepareTxFrame( void )
 	//tdr_data[0].honey_rh_decimal = 10;
 	tdr_data[0].honey_temp_integer = 11;
 	//tdr_data[0].honey_temp_decimal = 12;
-
     // DEBUG end
 
 
