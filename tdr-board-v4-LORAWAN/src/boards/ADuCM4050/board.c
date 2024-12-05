@@ -176,6 +176,7 @@ void BoardInitMcu( void )
 	}
 	// Initialize and allow power to the radio and eeprom
 	GpioInit( &radio_eeprom_PWR, RADIO_EEPROM_PWR, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+	GpioInit( &SuperCap_EN, SuperCapEN, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
 
 	// Initialize SPI for radio and eeprom
 	SpiInit( &SX1276.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
@@ -559,4 +560,27 @@ uint8_t RawLoRa_RadioSend(uint8_t *data, uint8_t packet_length) {
 	/* WARNING !!!
 	 * If you put the LoRa module in sleep mode, you need to call the initialize function before use it again */
 	return 0;
+}
+
+float getSuperCapV() {
+	// Initialize res
+	uint16_t adc_results[3];
+
+	// Enable supercap readings
+	GpioWrite(&SuperCap_EN, 1);
+
+	// Init ADC
+	ADC_Init();
+	// Activate
+
+	ADC_SampleChannels(adc_results);
+	float vbat_converted = adc_results[2] * 2.5/4096 * 250/100;
+
+	// Deinitialize ADC
+	ADC_Cleanup();
+
+	// Disable supercap readings
+	GpioWrite(&SuperCap_EN, 0);
+
+	return vbat_converted;
 }

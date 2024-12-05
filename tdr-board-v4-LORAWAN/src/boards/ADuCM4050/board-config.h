@@ -81,6 +81,7 @@ typedef struct {
 
 // Radio and EEPROM power
 Gpio_t radio_eeprom_PWR;
+Gpio_t SuperCap_EN;
 
 //PinMap NSSPin = {ADI_GPIO_PORT2, ADI_GPIO_PIN_8};
 
@@ -108,6 +109,9 @@ Gpio_t radio_eeprom_PWR;
 
 // PWR to radio and eeprom
 #define RADIO_EEPROM_PWR 								    P1_0
+
+// SuperCap
+#define SuperCapEN									P2_1
 
 //#define LED_1                                       (ADI_GPIO_PORT2, ADI_GPIO_PIN_2) //The yellow LED (why?
 #define UART_TX                                     P0__10 // not used

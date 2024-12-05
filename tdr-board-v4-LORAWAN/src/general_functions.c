@@ -10,9 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "tdr.h"
 #include "rtc.h"
-#include "sensors.h"
 #include "gpio-au.h"
 #include "spi-au.h"
 #include "adc-au.h"
@@ -104,154 +102,154 @@ void InitClock() {
 	//		return(eResult);
 	//	}
 }
-
-/*
- * Lucas (28-07-2024):
- * Function to initialize everything that is needed for taking the measurements
- */
-void InitMeasureMode() {
-	// Initialize digital pins
-	DigitalPinsEnable();
-
-	// Init ADC
-	adc_init(false);
-
-	// Init I2C
-	i2c_init();
-}
-
-/*
- * Lucas (28-07-2024):
- * Function to deinitialize everything that is needed for taking the measurements
- */
-void DeInitMeasureMode() {
-	// Disable some digital pins
-	DigitalPinsDisable();
-
-	// Disable ADC
-	adc_deinit();
-
-	// Disable I2C
-	i2c_deinit();
-}
-
-
-/*
- * Lucas (27-07-2024):
- * Deinitializes the things we dont need while we hibernate between power cycles.
- */
-void deinit_system() {
-	// Deinitialize GPIO driver
-	//adi_gpio_UnInit();
-
-	// Close SPI Driver
-	//SpiDeInit(NULL);
-
-}
-
-/*
- * Lucas (27-07-2024):
- * Re-initializes the systems that were deinitialized before hibernation
- */
-void reinit_system() {
-	// Init GPIO
-	//gpio_init();
-
-
-}
-
-/**
- * @brief    Changes the state of the board components to default (turn off).
- *
- * This is called in every measuring phase to set the initial state for the store function.
- *
- * @sa run_and_store_measurements
- */
-void init_store()
-{
-	/*
-		adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
-		adi_gpio_SetHigh(MICRO_TH_EN_PORT, MICRO_TH_EN_PIN);
-		adi_gpio_SetLow(MICRO_TH_S0_PORT, MICRO_TH_S0_PIN);
-		adi_gpio_SetLow(MICRO_TH_S1_PORT, MICRO_TH_S1_PIN);
-		adi_gpio_SetLow(MICRO_SENSOR_EN_PORT, MICRO_SENSOR_EN_PIN);
-		adi_gpio_SetLow(MICRO_RST_INT_PORT, MICRO_RST_INT_PIN);
-		adi_gpio_SetLow(MICRO_COMP_ON_PORT, MICRO_COMP_ON_PIN);
-		adi_gpio_SetLow(MICRO_STM_START_PORT, MICRO_STM_START_PIN);
-		adi_gpio_SetLow(MICRO_REF_S1_PORT, MICRO_REF_S1_PIN);
-		adi_gpio_SetLow(MICRO_REF_S0_PORT, MICRO_REF_S0_PIN);
-		adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN); //not really needed but it can be like this
-*/
-
-
-#if BOARD_NUM == 1
-    select_comparator_reference(REF1_0_8_REF2_1_2);
-#elif BOARD_NUM == 2
-    select_comparator_reference(REF1_0_8_REF2_1_2);
-#elif BOARD_NUM == 3
-    select_comparator_reference(REF1_0_8_REF2_1_2);
-#elif BOARD_NUM == 4
-    select_comparator_reference(REF1_0_8_REF2_1_2);
-#else
-    select_comparator_reference(REF1_0_8_REF2_1_2);
-#endif
-
-    /*
-     * What needs to be initialized here?
-     */
-    // DEBUG START
-    //uart_init();
-    //xint_init();
-    gpio_init();
-    adc_init(false);
-    i2c_init();
-    // DEBUG END
-
-    /*
-     * Lucas (23/03/2024):
-     * REMOVED FOR MERGE
-     */
-    //rtc_Init();
-    //spi_init();
-    //lora_initialize();
-
-}
-
-/**
- * @brief    Prints the TDR data memory (array) to UART.
- *
- * @param[in] tdr_data The array of structs holding the "memory" of the system (sensor data).
- *
- * This SHOULD BE viewed as a debug function. For now it can be used to spit out the measurement result to be saved to SD Card or to be viewed in the terminal via
- * UART-USB converter.
- *
- * @sa struct tdr_data
- */
-void print_tdr_data_to_uart(struct tdr_data tdr_data[])
-{
-	char buffer[128]={0}; // should be enough.
-	uint16_t msg_length;
-	for(uint16_t i=0;i<TDR_MEMORY_SIZE;++i)
-		{
-			msg_length = sprintf(buffer, "TDR %d: INT1: %u.%02u INT2: %u.%02u || THERM 1: %d | 2: %d | 3: %d | 4: %d|| HONEY: RH::%u.%u TEMP::%u.%u\r\n",
-				i,
-				tdr_data[i].int1_integer,
-				//tdr_data[i].int1_decimal,
-				tdr_data[i].int2_integer,
-				//tdr_data[i].int2_decimal,
-				tdr_data[i].th1_temp,
-				tdr_data[i].th2_temp,
-				tdr_data[i].th3_temp,
-				tdr_data[i].th4_temp,
-				tdr_data[i].honey_rh_integer,
-				//tdr_data[i].honey_rh_decimal,
-				tdr_data[i].honey_temp_integer
-				//tdr_data[i].honey_temp_decimal
-				);
-				uart_write(buffer, msg_length);
-		}
-}
-
+//
+///*
+// * Lucas (28-07-2024):
+// * Function to initialize everything that is needed for taking the measurements
+// */
+//void InitMeasureMode() {
+//	// Initialize digital pins
+//	DigitalPinsEnable();
+//
+//	// Init ADC
+//	adc_init(false);
+//
+//	// Init I2C
+//	i2c_init();
+//}
+//
+///*
+// * Lucas (28-07-2024):
+// * Function to deinitialize everything that is needed for taking the measurements
+// */
+//void DeInitMeasureMode() {
+//	// Disable some digital pins
+//	DigitalPinsDisable();
+//
+//	// Disable ADC
+//	adc_deinit();
+//
+//	// Disable I2C
+//	i2c_deinit();
+//}
+//
+//
+///*
+// * Lucas (27-07-2024):
+// * Deinitializes the things we dont need while we hibernate between power cycles.
+// */
+//void deinit_system() {
+//	// Deinitialize GPIO driver
+//	//adi_gpio_UnInit();
+//
+//	// Close SPI Driver
+//	//SpiDeInit(NULL);
+//
+//}
+//
+///*
+// * Lucas (27-07-2024):
+// * Re-initializes the systems that were deinitialized before hibernation
+// */
+//void reinit_system() {
+//	// Init GPIO
+//	//gpio_init();
+//
+//
+//}
+//
+///**
+// * @brief    Changes the state of the board components to default (turn off).
+// *
+// * This is called in every measuring phase to set the initial state for the store function.
+// *
+// * @sa run_and_store_measurements
+// */
+//void init_store()
+//{
+//	/*
+//		adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
+//		adi_gpio_SetHigh(MICRO_TH_EN_PORT, MICRO_TH_EN_PIN);
+//		adi_gpio_SetLow(MICRO_TH_S0_PORT, MICRO_TH_S0_PIN);
+//		adi_gpio_SetLow(MICRO_TH_S1_PORT, MICRO_TH_S1_PIN);
+//		adi_gpio_SetLow(MICRO_SENSOR_EN_PORT, MICRO_SENSOR_EN_PIN);
+//		adi_gpio_SetLow(MICRO_RST_INT_PORT, MICRO_RST_INT_PIN);
+//		adi_gpio_SetLow(MICRO_COMP_ON_PORT, MICRO_COMP_ON_PIN);
+//		adi_gpio_SetLow(MICRO_STM_START_PORT, MICRO_STM_START_PIN);
+//		adi_gpio_SetLow(MICRO_REF_S1_PORT, MICRO_REF_S1_PIN);
+//		adi_gpio_SetLow(MICRO_REF_S0_PORT, MICRO_REF_S0_PIN);
+//		adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN); //not really needed but it can be like this
+//*/
+//
+//
+//#if BOARD_NUM == 1
+//    select_comparator_reference(REF1_0_8_REF2_1_2);
+//#elif BOARD_NUM == 2
+//    select_comparator_reference(REF1_0_8_REF2_1_2);
+//#elif BOARD_NUM == 3
+//    select_comparator_reference(REF1_0_8_REF2_1_2);
+//#elif BOARD_NUM == 4
+//    select_comparator_reference(REF1_0_8_REF2_1_2);
+//#else
+//    select_comparator_reference(REF1_0_8_REF2_1_2);
+//#endif
+//
+//    /*
+//     * What needs to be initialized here?
+//     */
+//    // DEBUG START
+//    //uart_init();
+//    //xint_init();
+//    gpio_init();
+//    adc_init(false);
+//    i2c_init();
+//    // DEBUG END
+//
+//    /*
+//     * Lucas (23/03/2024):
+//     * REMOVED FOR MERGE
+//     */
+//    //rtc_Init();
+//    //spi_init();
+//    //lora_initialize();
+//
+//}
+//
+///**
+// * @brief    Prints the TDR data memory (array) to UART.
+// *
+// * @param[in] tdr_data The array of structs holding the "memory" of the system (sensor data).
+// *
+// * This SHOULD BE viewed as a debug function. For now it can be used to spit out the measurement result to be saved to SD Card or to be viewed in the terminal via
+// * UART-USB converter.
+// *
+// * @sa struct tdr_data
+// */
+//void print_tdr_data_to_uart(struct tdr_data tdr_data[])
+//{
+//	char buffer[128]={0}; // should be enough.
+//	uint16_t msg_length;
+//	for(uint16_t i=0;i<TDR_MEMORY_SIZE;++i)
+//		{
+//			msg_length = sprintf(buffer, "TDR %d: INT1: %u.%02u INT2: %u.%02u || THERM 1: %d | 2: %d | 3: %d | 4: %d|| HONEY: RH::%u.%u TEMP::%u.%u\r\n",
+//				i,
+//				tdr_data[i].int1_integer,
+//				//tdr_data[i].int1_decimal,
+//				tdr_data[i].int2_integer,
+//				//tdr_data[i].int2_decimal,
+//				tdr_data[i].th1_temp,
+//				tdr_data[i].th2_temp,
+//				tdr_data[i].th3_temp,
+//				tdr_data[i].th4_temp,
+//				tdr_data[i].honey_rh_integer,
+//				//tdr_data[i].honey_rh_decimal,
+//				tdr_data[i].honey_temp_integer
+//				//tdr_data[i].honey_temp_decimal
+//				);
+//				uart_write(buffer, msg_length);
+//		}
+//}
+//
 /**
  * @brief    Function to enter the sleep state.
  *
@@ -274,154 +272,154 @@ uint8_t enter_hibernation()
 	return 0;
 
 }
-
-/**
- * @brief    Sends the data using LoRA.
- *
- * The proposed protocol is very simple. This function should also be used only when pure LoRA communication is used (no gateway and no LoRAWAN). Introduced
- * mainly as a temporary workaround before AAU guys figure out the LoRAWAN and how to talk to the gateway on the drone.
- *
- * @param[in] tdr_data The array of structs holding the "memory" of the system (sensor data).
- * @param[in] num_msg Number of message being sent (one can check if the receiver is getting all the data).
- *
- * @sa run_and_store_measurements
- */
-void send_data_package(struct tdr_data integrator_vals_memory[], uint32_t num_msg)
-{
-	char buffer[256]={0};
-
-	int packageCount = 0;
-
-	uint8_t packet_length = sprintf(buffer, "[%d]{$%3u.%02u/%3u.%02u$%2d/%2d/%2d/%2d$%2u.%2u/%2u.%2u} -> Package %d",
-					packageCount,
-					integrator_vals_memory[0].int1_integer,
-					//integrator_vals_memory[0].int1_decimal,
-					integrator_vals_memory[0].int2_integer,
-					//integrator_vals_memory[0].int2_decimal,
-					integrator_vals_memory[0].th1_temp,
-					integrator_vals_memory[0].th2_temp,
-					integrator_vals_memory[0].th3_temp,
-					integrator_vals_memory[0].th4_temp,
-					integrator_vals_memory[0].honey_rh_integer,
-					//integrator_vals_memory[0].honey_rh_decimal,
-					integrator_vals_memory[0].honey_temp_integer,
-					//integrator_vals_memory[0].honey_temp_decimal,
-					packageNumber
-					);
-
-    while (lora_waitACK("Roger !", 10) && packageCount <= num_msg) {
-        lora_send_frame(buffer, packet_length);
-        packageCount++;
-    }
-}
-
-/**
- * @brief    Function with the entire measurement logic.
- *
- * In this function every measurement occurs, starting from the TDR, then thermistors and ending with Honeywell (temperature + humidity). Values got from the
- * specific sensors is convered to be stored in struct tdr_part. Before the measurements (TDR + thermistors), the APWR power rail has to be turned on. To reduce
- * the power consumption, it should be turned off after those two sets of measurements are done.
- *
- *
- * @note Some delays in this function may seem random but they depend on the datasheet of the uC, digital part of the TDR measurement setup or other requirements.
- * Sometimes they can be swapped for different values, but please, do explain the changes if you want to introduce them.
- *
- * @param[in] tdr_data The array of structs holding the "memory" of the system (sensor data).
- * @param[in] index Number of the record in tdr_data memory.
- *
- * @sa run_and_store_measurements
- */
-void run_and_store_measurements(struct tdr_data* tdr_data, uint16_t* index)
-{
-    uint16_t pin_status;
-    uint32_t delay_val;
-    adi_gpio_GetData(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN, &pin_status);
-    if(!pin_status)
-    {
-        adi_gpio_SetHigh(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
-        uint32_t delay_val = 960; // = 600us
-        while(--delay_val){}; // one value = 625ns of delay
-    }
-
-	int16_t thermistor_reading = 0;
-	uint16_t honeywell_data[2] = {0};
-
-	uint16_t integrators_data[2] = {0};
-	uint16_t integrators_avg[2] = {0};
-
-	double holder = 0;
-	power_up_adc(); // APWR -> RST = 71.2ms!!!
-	line_stimulation(integrators_data); //discarding one measurement
-
-	delay_val = 16; // around 10us
-	while(--delay_val){};
-
-	for(uint8_t i=0; i<ADC_NUM_OF_TDR_STIMULATIONS; ++i) // 5 stimulations, 10 samples each, 50 measurements.
-	{
-		line_stimulation(integrators_data);
-		integrators_avg[0] += integrators_data[0];
-		integrators_avg[1] += integrators_data[1];
-		delay_val = 16; // around 10us
-		while(--delay_val){};
-	}
-
-	integrators_avg[0] /= ADC_NUM_OF_TDR_STIMULATIONS;
-	integrators_avg[1] /= ADC_NUM_OF_TDR_STIMULATIONS;
-
-
-	holder = fitting_function_int1(integrators_avg[0]);
-	tdr_data[*index].int1_integer = (uint16_t)holder;
-	//tdr_data[*index].int1_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
-
-	holder = fitting_function_int1(integrators_avg[1]);
-	tdr_data[*index].int2_integer = (uint16_t)holder;
-	//tdr_data[*index].int2_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
-
-	therm_read_temp(&thermistor_reading, THERMISTOR1);
-	tdr_data[*index].th1_temp = (int8_t)thermistor_reading;
-
-	therm_read_temp(&thermistor_reading, THERMISTOR2);
-	tdr_data[*index].th2_temp = (int8_t)thermistor_reading;
-
-	therm_read_temp(&thermistor_reading, THERMISTOR3);
-	tdr_data[*index].th3_temp = (int8_t)thermistor_reading;
-
-	therm_read_temp(&thermistor_reading, THERMISTOR4);
-	tdr_data[*index].th4_temp = (int8_t)thermistor_reading;
-
-
-	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
-
-	honeywell_read(honeywell_data);
-
-
-	holder = get_honeywell_rh(honeywell_data[0]);
-	tdr_data[*index].honey_rh_integer = (uint8_t)holder;
-	//tdr_data[*index].honey_rh_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
-
-	holder = get_honeywell_temp(honeywell_data[1]);
-	tdr_data[*index].honey_temp_integer = (uint8_t)holder;
-	//tdr_data[*index].honey_temp_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
-
-
-	if(++(*index) == TDR_MEMORY_SIZE)
-		*index = 0;
-
-
-	select_comparator_reference(REF1_0_9_REF2_1_1);
-}
-
-void delay(uint32_t time) {
-    uint32_t clockFreq = getClkFreq(ADI_CLOCK_HCLK);
-    uint32_t delay_val = clockFreq / 10000;
-    delay_val *= time;
-    while(--delay_val) {}
-}
-
-uint32_t getClkFreq(const ADI_CLOCK_ID eClockId) {
-    uint32_t clockFreq;
-    adi_pwr_GetClockFrequency(eClockId, &clockFreq);
-    return clockFreq;
-}
-
-
+//
+///**
+// * @brief    Sends the data using LoRA.
+// *
+// * The proposed protocol is very simple. This function should also be used only when pure LoRA communication is used (no gateway and no LoRAWAN). Introduced
+// * mainly as a temporary workaround before AAU guys figure out the LoRAWAN and how to talk to the gateway on the drone.
+// *
+// * @param[in] tdr_data The array of structs holding the "memory" of the system (sensor data).
+// * @param[in] num_msg Number of message being sent (one can check if the receiver is getting all the data).
+// *
+// * @sa run_and_store_measurements
+// */
+//void send_data_package(struct tdr_data integrator_vals_memory[], uint32_t num_msg)
+//{
+//	char buffer[256]={0};
+//
+//	int packageCount = 0;
+//
+//	uint8_t packet_length = sprintf(buffer, "[%d]{$%3u.%02u/%3u.%02u$%2d/%2d/%2d/%2d$%2u.%2u/%2u.%2u} -> Package %d",
+//					packageCount,
+//					integrator_vals_memory[0].int1_integer,
+//					//integrator_vals_memory[0].int1_decimal,
+//					integrator_vals_memory[0].int2_integer,
+//					//integrator_vals_memory[0].int2_decimal,
+//					integrator_vals_memory[0].th1_temp,
+//					integrator_vals_memory[0].th2_temp,
+//					integrator_vals_memory[0].th3_temp,
+//					integrator_vals_memory[0].th4_temp,
+//					integrator_vals_memory[0].honey_rh_integer,
+//					//integrator_vals_memory[0].honey_rh_decimal,
+//					integrator_vals_memory[0].honey_temp_integer,
+//					//integrator_vals_memory[0].honey_temp_decimal,
+//					packageNumber
+//					);
+//
+//    while (lora_waitACK("Roger !", 10) && packageCount <= num_msg) {
+//        lora_send_frame(buffer, packet_length);
+//        packageCount++;
+//    }
+//}
+//
+///**
+// * @brief    Function with the entire measurement logic.
+// *
+// * In this function every measurement occurs, starting from the TDR, then thermistors and ending with Honeywell (temperature + humidity). Values got from the
+// * specific sensors is convered to be stored in struct tdr_part. Before the measurements (TDR + thermistors), the APWR power rail has to be turned on. To reduce
+// * the power consumption, it should be turned off after those two sets of measurements are done.
+// *
+// *
+// * @note Some delays in this function may seem random but they depend on the datasheet of the uC, digital part of the TDR measurement setup or other requirements.
+// * Sometimes they can be swapped for different values, but please, do explain the changes if you want to introduce them.
+// *
+// * @param[in] tdr_data The array of structs holding the "memory" of the system (sensor data).
+// * @param[in] index Number of the record in tdr_data memory.
+// *
+// * @sa run_and_store_measurements
+// */
+//void run_and_store_measurements(struct tdr_data* tdr_data, uint16_t* index)
+//{
+//    uint16_t pin_status;
+//    uint32_t delay_val;
+//    adi_gpio_GetData(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN, &pin_status);
+//    if(!pin_status)
+//    {
+//        adi_gpio_SetHigh(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
+//        uint32_t delay_val = 960; // = 600us
+//        while(--delay_val){}; // one value = 625ns of delay
+//    }
+//
+//	int16_t thermistor_reading = 0;
+//	uint16_t honeywell_data[2] = {0};
+//
+//	uint16_t integrators_data[2] = {0};
+//	uint16_t integrators_avg[2] = {0};
+//
+//	double holder = 0;
+//	power_up_adc(); // APWR -> RST = 71.2ms!!!
+//	line_stimulation(integrators_data); //discarding one measurement
+//
+//	delay_val = 16; // around 10us
+//	while(--delay_val){};
+//
+//	for(uint8_t i=0; i<ADC_NUM_OF_TDR_STIMULATIONS; ++i) // 5 stimulations, 10 samples each, 50 measurements.
+//	{
+//		line_stimulation(integrators_data);
+//		integrators_avg[0] += integrators_data[0];
+//		integrators_avg[1] += integrators_data[1];
+//		delay_val = 16; // around 10us
+//		while(--delay_val){};
+//	}
+//
+//	integrators_avg[0] /= ADC_NUM_OF_TDR_STIMULATIONS;
+//	integrators_avg[1] /= ADC_NUM_OF_TDR_STIMULATIONS;
+//
+//
+//	holder = fitting_function_int1(integrators_avg[0]);
+//	tdr_data[*index].int1_integer = (uint16_t)holder;
+//	//tdr_data[*index].int1_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
+//
+//	holder = fitting_function_int1(integrators_avg[1]);
+//	tdr_data[*index].int2_integer = (uint16_t)holder;
+//	//tdr_data[*index].int2_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
+//
+//	therm_read_temp(&thermistor_reading, THERMISTOR1);
+//	tdr_data[*index].th1_temp = (int8_t)thermistor_reading;
+//
+//	therm_read_temp(&thermistor_reading, THERMISTOR2);
+//	tdr_data[*index].th2_temp = (int8_t)thermistor_reading;
+//
+//	therm_read_temp(&thermistor_reading, THERMISTOR3);
+//	tdr_data[*index].th3_temp = (int8_t)thermistor_reading;
+//
+//	therm_read_temp(&thermistor_reading, THERMISTOR4);
+//	tdr_data[*index].th4_temp = (int8_t)thermistor_reading;
+//
+//
+//	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
+//
+//	honeywell_read(honeywell_data);
+//
+//
+//	holder = get_honeywell_rh(honeywell_data[0]);
+//	tdr_data[*index].honey_rh_integer = (uint8_t)holder;
+//	//tdr_data[*index].honey_rh_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
+//
+//	holder = get_honeywell_temp(honeywell_data[1]);
+//	tdr_data[*index].honey_temp_integer = (uint8_t)holder;
+//	//tdr_data[*index].honey_temp_decimal = (uint8_t)((holder - (uint32_t)holder)*100);
+//
+//
+//	if(++(*index) == TDR_MEMORY_SIZE)
+//		*index = 0;
+//
+//
+//	select_comparator_reference(REF1_0_9_REF2_1_1);
+//}
+//
+//void delay(uint32_t time) {
+//    uint32_t clockFreq = getClkFreq(ADI_CLOCK_HCLK);
+//    uint32_t delay_val = clockFreq / 10000;
+//    delay_val *= time;
+//    while(--delay_val) {}
+//}
+//
+//uint32_t getClkFreq(const ADI_CLOCK_ID eClockId) {
+//    uint32_t clockFreq;
+//    adi_pwr_GetClockFrequency(eClockId, &clockFreq);
+//    return clockFreq;
+//}
+//
+//

@@ -1,51 +1,47 @@
-/*
- * adc.h
+#ifndef ADC_HELPER_H
+#define ADC_HELPER_H
+
+#include <stdint.h>
+#include "adi_adc.h"  // Include the ADC library
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief Initialize and configure the ADC.
  *
- *  Created on: 26. jun. 2023
- *      Author: au703540
+ * This function initializes the ADC hardware, powers it up,
+ * configures its resolution, acquisition time, and sets up the ADC subsystem.
+ *
+ * @return ADI_ADC_RESULT
+ *         - ADI_ADC_SUCCESS on success
+ *         - An error code from the ADI_ADC_RESULT enum otherwise.
  */
-
-#ifndef ADC_AU_H_
-#define ADC_AU_H_
-
-#include <adi_adc.h>
+ADI_ADC_RESULT ADC_Init(void);
 
 /**
- * Number of times the line is stimulated to get the TDR readout.
+ * @brief Sample ADC channels 1, 2, and 3.
+ *
+ * This function samples the specified channels and returns the results.
+ *
+ * @param[out] results Pointer to a 3-element array where sampled values for
+ *                     channels 1, 2, and 3 will be stored.
+ * @return ADI_ADC_RESULT
+ *         - ADI_ADC_SUCCESS on success
+ *         - An error code from the ADI_ADC_RESULT enum otherwise.
  */
-#define ADC_NUM_OF_TDR_STIMULATIONS         5    // 625us per measurement package
+ADI_ADC_RESULT ADC_SampleChannels(uint16_t* results);
 
 /**
- * Number of samples to be taken in the single trigger for any measurement. Allows for simple digital filtering.
+ * @brief Cleanup the ADC.
+ *
+ * This function disables the ADC, powers it down, and releases its resources.
  */
-#define ADC_NUM_SAMPLES             (10u)
+void ADC_Cleanup(void);
 
-/**
- * ADC ID number.
- */
-#define ADC_DEV_NUM                	(0u)
+#ifdef __cplusplus
+}
+#endif
 
-/**
- * Renamed macros for the ADC channels used in the project (more readable).
- */
-#define	ADC_THERM_READ_CHANNEL			ADI_ADC_CHANNEL_0
-#define ADC_INTEGRATOR1_CHANNEL			ADI_ADC_CHANNEL_1
-#define ADC_INTEGRATOR2_CHANNEL			ADI_ADC_CHANNEL_2
-
-/*
- * Approximately 3.1V, but can vary with tolerance defined for the reference voltage generator. Refer to its datasheet.
- */
-#define ADC_VCC_REF                     3.100 // V  #5: 3.092V (diff 0.2mV)
-/*
- * 2^10 = 4096, so 4095 is the max value for the ADC in this config.
- */
-#define ADC_MAX_VAL                     4095.0 // b
-
-void adc_init(bool calibration);
-void adc_deinit();
-void power_up_adc();
-void power_down_adc();
-void ADC_SampleData(ADI_ADC_CHANNEL channels, uint8_t acquisition_time);
-uint16_t get_adc_data_buffer();
-
-#endif /* ADC_AU_H_ */
+#endif /* ADC_HELPER_H */
