@@ -280,67 +280,7 @@ int main(void) {
 	NVIC_SetPriority(SPI0_EVT_IRQn, 1);
 	NVIC_SetPriority(RTC1_EVT_IRQn, 2);
 	NVIC_SetPriority(RTC0_EVT_IRQn, 2);
- 	/*
- 	// DEBUG START
- 	volatile uint32_t *reg = (uint32_t *)0x4004C038;
- 	uint32_t reg_value = *reg;
 
- 	if(reg_value & (1 << 29)) {
- 		adi_gpio_SetHigh(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
- 	}
- 	else {
- 		adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
- 	}
- 	if(reg_value & (1 << 30)) {
- 		adi_gpio_SetHigh(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
- 	}
- 	else {
- 		adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
- 	}
- 	// DEBUG END
- 	DelayMsMcu(5000);
-	*/
-/*
- 	// EEPROM TEST START
-	#define bufferSize 1100
- 	while(1) {
- 		BoardInitMcu();
- 		EepromReset();
-
- 		uint16_t address = 0;
-
- 		uint8_t writeBuffer[bufferSize] = {0};
-		uint8_t readBuffer[bufferSize] = {0};
-
- 		// Fill buffer with data
- 		for(int i = 0; i < bufferSize; i++) {
- 			writeBuffer[i] = rand() % 256;
- 		}
- 		uint8_t status_reg[1] = {0};
- 		uint8_t identification_reg[3] = {0};
-
- 		// Read identification register
- 		EepromMcuReadIdentification(identification_reg, 3);
-
- 		// Read status register
- 		EepromMcuReadStatus(status_reg, 1);
-
- 		// Read data from the EEPROM
- 		EepromMcuReadBuffer(address, readBuffer, bufferSize);
-
- 		// Write the data to the EEPROM
- 		EepromMcuWriteBuffer(address, writeBuffer, bufferSize);
-
- 		// Read data from the EEPROM
- 		EepromMcuReadBuffer(address, readBuffer, bufferSize);
- 	}
- 	// EEPROM TEST END
-*/
-
- 	// Reset DEBUG pins
-	//adi_gpio_SetLow(ADI_GPIO_PORT2, ADI_GPIO_PIN_0); // DEBUG orange
- 	//adi_gpio_SetLow(ADI_GPIO_PORT1, ADI_GPIO_PIN_15); // DEBUG blue
- 	//DelayMsMcu(20000);
  	// Create timers
  	TimerInit( &SleepTimer, OnSleepTimerEvent );
  	TimerInit( &RawLoRaStartInTimer, OnRawLoRaStartInEvent );
