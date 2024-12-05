@@ -56,6 +56,8 @@ enum BoardPowerSources
     BATTERY_POWER,
 };
 
+uint16_t getADCSuperCapMeasurement();
+
 /*!
  * \brief Lucas: Initializes the required systems on the board after hibernate wakeup.
  */

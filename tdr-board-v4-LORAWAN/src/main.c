@@ -176,8 +176,8 @@ static void OnUplinkPeriodicityEvent(void* context);
  */
 static uint8_t CLIHandler2(LmHandlerAppData_t* appData);
 float SCVoltageAfterTX(float V_cap_i, float C, float t_tx, float V_sup, float i_tx);
-bool IsVoltageSufficient(float V_cap_i, float t_tx);
-
+bool IsVoltageSufficient(float V_cap_i, float t_tx, float V_sup, float i_sup);
+void UpdateSuperCapVariables(uint16_t *ADC_meas, float *V_SC_m_local, float *V_SC_local, bool *TXreadyFlag_local, float t_tx_local, float V_sup, float i_sup);
 //Function pointers for loramac callbacks.
 static LmHandlerCallbacks_t LmHandlerCallbacks =
 {
@@ -249,16 +249,21 @@ const int32_t minSleepMs = 300;
 
 // For supercap calculations (SC = Super Capacitor)
 const float C_SC = 1.0;			// Supercap capacitance
-const float V_radio = 3.3;		// Radio supply voltage
-const float V_SC_min = 3.5;	// Minimum supercap voltage for operation
+const float V_sup = 3.3;		// Radio supply voltage
+const float V_SC_min = 3.8;	// Minimum supercap voltage for operation
 const float i_tx = 0.12;		// Current draw during radio transmission
-float t_tx = 3.0;				// Radio transmission time
-float V_SC = 0.0;				// Voltage over the supercapacitor
-float V_SC_e = 0.0;				// Voltage over the supercapacitor after hypothetical transmission
+const float R102 = 150.0;
+const float R104 = 100.0;
+float t_tx = 3;				// Radio transmission time
+float V_SC;				// Voltage over the supercapacitor
+float V_SC_e;				// Voltage over the supercapacitor after hypothetical transmission
+float V_SC_m;			// Measured voltage after voltage division
+uint16_t ADC_SC;
+bool TXreadyFlag = false;
 
 // Logical Flags
 uint8_t enableSleepFlag = 0;
-uint8_t isJoiningFlag = 0;
+uint8_t isJoiningFlag = 1; // Initialize as 1
 uint8_t hasHibernated = 0;
 uint8_t testModeInitialized = 0;
 uint8_t rawLoRaEnabled = 0;
@@ -300,9 +305,11 @@ int main(void) {
  	TimerInit( &UplinkPeriodicityTimer, OnUplinkPeriodicityEvent );
 
 	while (1) {
+		// Initialize board with AAU settings
 		BoardInitMcu();
+
+
 		/*
-		 * Lucas (23-08-2024):
 		 * If the flag is set, the board executes the raw lora session
 		 * until the flag is disabled unset.
 		 */
@@ -313,8 +320,11 @@ int main(void) {
 			}
 		}
 
+		// Read supercap voltage and check if we have enough power to send.
+		UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx);
+
+
 		/*
-		 * Lucas (30-03-2024):
 		 * AU runs their measurements. The data is stored in tdr_data.
 		 * The stack uses this struct as data source when transmitting data.
 		 */
@@ -332,7 +342,6 @@ int main(void) {
 		desiredUplinks = 1;
 
 		/*
-		 * Lucas (30-03-2024):
 		 * Run the LoRaMac stack.
 		 */
 		// Initlialize board (sets up pins as LoRaMac wants it)
@@ -367,7 +376,7 @@ int main(void) {
 			LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams);
 
 			// The join process can be made here but it does not need to run. The state machine handles it.
-			LmHandlerJoin(); // DELETE THIS IF WE WANT TO NOT HAVING THE BOARD JOIN ON EACH STARTUP.
+			LmHandlerJoin(); // DELETE THIS IF WE WANT TO NOT HAVING THE BOARD JOIN ON EACH STARTUP?
 
 			// Mark the program as initiated.
 			initialized = 1;
@@ -496,9 +505,9 @@ float SCVoltageAfterTX(float V_cap_i, float C, float t_tx, float V_sup, float i_
 	return sqrt(V_cap_i*V_cap_i - (2*i_tx*V_sup*t_tx) / C);
 }
 
-bool IsVoltageSufficient(float V_cap_i, float t_tx) {
+bool IsVoltageSufficient(float V_cap_i, float t_tx, float V_sup, float i_sup) {
 	// Compute voltage after transmission
-	float V_cap_e = SCVoltageAfterTX(V_cap_i, C_SC, t_tx, V_radio,i_tx);
+	float V_cap_e = SCVoltageAfterTX(V_cap_i, C_SC, t_tx, V_sup, i_sup);
 
 	// Check if the end voltage is over the required operating voltage
 	if( V_cap_e >= V_SC_min ) {
@@ -507,6 +516,35 @@ bool IsVoltageSufficient(float V_cap_i, float t_tx) {
 	else {
 		return false;
 	}
+}
+
+void UpdateSuperCapVariables(uint16_t *ADC_meas, float *V_SC_m_local, float *V_SC_local, bool *TXreadyFlag_local, float t_tx_local, float V_sup, float i_sup) {
+	// Initialize local variables
+	float ADC = 0;
+	float V_measured = 0;
+	float V_real = 0;
+	bool readyFlag = 0;
+
+	// Get the ADC measurement
+	ADC = getADCSuperCapMeasurement(); // Get measured voltage
+
+	// Convert ADC value to voltage
+	V_measured = ADC_SC * (2.5 / 4096.0);
+
+	// Compute real voltage over the supercap
+	V_real = V_measured * 2.5;
+
+	// Save in global varaibles
+	*ADC_meas = ADC;
+	*V_SC_m_local = V_measured;
+	*V_SC_local = V_real;
+
+	// Get voltage over supercap after transmission
+	readyFlag = IsVoltageSufficient(V_real, t_tx_local, V_sup, i_sup);
+
+	// Save in global
+	*TXreadyFlag_local = readyFlag;
+
 }
 
 /*
@@ -525,26 +563,31 @@ int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX) {
  * Code that executes during raw LoRa session.
  */
 void RawLoRaSession() {
-	// Get data to send?
-	//??????????????????
+	// Read supercap voltage and check if we have enough power to send.
+	UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx, V_sup, i_tx);
 
-	// For dummy data, send the same as in LoRaWAN
-	uint8_t packet_length = sizeof(tdr_data);
-	memcpy1(AppData.Buffer, tdr_data, packet_length);
-	AppData.BufferSize = packet_length;
+	if (TXreadyFlag) {
+		// Get data to send?
+		//??????????????????
 
-	// Configure the radio
-	RawLoRa_RadioConfig( &RawLoRaConfig );
+		// For dummy data, send the same as in LoRaWAN
+		uint8_t packet_length = sizeof(tdr_data);
+		memcpy1(AppData.Buffer, tdr_data, packet_length);
+		AppData.BufferSize = packet_length;
 
-	// Wait until it is time to send
-	uint32_t currentTime = TimerGetCurrentTime();
-	while(currentTime - lastRawTX < RawLoRaConfig.TxPeriodicity) {
-		currentTime = TimerGetCurrentTime();
+		// Configure the radio
+		RawLoRa_RadioConfig(&RawLoRaConfig);
+
+		// Wait until it is time to send
+		uint32_t currentTime = TimerGetCurrentTime();
+		while (currentTime - lastRawTX < RawLoRaConfig.TxPeriodicity) {
+			currentTime = TimerGetCurrentTime();
+		}
+
+		// Send the data packet
+		RawLoRa_RadioSend(AppData.Buffer, AppData.BufferSize);
+		lastRawTX = currentTime;
 	}
-
-	// Send the data packet
-	RawLoRa_RadioSend(AppData.Buffer, AppData.BufferSize);
-	lastRawTX = currentTime;
 
 	// Compute sleep time
 	sleepTime = RawLoRaConfig.TxPeriodicity - (TimerGetCurrentTime() - lastRawTX) - maxInitializationTimeRawLoRa;

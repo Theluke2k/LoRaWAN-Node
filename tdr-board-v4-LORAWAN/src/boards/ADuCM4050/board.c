@@ -562,19 +562,22 @@ uint8_t RawLoRa_RadioSend(uint8_t *data, uint8_t packet_length) {
 	return 0;
 }
 
-float getSuperCapV() {
+uint16_t getADCSuperCapMeasurement() {
 	// Initialize res
 	uint16_t adc_results[3];
+	float R102 = 150;
+	float R104 = 100;
 
 	// Enable supercap readings
 	GpioWrite(&SuperCap_EN, 1);
 
 	// Init ADC
 	ADC_Init();
-	// Activate
 
+	// Measure
 	ADC_SampleChannels(adc_results);
-	float vbat_converted = adc_results[2] * 2.5/4096 * 250/100;
+	//float vbat_converted = adc_results[2] * 2.5/4096;
+	//float x = vbat_converted*((R102+R102)/(R104));
 
 	// Deinitialize ADC
 	ADC_Cleanup();
@@ -582,5 +585,5 @@ float getSuperCapV() {
 	// Disable supercap readings
 	GpioWrite(&SuperCap_EN, 0);
 
-	return vbat_converted;
+	return adc_results[2];
 }
