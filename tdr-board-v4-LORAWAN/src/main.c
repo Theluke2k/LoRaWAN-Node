@@ -178,6 +178,9 @@ static uint8_t CLIHandler2(LmHandlerAppData_t* appData);
 float SCVoltageAfterTX(float V_cap_i, float C, float t_tx, float V_sup, float i_tx);
 bool IsVoltageSufficient(float V_cap_i, float t_tx, float V_sup, float i_sup);
 void UpdateSuperCapVariables(uint16_t *ADC_meas, float *V_SC_m_local, float *V_SC_local, bool *TXreadyFlag_local, float t_tx_local, float V_sup, float i_sup);
+void LoRaWANModeSleep();
+
+
 //Function pointers for loramac callbacks.
 static LmHandlerCallbacks_t LmHandlerCallbacks =
 {
@@ -246,6 +249,7 @@ uint32_t lastUplinkTime = 0;
 uint32_t lastRawTX = 0;
 uint32_t uplinkTimeDiff = 0;
 const int32_t minSleepMs = 300;
+const uint32_t chargingTime = 5000;
 
 // For supercap calculations (SC = Super Capacitor)
 const float C_SC = 1.0;			// Supercap capacitance
@@ -274,7 +278,7 @@ int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX);
 // Raw LoRa configuration defaults
 static RawLoRa_Config RawLoRaConfig =
 {
-		.StartIn = 1000,
+		.StartIn = 5000,
 		.Duration = 10000,
 		.TxPeriodicity = 5000,
 		.SpreadingFactor = 12,
@@ -308,7 +312,6 @@ int main(void) {
 		// Initialize board with AAU settings
 		BoardInitMcu();
 
-
 		/*
 		 * If the flag is set, the board executes the raw lora session
 		 * until the flag is disabled unset.
@@ -318,10 +321,19 @@ int main(void) {
 			while (rawLoRaEnabled) {
 				RawLoRaSession();
 			}
+			// Reset settings to to be sure
+			BoardInitMcu();
 		}
 
 		// Read supercap voltage and check if we have enough power to send.
-		UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx);
+		UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx,V_sup, i_tx);
+
+		// Sleep until we have enough power
+		while (!TXreadyFlag) {
+			LoRaWANModeSleep();
+
+			UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx,V_sup, i_tx);
+		}
 
 
 		/*
@@ -388,12 +400,22 @@ int main(void) {
 
 		// MAIN STATE MACHINE IN ACTIVE MODE
 		do  {
+
 			// Processes the LoRaMac events
 			LmHandlerProcess();
 
 			// Try to send uplink
 			if (uplinksSent < desiredUplinks) {
-				LmHandlerErrorStatus_t deviceTimeReq =  LmHandlerDeviceTimeReq();
+				LmHandlerErrorStatus_t deviceTimeReq = LmHandlerDeviceTimeReq();
+				if (LmHandlerIsBusy() == false && uplinksSent == 0) {
+					// Read supercap voltage and check if we have enough power to send.
+					UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC,
+							&TXreadyFlag, t_tx, V_sup, i_tx);
+					if (!TXreadyFlag) {
+						// If there is not enough energy to send an uplink. Go directly to sleep
+						break;
+					}
+				}
 				PrepareTxFrame();
 			}
 
@@ -477,28 +499,38 @@ int main(void) {
 		EepromUploadMirror(0, EMULATED_EEPROM_SIZE);
 		ET = RtcTick2Ms(RtcGetTimerValue() - ST);
 
-		// Compute sleepTime
-		sleepTime = uplinkPeriodicity - (TimerGetCurrentTime() - lastUplinkTime) - maxInitializationTime;
-
-		// Start timer and enter hibernation is sleepTime is larger than 300 ms.
-		if(sleepTime > minSleepMs) {
-			// De-initialize system we don't need while hibernating
-			SystemPrepareHibernate();
-
-			// Set timers
-			TimerSetValue( &UplinkPeriodicityTimer, sleepTime);
-			TimerStart( &UplinkPeriodicityTimer );
-
-			// Enter hibernation
-			iHibernateExitFlag = 0;
-			enter_hibernation();
-			iHibernateExitFlag = 0;
-
-			// Re-initialize system after hibernate
-			SystemReinitializerFromHibernate();
-		}
+		LoRaWANModeSleep();
 	}
 	return 0;
+}
+
+void LoRaWANModeSleep() {
+	if (TXreadyFlag) {
+		// Compute sleepTime
+		sleepTime = uplinkPeriodicity - (TimerGetCurrentTime() - lastUplinkTime)
+				- maxInitializationTime;
+	} else {
+		// Sleep for X seconds to charge
+		sleepTime = chargingTime;
+	}
+
+	// Start timer and enter hibernation is sleepTime is larger than 300 ms.
+	if (sleepTime > minSleepMs) {
+		// De-initialize system we don't need while hibernating
+		SystemPrepareHibernate();
+
+		// Set timers
+		TimerSetValue(&UplinkPeriodicityTimer, sleepTime);
+		TimerStart(&UplinkPeriodicityTimer);
+
+		// Enter hibernation
+		iHibernateExitFlag = 0;
+		enter_hibernation();
+		iHibernateExitFlag = 0;
+
+		// Re-initialize system after hibernate
+		SystemReinitializerFromHibernate();
+	}
 }
 
 float SCVoltageAfterTX(float V_cap_i, float C, float t_tx, float V_sup, float i_tx) {
@@ -529,7 +561,7 @@ void UpdateSuperCapVariables(uint16_t *ADC_meas, float *V_SC_m_local, float *V_S
 	ADC = getADCSuperCapMeasurement(); // Get measured voltage
 
 	// Convert ADC value to voltage
-	V_measured = ADC_SC * (2.5 / 4096.0);
+	V_measured = ADC * (2.5 / 4096.0);
 
 	// Compute real voltage over the supercap
 	V_real = V_measured * 2.5;
@@ -587,6 +619,15 @@ void RawLoRaSession() {
 		// Send the data packet
 		RawLoRa_RadioSend(AppData.Buffer, AppData.BufferSize);
 		lastRawTX = currentTime;
+	}
+
+	if (TXreadyFlag) {
+		// Compute sleepTime
+		sleepTime = uplinkPeriodicity - (TimerGetCurrentTime() - lastUplinkTime)- maxInitializationTime;
+		}
+	else {
+		// Sleep for X seconds to charge
+		sleepTime = chargingTime;
 	}
 
 	// Compute sleep time
@@ -720,7 +761,7 @@ static uint8_t CLIHandler2(LmHandlerAppData_t* appData) { // BEFORE: char *comma
 				// Execute handler for command
 
 				// Check validity
-				if (duration < 131072000) {
+				if (duration < 131072000 && duration > 5000) {
 					RawLoRaConfig.Duration = duration; // set flag
 				}
 				num_of_commands++;
