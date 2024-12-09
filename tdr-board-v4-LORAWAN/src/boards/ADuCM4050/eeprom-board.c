@@ -60,9 +60,6 @@ void EepromReset() {
 	// Variable to store byte received from EEPROM
 	uint8_t rx = 0;
 
-	// Ensure that hold is high
-	GpioWrite( &eeprom.HOLD, 1 );
-
 	// Disable Write Protect
 	GpioWrite( &eeprom.WP, 1 );
 	//DelayMsMcu(eepDelay);
@@ -81,9 +78,6 @@ void EepromReset() {
 
 	// Enable Write Protect
 	GpioWrite( &eeprom.WP, 0 );
-
-	// Ensure that hold is low
-	GpioWrite( &eeprom.HOLD, 0 );
 
 	//DelayMsMcu(eepDelay);
 }
@@ -115,9 +109,6 @@ LmnStatus_t EepromWriteBufferDirect( uint16_t addr, uint8_t *buffer, uint16_t si
 {
 	// Variable to store byte received from EEPROM
 	uint8_t rx = 0;
-
-	// Ensure that hold is high
-	GpioWrite( &eeprom.HOLD, 1 );
 
 	// Disable Write Protect
 	GpioWrite( &eeprom.WP, 1 );
@@ -162,9 +153,6 @@ LmnStatus_t EepromWriteBufferDirect( uint16_t addr, uint8_t *buffer, uint16_t si
 	// Enable Write Protect
 	GpioWrite( &eeprom.WP, 0 );
 
-	// Ensure that hold is low
-	GpioWrite( &eeprom.HOLD, 0 );
-
 
     return LMN_STATUS_OK;
 }
@@ -206,9 +194,6 @@ LmnStatus_t EepromReadBufferDirect( uint16_t addr, uint8_t *buffer, uint16_t siz
 	// Variable to store byte received from EEPROM
 	uint8_t rx = 0;
 
-	// Ensure that hold is high
-	GpioWrite( &eeprom.HOLD, 1 );
-
 	// Select slave
 	GpioWrite(&eeprom.Spi.Nss, 0);
 
@@ -228,9 +213,6 @@ LmnStatus_t EepromReadBufferDirect( uint16_t addr, uint8_t *buffer, uint16_t siz
 	// De-select slave
 	GpioWrite(&eeprom.Spi.Nss, 1);
 
-	// Ensure that hold is low
-	GpioWrite( &eeprom.HOLD, 0 );
-
 	DelayMsMcu(eepDelay);
 
 	return LMN_STATUS_OK;
@@ -242,8 +224,6 @@ LmnStatus_t EepromReadStatus( uint8_t *buffer, uint16_t size )
 	// Variable to store byte received from EEPROM
 	uint8_t rx = 0;
 
-	// Ensure that hold is high
-	GpioWrite( &eeprom.HOLD, 1 );
 
 	// Select slave
 	GpioWrite(&eeprom.Spi.Nss, 0);
@@ -287,8 +267,6 @@ LmnStatus_t EepromReadIdentification( uint8_t *buffer, uint16_t size )
 	// De-select slave
 	GpioWrite(&eeprom.Spi.Nss, 1);
 
-	// Ensure that hold is low
-	GpioWrite( &eeprom.HOLD, 0 );
 	//DelayMsMcu(eepDelay);
 
 	return LMN_STATUS_OK;
