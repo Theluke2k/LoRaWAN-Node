@@ -148,3 +148,7 @@ int mcp23s17_set_device_outputs(uint8_t deviceIndex, uint16_t states) {
 
     return 0;
 }
+
+void mcp23s16_spi_de_init(){
+	adi_spi_Close(spiHandle);
+}

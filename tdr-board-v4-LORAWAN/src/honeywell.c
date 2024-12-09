@@ -32,7 +32,7 @@ void i2c_init()
 }
 
 void i2c_de_init(){
-	adi_i2c_Close(&i2cDevice);
+	adi_i2c_Close(i2cDevice);
 }
 
 /*

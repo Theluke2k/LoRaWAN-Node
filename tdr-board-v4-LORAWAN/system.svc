@@ -8,7 +8,7 @@
 	</installedComponents>
 	<configurations>
 		<configuration id="com.analog.crosscore.ssldd.pinmux.component">
-			<pinmux-configuration processor="ADuCM4050BCBZ" version="1.0">
+			<pinmux-configuration processor="ADuCM4050" version="1.0">
 				<peripheral description="SPI2 Module" name="SPI2">
 					<signal bit="4" mux="1" name="CLK" pin="2" port="P1"/>
 					<signal bit="6" mux="1" name="MOSI" pin="3" port="P1"/>
@@ -24,7 +24,6 @@
 				<peripheral description="UART0 Module" name="UART0">
 					<signal bit="20" mux="1" name="Tx" pin="10" port="P0"/>
 					<signal bit="22" mux="1" name="Rx" pin="11" port="P0"/>
-					<signal bit="24" mux="3" name="SOUT_EN" pin="12" port="P0"/>
 				</peripheral>
 				<peripheral description="UART1 Module" name="UART1">
 					<signal bit="30" mux="2" name="Tx" pin="15" port="P1"/>
@@ -41,7 +40,6 @@
 					<signal bit="18" name="P0_09" pin="9" port="P0"/>
 					<signal bit="20" name="P0_10" pin="10" port="P0"/>
 					<signal bit="22" name="P0_11" pin="11" port="P0"/>
-					<signal bit="24" name="P0_12" pin="12" port="P0"/>
 				</gpio>
 				<gpio name="P1">
 					<signal bit="4" name="P1_02" pin="2" port="P1"/>

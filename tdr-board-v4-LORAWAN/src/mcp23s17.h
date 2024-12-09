@@ -32,5 +32,5 @@ int mcp23s17_initialize_all(void);
  */
 int mcp23s17_set_device_outputs(uint8_t deviceIndex, uint16_t states);
 int mcp23s17_read_register(uint8_t deviceIndex, uint8_t regAddr, uint8_t *value);
-
+void mcp23s16_spi_de_init();
 #endif // MCP23S17_H

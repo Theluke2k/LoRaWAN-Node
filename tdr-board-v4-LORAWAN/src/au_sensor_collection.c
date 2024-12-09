@@ -34,6 +34,8 @@ void init_sensor_collection(){
 void de_init_sensor_collection(){
 	ADC_Cleanup();
 	i2c_de_init();
+	mcp23s16_spi_de_init();
+	digital_pin_deinit();
 }
 
 
@@ -51,7 +53,7 @@ void get_all_sensor_data(sensor_data_struct *sensor_data) {
 
 	// Read temp sensor
     uint8_t temp_sensor_regA, temp_sensor_regB;
-	uint8_t temp_sensor_rst = 1;
+	uint8_t temp_sensor_rst = 0;
     uint16_t temp_sensor_output; // 12-bit
 	while (temp_sensor_rst) {
 		mcp23s17_read_register(MCP23S17_DEVICE_2, 18, &temp_sensor_regA);

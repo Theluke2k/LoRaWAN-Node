@@ -337,12 +337,13 @@ int main(void) {
 			UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx,V_sup, i_tx);
 		}
 
-
 		/*
 		 * AU runs their measurements. The data is stored in tdr_data.
 		 * The stack uses this struct as data source when transmitting data.
 		 */
+
 		// Init data struct
+		init_sensor_collection();
 		sensor_data_struct sensor_data; // Different struct from Viktors code!
     	get_all_sensor_data(&sensor_data);
 
@@ -351,7 +352,8 @@ int main(void) {
 
     	de_init_sensor_collection();
 
-
+    	// Reinitialize board
+    	BoardInitMcu();
 
 		// Specify the amount of desired uplinks before going to sleep.
 		desiredUplinks = 1;
@@ -932,30 +934,40 @@ static void PrepareTxFrame( void )
         return;
     }
 
-    // DEBUG start (fill some test data to send)
-    tdr_data[0].int1_integer = 1;
-	//tdr_data[0].int1_decimal = 2;
-	tdr_data[0].int2_integer = 3;
-	//tdr_data[0].int2_decimal = 4;
-	tdr_data[0].th1_temp = 5;
-	tdr_data[0].th2_temp = 6;
-	tdr_data[0].th3_temp = 7;
-	tdr_data[0].th4_temp = 8;
-	tdr_data[0].honey_rh_integer = 9;
-	//tdr_data[0].honey_rh_decimal = 10;
-	tdr_data[0].honey_temp_integer = 11;
-	//tdr_data[0].honey_temp_decimal = 12;
+//    // DEBUG start (fill some test data to send)
+//    tdr_data[0].int1_integer = 1;
+//	//tdr_data[0].int1_decimal = 2;
+//	tdr_data[0].int2_integer = 3;
+//	//tdr_data[0].int2_decimal = 4;
+//	tdr_data[0].th1_temp = 5;
+//	tdr_data[0].th2_temp = 6;
+//	tdr_data[0].th3_temp = 7;
+//	tdr_data[0].th4_temp = 8;
+//	tdr_data[0].honey_rh_integer = 9;
+//	//tdr_data[0].honey_rh_decimal = 10;
+//	tdr_data[0].honey_temp_integer = 11;
+//	//tdr_data[0].honey_temp_decimal = 12;
+//
+//    // DEBUG end
 
-    // DEBUG end
-
+//    // Specify the port on which to send
+//    AppData.Port = LORAWAN_APP_PORT;
+//
+//    uint8_t packet_length = sizeof(tdr_data);
+//
+//    // Copy the contents of the tdr_data variable into the appdata buffer
+//    memcpy1(AppData.Buffer, tdr_data, packet_length);
+//
+//    // The size of the buffer should always be equal to the maximum size
+//    AppData.BufferSize = packet_length;
 
     // Specify the port on which to send
     AppData.Port = LORAWAN_APP_PORT;
 
-    uint8_t packet_length = sizeof(tdr_data);
+    uint8_t packet_length = sizeof(packed_data);
 
     // Copy the contents of the tdr_data variable into the appdata buffer
-    memcpy1(AppData.Buffer, tdr_data, packet_length);
+    memcpy1(AppData.Buffer, packed_data, packet_length);
 
     // The size of the buffer should always be equal to the maximum size
     AppData.BufferSize = packet_length;

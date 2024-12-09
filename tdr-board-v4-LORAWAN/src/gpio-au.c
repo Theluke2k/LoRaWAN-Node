@@ -106,6 +106,17 @@ void digital_pin_init()
 	*/
 }
 
+void digital_pin_deinit() {
+	adi_gpio_OutputEnable(VBAT_READ_EN_PORT, VBAT_READ_EN_PIN, false);
+	adi_gpio_OutputEnable(TDR_PWR_PORT, TDR_PWR_PIN, false);
+	adi_gpio_OutputEnable(SHIFTREG_NRST_PORT, SHIFTREG_NRST_PIN, false);
+	adi_gpio_OutputEnable(DRV_IN_PORT, DRV_IN_PIN, false);
+	adi_gpio_OutputEnable(PLL_ON_PORT, PLL_ON_PIN, false);
+	adi_gpio_OutputEnable(CLK_SRIO_PORT, CLK_SRIO_PIN, false);
+	adi_gpio_OutputEnable(PWR_HONEYWELL_PORT, PWR_HONEYWELL_PIN, false);
+	adi_gpio_OutputEnable(DEBUG_PIN_PORT, DEBUG_PIN_PIN, false);
+}
+
 /**
  * @brief    I2C pin mux setup.
  *
@@ -127,7 +138,7 @@ void gpio_init()
 
 	gpioStatus = adi_gpio_Init(gpioMemory, ADI_GPIO_MEMORY_SIZE);
 	//DEBUG_RESULT("GPIO init failed", gpioStatus, ADI_GPIO_SUCCESS);
-    digital_pin_init();
+    //digital_pin_init();
     //analog_pin_init();
     //i2c_pin_init();
 }
