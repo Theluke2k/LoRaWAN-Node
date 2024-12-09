@@ -180,6 +180,7 @@ float SCVoltageAfterTX(float V_cap_i, float C, float t_tx, float V_sup, float i_
 bool IsVoltageSufficient(float V_cap_i, float t_tx, float V_sup, float i_sup);
 void UpdateSuperCapVariables(uint16_t *ADC_meas, float *V_SC_m_local, float *V_SC_local, bool *TXreadyFlag_local, float t_tx_local, float V_sup, float i_sup);
 void LoRaWANModeSleep();
+void getSensorMeasurements();
 
 
 //Function pointers for loramac callbacks.
@@ -254,12 +255,12 @@ const int32_t minSleepMs = 300;
 const uint32_t chargingTime = 5000;
 
 // For supercap calculations (SC = Super Capacitor)
-const float C_SC = 1.0;			// Supercap capacitance
-const float V_sup = 3.3;		// Radio supply voltage
-const float V_SC_min = 3.8;	// Minimum supercap voltage for operation
-const float i_tx = 0.12;		// Current draw during radio transmission
-const float R102 = 150.0;
-const float R104 = 100.0;
+float C_SC = 1.0;			// Supercap capacitance
+float V_radio = 3.3;		// Radio supply voltage
+float V_SC_min = 3.8;	// Minimum supercap voltage for operation
+float i_tx = 0.12;		// Current draw during radio transmission
+float R102 = 150.0;
+float R104 = 100.0;
 float t_tx = 3;				// Radio transmission time
 float V_SC;				// Voltage over the supercapacitor
 float V_SC_e;				// Voltage over the supercapacitor after hypothetical transmission
@@ -328,13 +329,13 @@ int main(void) {
 		}
 
 		// Read supercap voltage and check if we have enough power to send.
-		UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx,V_sup, i_tx);
+		UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx,V_radio, i_tx);
 
 		// Sleep until we have enough power
 		while (!TXreadyFlag) {
 			LoRaWANModeSleep();
 
-			UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx,V_sup, i_tx);
+			UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx,V_radio, i_tx);
 		}
 
 		/*
@@ -342,15 +343,7 @@ int main(void) {
 		 * The stack uses this struct as data source when transmitting data.
 		 */
 
-		// Init data struct
-		init_sensor_collection();
-		sensor_data_struct sensor_data; // Different struct from Viktors code!
-    	get_all_sensor_data(&sensor_data);
-
-        // Pack the bits efficiently
-        pack_sensor_data(&sensor_data, packed_data);
-
-    	de_init_sensor_collection();
+		getSensorMeasurements();
 
     	// Reinitialize board
     	BoardInitMcu();
@@ -414,8 +407,7 @@ int main(void) {
 				LmHandlerErrorStatus_t deviceTimeReq = LmHandlerDeviceTimeReq();
 				if (LmHandlerIsBusy() == false && uplinksSent == 0) {
 					// Read supercap voltage and check if we have enough power to send.
-					UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC,
-							&TXreadyFlag, t_tx, V_sup, i_tx);
+					UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx, V_radio, i_tx);
 					if (!TXreadyFlag) {
 						// If there is not enough energy to send an uplink. Go directly to sleep
 						break;
@@ -509,6 +501,20 @@ int main(void) {
 	return 0;
 }
 
+void getSensorMeasurements() {
+	// Init data struct
+	init_sensor_collection();
+	sensor_data_struct sensor_data; // Different struct from Viktors code!
+	get_all_sensor_data(&sensor_data);
+
+    // Pack the bits efficiently
+    pack_sensor_data(&sensor_data, packed_data);
+
+	de_init_sensor_collection();
+
+	DelayMsMcu(2);
+}
+
 void LoRaWANModeSleep() {
 	if (TXreadyFlag) {
 		// Compute sleepTime
@@ -600,16 +606,24 @@ int32_t getSleepTimeOffset(uint32_t random_value, int32_t MIN, int32_t MAX) {
  * Code that executes during raw LoRa session.
  */
 void RawLoRaSession() {
+	DelayMsMcu(2);
 	// Read supercap voltage and check if we have enough power to send.
-	UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx, V_sup, i_tx);
+	UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx, V_radio, i_tx);
 
 	if (TXreadyFlag) {
 		// Get data to send?
-		//??????????????????
+		getSensorMeasurements();
+
+		// Initialize LORAWAN settings again
+		BoardInitMcu();
 
 		// For dummy data, send the same as in LoRaWAN
-		uint8_t packet_length = sizeof(tdr_data);
-		memcpy1(AppData.Buffer, tdr_data, packet_length);
+//		uint8_t packet_length = sizeof(tdr_data);
+//		memcpy1(AppData.Buffer, tdr_data, packet_length);
+//		AppData.BufferSize = packet_length;
+
+		uint8_t packet_length = sizeof(packed_data);
+		memcpy1(AppData.Buffer, packed_data, packet_length);
 		AppData.BufferSize = packet_length;
 
 		// Configure the radio
@@ -628,15 +642,12 @@ void RawLoRaSession() {
 
 	if (TXreadyFlag) {
 		// Compute sleepTime
-		sleepTime = uplinkPeriodicity - (TimerGetCurrentTime() - lastUplinkTime)- maxInitializationTime;
-		}
+		sleepTime = RawLoRaConfig.TxPeriodicity - (TimerGetCurrentTime() - lastRawTX) - maxInitializationTimeRawLoRa;
+	}
 	else {
 		// Sleep for X seconds to charge
 		sleepTime = chargingTime;
 	}
-
-	// Compute sleep time
-	sleepTime = RawLoRaConfig.TxPeriodicity - (TimerGetCurrentTime() - lastRawTX) - maxInitializationTimeRawLoRa;
 
 	// Start timer and enter hibernation is sleepTime is larger than 300 ms.
 	if(sleepTime > minSleepMs) {
