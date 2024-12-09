@@ -24,7 +24,7 @@ uint8_t enter_hibernation();
 
 void send_data_package(struct tdr_data integrator_vals_memory[], uint32_t num_msg);
 
-void delay(uint32_t time);
+void delay_us(uint32_t time);
 uint32_t getClkFreq(const ADI_CLOCK_ID eClockId);
 
 

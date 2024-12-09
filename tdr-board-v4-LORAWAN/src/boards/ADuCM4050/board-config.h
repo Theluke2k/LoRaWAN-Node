@@ -108,7 +108,7 @@ Gpio_t SuperCap_EN;
 #define EEPROM_HOLD									P0_12
 
 // PWR to radio and eeprom
-#define RADIO_EEPROM_PWR 								    P1_0
+#define RADIO_EEPROM_PWR 							P1_0
 
 // SuperCap
 #define SuperCapEN									P2_1

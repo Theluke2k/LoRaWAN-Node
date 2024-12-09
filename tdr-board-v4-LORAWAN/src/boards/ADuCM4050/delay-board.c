@@ -39,3 +39,4 @@ void DelayMsMcu( uint32_t ms )
 	delay_val *= ms;
 	while(--delay_val) {}
 }
+

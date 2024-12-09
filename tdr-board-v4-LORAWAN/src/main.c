@@ -37,6 +37,7 @@
 #include "spi.h"
 #include "sx1276-board.h"
 #include "eeprom-board.h"
+#include "au_sensor_collection.h"
 
 // DEBUG
 uint8_t tester = 0; //
@@ -235,6 +236,7 @@ static volatile uint32_t TxPeriodicity = 0;
  * TDR data struct definition. Holds information about all of the measurements done in the measurement phase.
  */
 struct tdr_data tdr_data[1];
+uint8_t packed_data[16] = {0};
 volatile uint32_t iHibernateExitFlag = 0;
 volatile uint8_t print_flag = 0;
 uint8_t desiredUplinks = 0;
@@ -340,15 +342,16 @@ int main(void) {
 		 * AU runs their measurements. The data is stored in tdr_data.
 		 * The stack uses this struct as data source when transmitting data.
 		 */
-		// Initialize measure mode
-		//InitMeasureMode();
+		// Init data struct
+		sensor_data_struct sensor_data; // Different struct from Viktors code!
+    	get_all_sensor_data(&sensor_data);
 
-		// Run measurements
-		//init_store();
-		//run_and_store_measurements(tdr_data, &index);
+        // Pack the bits efficiently
+        pack_sensor_data(&sensor_data, packed_data);
 
-		// Deinitialize measure mode
-		//DeInitMeasureMode();
+    	de_init_sensor_collection();
+
+
 
 		// Specify the amount of desired uplinks before going to sleep.
 		desiredUplinks = 1;

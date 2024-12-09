@@ -35,8 +35,7 @@
 #define SPI0_CLK_PORTP0_MUX   	((uint16_t) ((uint16_t) 1<<0))
 #define SPI0_MOSI_PORTP0_MUX  	((uint16_t) ((uint16_t) 1<<2))
 #define SPI0_MISO_PORTP0_MUX  	((uint16_t) ((uint16_t) 1<<4))
-#define SPI0_CS0_PORT0_MUX		((uint16_t) ((uint16_t) 1<<6))
-#define SPI0_CS1_PORT1_MUX		((uint16_t) ((uint16_t) 1<<10))
+#define SPI0_CS_PORT0_MUX		((uint16_t) ((uint16_t) 1<<6))
 
 // UART0
 #define UART0_TX_PORTP0_MUX  ((uint32_t) ((uint32_t) 0x1 << 20))
@@ -69,124 +68,42 @@ void analog_pin_init()
  */
 void digital_pin_init()
 {
-	ADI_GPIO_RESULT error_status = ADI_GPIO_SUCCESS;
-	/*
-	// Radio and EEPROM power pin
-	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(LORA_PWR_PORT, LORA_PWR_PIN, true))) {
-		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
-	}
-	// Allow power to the radio (low)
-	adi_gpio_SetLow(LORA_PWR_PORT, LORA_PWR_PIN);
-*/
+	adi_gpio_InputEnable(DATA_OUT_SRIO_PORT, DATA_OUT_SRIO_PIN, true);
 
-	// DEBUG PIN
-	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(ADI_GPIO_PORT0, ADI_GPIO_PIN_14, true))) {
-		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
-	}
+	adi_gpio_OutputEnable(VBAT_READ_EN_PORT, VBAT_READ_EN_PIN, true);
+	adi_gpio_OutputEnable(TDR_PWR_PORT, TDR_PWR_PIN, true);
+	adi_gpio_OutputEnable(SHIFTREG_NRST_PORT, SHIFTREG_NRST_PIN, true);
+	adi_gpio_OutputEnable(DRV_IN_PORT, DRV_IN_PIN, true);
+	adi_gpio_OutputEnable(PLL_ON_PORT, PLL_ON_PIN, true);
+	adi_gpio_OutputEnable(CLK_SRIO_PORT, CLK_SRIO_PIN, true);
+	adi_gpio_OutputEnable(PWR_HONEYWELL_PORT, PWR_HONEYWELL_PIN, true);
+	adi_gpio_OutputEnable(DEBUG_PIN_PORT, DEBUG_PIN_PIN, true);
 
+	adi_gpio_SetLow(VBAT_READ_EN_PORT, VBAT_READ_EN_PIN);
+	adi_gpio_SetHigh(TDR_PWR_PORT, TDR_PWR_PIN);
+	adi_gpio_SetHigh(SHIFTREG_NRST_PORT, SHIFTREG_NRST_PIN);
+	adi_gpio_SetLow(DRV_IN_PORT, DRV_IN_PIN);
+	adi_gpio_SetLow(PLL_ON_PORT, PLL_ON_PIN);
+	adi_gpio_SetHigh(CLK_SRIO_PORT, CLK_SRIO_PIN);
+	adi_gpio_SetHigh(PWR_HONEYWELL_PORT, PWR_HONEYWELL_PIN);
+	adi_gpio_SetLow(DEBUG_PIN_PORT, DEBUG_PIN_PIN);
 
+	// XINT
+	//if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_InputEnable(UART_WAKEUP_PORT, UART_WAKEUP_PIN, true)))
+	//{
+	//	DEBUG_MESSAGE("adi_gpio_InputEnable failed\n");
+	//}
 
-//	// XINT
-//	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_InputEnable(UART_WAKEUP_PORT, UART_WAKEUP_PIN, true)))
-//	{
-//		DEBUG_MESSAGE("adi_gpio_InputEnable failed\n");
-//	}
-//	// UART0
-//	*((volatile uint32_t *)REG_GPIO0_CFG) |= UART0_TX_PORTP0_MUX;
-//	*((volatile uint32_t *)REG_GPIO0_CFG) |= UART0_RX_PORTP0_MUX;
-//
-//	// UART1
-//    *((volatile uint32_t *)REG_GPIO1_CFG) |= UART1_TX_PORTP2_MUX;
-//	*((volatile uint32_t *) REG_GPIO2_CFG) |= UART1_RX_PORTP3_MUX;
-
-	// DEBUG start
-    // LORA/SPI
-    //*((volatile uint32_t *)REG_GPIO0_CFG) |= SPI0_CLK_PORTP0_MUX | SPI0_MOSI_PORTP0_MUX | SPI0_MISO_PORTP0_MUX | SPI0_CS_PORT0_MUX;
-
-
+	// UART0
 
 	/*
-	 * Lucas (27/10/24):
-	 * During testing of the program, these pins should be initialized.
-	 * This is because LoRaWAN actually does it normally, but if we use the
-	 * program without LoRaWAN, then we have to do it ourselves.
-	 */
-	// DEBUG START
-	// LORA/SPI and EEPROM CS
-	//*((volatile uint32_t *)REG_GPIO0_CFG) |= SPI0_CLK_PORTP0_MUX | SPI0_MOSI_PORTP0_MUX | SPI0_MISO_PORTP0_MUX;
-	//*((volatile uint32_t *)REG_GPIO1_CFG) |= SPI0_CS1_PORT1_MUX;
+	*((volatile uint32_t *)REG_GPIO0_CFG) |= UART0_TX_PORTP0_MUX;
+	*((volatile uint32_t *)REG_GPIO0_CFG) |= UART0_RX_PORTP0_MUX;
 
-
-/*
-	// LORA DIO0
-	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_InputEnable(LORA_DIO0_PORT, LORA_DIO0_PIN, true)))
-	{
-		DEBUG_MESSAGE("adi_gpio_InputEnable failed\n");
-	}
-	// LORA RST
-	if(ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(LORA_RST_PORT, LORA_RST_PIN, true)))
-	{
-		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
-	}
-
-	// DEBUG END
-
-*/
-
-	/*
-	 * Lucas (20-10-2024):
-	 * EEPROM PINS
-	 */
-//	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(EEPROM_WP_PORT, EEPROM_WP_PIN, true))) {
-//		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
-//	}
-//
-//	if (ADI_GPIO_SUCCESS != (error_status = adi_gpio_OutputEnable(EEPROM_HOLD_PORT, EEPROM_HOLD_PIN, true))) {
-//		DEBUG_MESSAGE("adi_gpio_OutputEnable failed\n");
-//	}
-
-	// INITIAL PINS STATES
-	//adi_gpio_SetLow(EEPROM_WP_PORT, EEPROM_WP_PIN);					// Enable write protection (low). Remember to disable when writing to EEPROM
-	//adi_gpio_SetHigh(EEPROM_HOLD_PORT, EEPROM_HOLD_PORT);			// Disable Hold (high). If enabled (low), the communication with the EEPROM is paused.
-	//adi_gpio_SetHigh(EEPROM_CS_PORT, EEPROM_CS_PORT);				// De-select the chip (high). Remember to select (low) before communication.
-}
-
-/*
- * Lucas (28-07-2024):
- * Function to initialize digital pins for measurement mode.
- */
-void DigitalPinsEnable() {
-	//Initial states
-//	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
-//	adi_gpio_SetHigh(MICRO_TH_EN_PORT, MICRO_TH_EN_PIN);
-//	adi_gpio_SetLow(MICRO_TH_S0_PORT, MICRO_TH_S0_PIN);
-//	adi_gpio_SetLow(MICRO_TH_S1_PORT, MICRO_TH_S1_PIN);
-//	adi_gpio_SetLow(MICRO_SENSOR_EN_PORT, MICRO_SENSOR_EN_PIN);
-//	adi_gpio_SetLow(MICRO_RST_INT_PORT, MICRO_RST_INT_PIN);
-//	adi_gpio_SetLow(MICRO_COMP_ON_PORT, MICRO_COMP_ON_PIN);
-//	adi_gpio_SetLow(MICRO_STM_START_PORT, MICRO_STM_START_PIN);
-//	adi_gpio_SetLow(MICRO_REF_S1_PORT, MICRO_REF_S1_PIN);
-//	adi_gpio_SetLow(MICRO_REF_S0_PORT, MICRO_REF_S0_PORT);
-//	adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN);
-}
-
-/*
- * Lucas (28-07-2024):
- * Function to disable any digital pin used for measurements.
- */
-void DigitalPinsDisable() {
-	// Disable everything
-//	adi_gpio_SetLow(MICRO_APWR_EN_PORT, MICRO_APWR_EN_PIN);
-//	adi_gpio_SetLow(MICRO_TH_EN_PORT, MICRO_TH_EN_PIN);
-//	adi_gpio_SetLow(MICRO_TH_S0_PORT, MICRO_TH_S0_PIN);
-//	adi_gpio_SetLow(MICRO_TH_S1_PORT, MICRO_TH_S1_PIN);
-//	adi_gpio_SetLow(MICRO_SENSOR_EN_PORT, MICRO_SENSOR_EN_PIN);
-//	adi_gpio_SetLow(MICRO_RST_INT_PORT, MICRO_RST_INT_PIN);
-//	adi_gpio_SetLow(MICRO_COMP_ON_PORT, MICRO_COMP_ON_PIN);
-//	adi_gpio_SetLow(MICRO_STM_START_PORT, MICRO_STM_START_PIN);
-//	adi_gpio_SetLow(MICRO_REF_S1_PORT, MICRO_REF_S1_PIN);
-//	adi_gpio_SetLow(MICRO_REF_S0_PORT, MICRO_REF_S0_PORT);
-//	adi_gpio_SetLow(MICRO_INTEGRATOR_TEST_PORT, MICRO_INTEGRATOR_TEST_PIN);
+	// UART1
+    *((volatile uint32_t *)REG_GPIO1_CFG) |= UART1_TX_PORTP2_MUX;
+    *((volatile uint32_t *)REG_GPIO2_CFG) |= UART1_RX_PORTP3_MUX;
+	*/
 }
 
 /**
@@ -207,16 +124,10 @@ void i2c_pin_init()
 void gpio_init()
 {
 	ADI_GPIO_RESULT gpioStatus = ADI_GPIO_SUCCESS;
-	gpioStatus = adi_gpio_Init(gpioMemory, ADI_GPIO_MEMORY_SIZE);
-	DEBUG_RESULT("GPIO init failed", gpioStatus, ADI_GPIO_SUCCESS);
 
-	digital_pin_init();
+	gpioStatus = adi_gpio_Init(gpioMemory, ADI_GPIO_MEMORY_SIZE);
+	//DEBUG_RESULT("GPIO init failed", gpioStatus, ADI_GPIO_SUCCESS);
+    digital_pin_init();
     //analog_pin_init();
     //i2c_pin_init();
-}
-
-void InitGPIODriver() {
-	ADI_GPIO_RESULT gpioStatus = ADI_GPIO_SUCCESS;
-	gpioStatus = adi_gpio_Init(gpioMemory, ADI_GPIO_MEMORY_SIZE);
-	DEBUG_RESULT("GPIO init failed", gpioStatus, ADI_GPIO_SUCCESS);
 }

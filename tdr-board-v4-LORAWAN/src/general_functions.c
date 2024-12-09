@@ -16,7 +16,6 @@
 #include "adc-au.h"
 #include "xint.h"
 #include "uart-au.h"
-#include "i2c-au.h"
 #include "sx1276.h"
 #include "shared.h"
 #include "eeprom.h"
@@ -409,17 +408,20 @@ uint8_t enter_hibernation()
 //	select_comparator_reference(REF1_0_9_REF2_1_1);
 //}
 //
-//void delay(uint32_t time) {
-//    uint32_t clockFreq = getClkFreq(ADI_CLOCK_HCLK);
-//    uint32_t delay_val = clockFreq / 10000;
-//    delay_val *= time;
-//    while(--delay_val) {}
-//}
-//
-//uint32_t getClkFreq(const ADI_CLOCK_ID eClockId) {
-//    uint32_t clockFreq;
-//    adi_pwr_GetClockFrequency(eClockId, &clockFreq);
-//    return clockFreq;
-//}
-//
-//
+void delay_us(uint32_t time) {
+    uint32_t clockFreq = getClkFreq(ADI_CLOCK_HCLK); // Get clock frequency in Hz
+    uint32_t cycles_per_us = clockFreq / 1000000;    // Calculate clock cycles per microsecond
+    uint32_t delay_val = cycles_per_us * time/15;       // Total cycles needed for the delay
+
+    while(delay_val--) {                             // Simple delay loop
+        __NOP();                                     // Add a no-operation instruction for better timing accuracy
+    }
+}
+
+uint32_t getClkFreq(const ADI_CLOCK_ID eClockId) {
+    uint32_t clockFreq;
+    adi_pwr_GetClockFrequency(eClockId, &clockFreq);
+    return clockFreq;
+}
+
+
