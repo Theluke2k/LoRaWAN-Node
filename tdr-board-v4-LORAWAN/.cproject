@@ -54,7 +54,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/apps/LoRaMac/common/LmHandler/packages}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/boards/ADuCM4050}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/radio/sx1276}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.9.0/CMSIS/Core/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -105,7 +105,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/apps/LoRaMac/common/LmHandler/packages}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/boards/ADuCM4050}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/radio/sx1276}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.9.0/CMSIS/Core/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -153,7 +153,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/apps/LoRaMac/common/LmHandler/packages}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/boards/ADuCM4050}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/radio/sx1276}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.9.0/CMSIS/Core/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -195,7 +195,7 @@
 								</option>
 								<option id="arm.toolchain.cpp.compiler.option.coreid.779721597" name="Specify the core Id (-DCORE[A|B|0-2])" superClass="arm.toolchain.cpp.compiler.option.coreid" value="0" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="arm.base.compiler.option.include.paths.102970480" name="Additional include directories (-I):" superClass="arm.base.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.9.0/CMSIS/Core/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -227,7 +227,7 @@
 									<listOptionValue builtIn="false" value="__SILICON_REVISION__=0x1"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="arm.linker.option.include.paths.1810248809" name="Additional include directories (-I):" superClass="arm.linker.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.9.0/CMSIS/Core/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -373,7 +373,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/apps/LoRaMac/common/LmHandler/packages}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/boards/ADuCM4050}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/radio/sx1276}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.9.0/CMSIS/Core/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -423,7 +423,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/apps/LoRaMac/common/LmHandler/packages}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/boards/ADuCM4050}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/radio/sx1276}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.9.0/CMSIS/Core/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -468,7 +468,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/apps/LoRaMac/common/LmHandler/packages}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/boards/ADuCM4050}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tdr-board-v4-LORAWAN/src/radio/sx1276}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.9.0/CMSIS/Core/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -507,7 +507,7 @@
 								</option>
 								<option id="arm.toolchain.cpp.compiler.option.coreid.1555272035" name="Specify the core Id (-DCORE[A|B|0-2])" superClass="arm.toolchain.cpp.compiler.option.coreid" value="0" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="arm.base.compiler.option.include.paths.1857173238" name="Additional include directories (-I):" superClass="arm.base.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.9.0/CMSIS/Core/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>
@@ -539,7 +539,7 @@
 									<listOptionValue builtIn="false" value="__SILICON_REVISION__=0x1"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="arm.linker.option.include.paths.1057498042" name="Additional include directories (-I):" superClass="arm.linker.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.0.1/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/ARM/CMSIS/5.9.0/CMSIS/Core/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/adc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${cmsis_pack_root}/AnalogDevices/ADuCM4x50_DFP/4.0.0/Include/drivers/beep&quot;"/>

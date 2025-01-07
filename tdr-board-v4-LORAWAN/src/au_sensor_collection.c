@@ -38,7 +38,6 @@ void de_init_sensor_collection(){
 	digital_pin_deinit();
 }
 
-
 void get_all_sensor_data(sensor_data_struct *sensor_data) {
 
     uint16_t adc_results[3];
@@ -51,9 +50,13 @@ void get_all_sensor_data(sensor_data_struct *sensor_data) {
 	sensor_data->honeywell_humidity    = honeywell_humidity;
 	sensor_data->honeywell_temperature = honeywell_temperature;
 
+    // Power on TDR (active low)
+	adi_gpio_SetLow(TDR_PWR_PORT, TDR_PWR_PIN);
+	delay_us(100);
+
 	// Read temp sensor
     uint8_t temp_sensor_regA, temp_sensor_regB;
-	uint8_t temp_sensor_rst = 0;
+	uint8_t temp_sensor_rst = 1;
     uint16_t temp_sensor_output; // 12-bit
 	while (temp_sensor_rst) {
 		mcp23s17_read_register(MCP23S17_DEVICE_2, 18, &temp_sensor_regA);
@@ -79,9 +82,6 @@ void get_all_sensor_data(sensor_data_struct *sensor_data) {
 
     sensor_data->bjt_temperature = temp_sensor_output;
 
-    // Power on TDR (active low)
-	adi_gpio_SetLow(TDR_PWR_PORT, TDR_PWR_PIN);
-	delay_us(100);
 
 	tdr_read_thermistors(thermistor_values);
     sensor_data->tdr_thermistor_0 = thermistor_values[0];
@@ -95,7 +95,8 @@ void get_all_sensor_data(sensor_data_struct *sensor_data) {
     tdr_de_init();
 
     // Disable TDR power
-	adi_gpio_SetHigh(TDR_PWR_PORT, TDR_PWR_PIN);
+	//adi_gpio_SetHigh(TDR_PWR_PORT, TDR_PWR_PIN);
+    adi_gpio_SetHigh(TDR_PWR_PORT, TDR_PWR_PIN);
 
 	// Comment out in case we use the vbat sample from Lucas
 	adi_gpio_SetHigh(VBAT_READ_EN_PORT, VBAT_READ_EN_PIN);

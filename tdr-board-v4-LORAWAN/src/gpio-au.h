@@ -76,5 +76,6 @@ void analog_pin_init();
 void digital_pin_init();
 void i2c_pin_init();
 void gpio_init();
+void digital_pin_deinit();
 
 #endif /* GPIO_AU_H_ */

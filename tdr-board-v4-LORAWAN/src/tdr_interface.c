@@ -49,7 +49,7 @@ void set_tdr_register_bits(const TDR_RegisterBits *bits) {
     mcp23s17_set_device_outputs(MCP23S17_DEVICE_1, DATA_P1);
 }
 
-void tdr_start_test_measurement_digital(uint32_t test_pulsewidth_us) {
+uint32_t tdr_start_test_measurement_digital(uint32_t test_pulsewidth_us) {
     char uart_msg[255] = {0};
 
     uint16_t srio_data_pin_value;
@@ -136,13 +136,13 @@ void tdr_start_test_measurement_digital(uint32_t test_pulsewidth_us) {
 	    srio_data |= (srio_data_pin_value << i);
 		delay_us(100);
 	}
-	srio_data_converted = srio_data/(1.28*1000);
 
 	adi_gpio_SetLow(DRV_IN_PORT, DRV_IN_PIN);
 	adi_gpio_SetLow(PLL_ON_PORT, PLL_ON_PIN);
 	adi_gpio_SetLow(TEST_STOP_PORT, TEST_STOP_PIN);
 	adi_gpio_SetHigh(CLK_SRIO_PORT, CLK_SRIO_PIN);
 
+	return srio_data;
 
 	//sprintf(uart_msg, "measured pulsewidth: %.2f, applied pulsewidth: %d", srio_data_converted, test_pulsewidth_us);
 	//uart_write(uart_msg);

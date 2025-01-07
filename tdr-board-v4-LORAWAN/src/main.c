@@ -284,7 +284,7 @@ static RawLoRa_Config RawLoRaConfig =
 		.StartIn = 5000,
 		.Duration = 10000,
 		.TxPeriodicity = 5000,
-		.SpreadingFactor = 12,
+		.SpreadingFactor = 7,
 		.Frequency = 868000000,
 };
 
@@ -297,6 +297,7 @@ int main(void) {
 
  	// Initializes the system clock and needed drivers.
  	init_system();
+
 
 	// Set interrup priorities. SPI must have highest prioriy!
 	NVIC_SetPriority(SYS_GPIO_INTA_IRQn, 2);
@@ -319,6 +320,9 @@ int main(void) {
 		 * If the flag is set, the board executes the raw lora session
 		 * until the flag is disabled unset.
 		 */
+
+		//rawLoRaEnabled = 1;
+
 		if (rawLoRaEnabled) {
 			// Start LoRa session
 			while (rawLoRaEnabled) {
@@ -504,8 +508,19 @@ int main(void) {
 void getSensorMeasurements() {
 	// Init data struct
 	init_sensor_collection();
-	sensor_data_struct sensor_data; // Different struct from Viktors code!
+	sensor_data_struct sensor_data;
 	get_all_sensor_data(&sensor_data);
+
+
+	// Test stuff
+
+	uart_init();
+
+	char uart_msg[255] = {0};
+	sprintf(uart_msg, "TDR pulsewidth: %d", sensor_data.tdr_pulsewidth);
+	uart_write(uart_msg, strlen(uart_msg));
+
+	uart_deinit();
 
     // Pack the bits efficiently
     pack_sensor_data(&sensor_data, packed_data);
@@ -610,6 +625,7 @@ void RawLoRaSession() {
 	// Read supercap voltage and check if we have enough power to send.
 	UpdateSuperCapVariables(&ADC_SC, &V_SC_m, &V_SC, &TXreadyFlag, t_tx, V_radio, i_tx);
 
+	//TXreadyFlag = 1;
 	if (TXreadyFlag) {
 		// Get data to send?
 		getSensorMeasurements();
@@ -623,6 +639,12 @@ void RawLoRaSession() {
 //		AppData.BufferSize = packet_length;
 
 		uint8_t packet_length = sizeof(packed_data);
+		/*
+		for (int i =0; i < packet_length; i++){
+			packed_data[i] = i;
+		}
+		*/
+
 		memcpy1(AppData.Buffer, packed_data, packet_length);
 		AppData.BufferSize = packet_length;
 

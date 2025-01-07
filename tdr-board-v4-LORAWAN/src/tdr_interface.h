@@ -49,7 +49,7 @@ void set_tdr_register_bits(const TDR_RegisterBits *bits);
 
 void tdr_de_init();
 uint32_t tdr_start_measurement_digital();
-void tdr_start_test_measurement_digital(uint32_t test_pulsewidth_us);
+uint32_t tdr_start_test_measurement_digital(uint32_t test_pulsewidth_us);
 
 void tdr_start_measurement_analog(uint32_t test_pulsewidth_us);
 void tdr_read_thermistors(uint16_t* thermistor_values);
